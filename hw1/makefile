@@ -14,9 +14,8 @@ all: $(SRC)
 	$(CC) $(CFLAGS) $(SRC)
 	ar -rcs $(LIB) *.o
 
-# a.out: $(SRCS)
-# 	ar -rcs libmythread.a mythread.o
-# 	$(CC) $(CFLAGS) fib.c -o fib -L. -lmythread
+fib: $(SRCS) fib.c
+	$(CC) $(CFLAGS) fib.c -o fib -L. -lmythread
 
 clean:
 	rm -rf $(LIB) mythread.o
