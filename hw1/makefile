@@ -1,6 +1,6 @@
 CC      = gcc
 SRC     = mythread.c
-CFLAGS  = -Wall -Wextra -Wpedantic -c -m32
+CFLAGS  = -Wall -Wextra -pedantic -c -m32
 RM      = rm -f
 DIFF    = diff
 LIB     = mythread.a
