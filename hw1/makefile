@@ -8,13 +8,13 @@ INDEX   = index.bin
 SERIES  = micro small medium a
 ORDERS  = 4
 
-default: all
+default: lib
 
-all: $(SRC)
+lib: $(SRC)
 	$(CC) $(CFLAGS) $(SRC)
 	ar -rcs $(LIB) *.o
 
-fib: $(SRCS) fib.c
+fib: lib fib.c
 	$(CC) $(CFLAGS) fib.c -o fib -L. -lmythread
 
 clean:
