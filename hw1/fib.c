@@ -52,7 +52,7 @@ void fib(void *in)
   MyThreadExit();   // always call this at end
 }
 
-main(int argc, void *argv)
+main(int argc, char **argv)
 {
   int n;
 
