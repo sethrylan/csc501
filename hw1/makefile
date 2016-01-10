@@ -18,7 +18,7 @@ fib: lib fib.c
 	$(CC) $(CFLAGS) fib.c -o fib -L. -lmythread
 
 clean:
-	rm -rf $(LIB) mythread.o
+	rm -rf $(LIB) mythread.o fib
 
 # test: clean all
 # 	@$(foreach series, $(SERIES), $(foreach order, $(ORDERS), \
