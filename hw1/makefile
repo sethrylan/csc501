@@ -18,7 +18,8 @@ fib: lib tests/fib.c
 	$(CC) $(CFLAGS) tests/fib.c -o tests/fib -L. -lmythread
 
 clean:
-	rm -rf $(LIB) mythread.o fib
+	rm -rf $(LIB) mythread.o
+	find ./tests/ -type f  ! -name "*.*"  -delete
 
 # test: clean all
 # 	@$(foreach series, $(SERIES), $(foreach order, $(ORDERS), \
