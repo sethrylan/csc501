@@ -1,21 +1,18 @@
 CC      = gcc
 SRC     = mythread.c
-CFLAGS  = -Wall -Wextra -pedantic -c -m32
+CFLAGS  = -Wall -Wextra -pedantic
 RM      = rm -f
 DIFF    = diff
 LIB     = mythread.a
-INDEX   = index.bin
-SERIES  = micro small medium a
-ORDERS  = 4
 
 default: lib
 
 lib: $(SRC)
-	$(CC) $(CFLAGS) $(SRC)
+	$(CC) $(CFLAGS) -c $(SRC)
 	ar -rcs $(LIB) *.o
 
 fib: lib tests/fib.c
-	$(CC) $(CFLAGS) tests/fib.c -o tests/fib -L. -lmythread
+	$(CC) $(CFLAGS) tests/fib.c ./mythread.a -o tests/fib
 
 clean:
 	rm -rf $(LIB) mythread.o
