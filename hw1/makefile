@@ -4,6 +4,7 @@ CFLAGS  = -Wall -Wextra -pedantic
 RM      = rm -f
 DIFF    = diff
 LIB     = mythread.a
+TESTS   = fib one
 
 default: lib
 
@@ -11,8 +12,10 @@ lib: $(SRC)
 	$(CC) $(CFLAGS) -c $(SRC)
 	ar -rcs $(LIB) *.o
 
-fib: lib tests/fib.c
-	$(CC) $(CFLAGS) tests/fib.c ./mythread.a -o tests/fib
+tests: lib tests/*.c
+	@$(foreach test, $(TESTS), \
+		$(CC) $(CFLAGS) tests/$(test).c ./mythread.a -o tests/$(test);\
+	)
 
 clean:
 	rm -rf $(LIB) mythread.o
