@@ -137,3 +137,7 @@ Extra credit of 5% is available. Two restrictions were designed into the assignm
     >   </pre>
 
 3.  Submit a second header file (mythreadextra.h) that contains everything in the original header plus the definition of MyThreadInitExtra().
+
+
+ssh <unityID>@remote-linux.eos.ncsu.edu
+# enter unity password
