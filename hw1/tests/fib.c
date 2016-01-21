@@ -13,7 +13,7 @@
  *
  *****************************************************************************/
 
-#include "mythread.h"
+#include "../mythread.h"
 
 // evaluate a Fibonacci number:
 //  fib(0) = 0

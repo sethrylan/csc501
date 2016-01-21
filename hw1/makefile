@@ -14,8 +14,8 @@ lib: $(SRC)
 	$(CC) $(CFLAGS) $(SRC)
 	ar -rcs $(LIB) *.o
 
-fib: lib fib.c
-	$(CC) $(CFLAGS) fib.c -o fib -L. -lmythread
+fib: lib tests/fib.c
+	$(CC) $(CFLAGS) tests/fib.c -o tests/fib -L. -lmythread
 
 clean:
 	rm -rf $(LIB) mythread.o fib
