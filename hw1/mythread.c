@@ -9,7 +9,7 @@
  *
  *****************************************************************************/
 
-#define _XOPEN_SOURCE // see https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00015.html
+#define _XOPEN_SOURCE 700 // see https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00015.html
 #include "mythread.h"
 #include "queue.h"
 #include <stdio.h>
