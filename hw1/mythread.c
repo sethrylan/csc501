@@ -9,10 +9,10 @@
  *
  *****************************************************************************/
 
+#define _XOPEN_SOURCE // see https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00015.html
 #include "mythread.h"
 #include "queue.h"
 #include <stdio.h>
-#define _XOPEN_SOURCE // see https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00015.html
 
 Queue *ready_queue;
 Queue *blocked_queue;
