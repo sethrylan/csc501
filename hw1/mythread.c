@@ -9,10 +9,12 @@
  *
  *****************************************************************************/
 
-#define _XOPEN_SOURCE 700 // see https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00015.html
 #include "mythread.h"
 #include "queue.h"
 #include <stdio.h>
+#include <signal.h>
+#include <stdlib.h>
+
 
 Queue *ready_queue;
 Queue *blocked_queue;
@@ -21,6 +23,12 @@ Thread *currentThread;
 Thread *initThread;
 
 static ucontext_t initProcesssContext;
+
+void die (const char *msg)
+{
+   perror(msg);
+   exit(1);
+}
 
 Thread* make_thread (void(*start_funct)(void *), void *args)
 {
@@ -33,12 +41,11 @@ Thread* make_thread (void(*start_funct)(void *), void *args)
   ucontext_t *context = (ucontext_t *)malloc(sizeof(ucontext_t));
 
   if(getcontext(context) == -1) {
-    printf("Could not get context\n");
-    exit(1);
+    die("getcontext failed\n");
   }
 
-  (context->uc_stack).ss_sp = (char *)malloc(4048*sizeof(char));
-  (context->uc_stack).ss_size = 4048;
+  (context->uc_stack).ss_sp = (char *)malloc(MINSIGSTKSZ*sizeof(char));
+  (context->uc_stack).ss_size = MINSIGSTKSZ;
   context->uc_link = &(currentThread->ctx);
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = *context;
@@ -114,6 +121,9 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
 
   currentThread = make_thread(start_funct, args);
   initThread = currentThread;
+
+  if (getcontext(&initProcesssContext) == -1)
+       die("getcontext failed\n");
 
   // save current thread context in initProcesssContext, and make currentThread context active
   swapcontext(&initProcesssContext, &(currentThread->ctx));
