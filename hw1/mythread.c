@@ -35,7 +35,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
     die("getcontext failed\n");
   }
 
-  (context->uc_stack).ss_sp = (char *)malloc(MINSIGSTKSZ*sizeof(char));
+  (context->uc_stack).ss_sp = (char *)malloc(MINSIGSTKSZ * sizeof(char));
   (context->uc_stack).ss_size = MINSIGSTKSZ;
   context->uc_link = uc_context;
   makecontext(context, (void (*)()) start_funct, 1, args);
@@ -47,10 +47,10 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 void free_thread(Thread *thread) {
   free((thread->ctx).uc_stack.ss_sp);
   free(thread->children);
-  thread->children = NULL;
-  thread->parent = NULL;
+  // thread->children = NULL;
+  // thread->parent = NULL;
   free(thread);
-  thread = NULL;
+  // thread = NULL;
 }
 
 Thread* get_next_thread() {
