@@ -22,7 +22,7 @@ Thread *init_thread;
 
 static ucontext_t init_context;
 
-Thread* make_thread (void(*start_funct)(void *), void *args)
+Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_context)
 {
   Thread *thread = (Thread *)malloc(sizeof(Thread));
   thread->children = make_queue(1000);
@@ -37,7 +37,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args)
 
   (context->uc_stack).ss_sp = (char *)malloc(MINSIGSTKSZ*sizeof(char));
   (context->uc_stack).ss_size = MINSIGSTKSZ;
-  context->uc_link = &(current_thread->ctx);
+  context->uc_link = uc_context;
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = *context;
 
@@ -138,7 +138,7 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
 
   // init_context = (ucontext_t *)malloc(sizeof(ucontext_t));
 
-  current_thread = make_thread(start_funct, args);
+  current_thread = make_thread(start_funct, args, NULL);
   init_thread = current_thread;
 
   if (getcontext(&init_context) == -1) {
