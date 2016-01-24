@@ -11,10 +11,8 @@
 
 #include "mythread.h"
 #include "queue.h"
-#include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
-
 
 Queue *ready_queue;
 Queue *blocked_queue;
@@ -23,12 +21,6 @@ Thread *currentThread;
 Thread *initThread;
 
 static ucontext_t initProcesssContext;
-
-void die (const char *msg)
-{
-   perror(msg);
-   exit(1);
-}
 
 Thread* make_thread (void(*start_funct)(void *), void *args)
 {

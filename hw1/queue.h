@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <ucontext.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct Thread {
   ucontext_t ctx;
@@ -61,3 +62,10 @@ void push (Queue *q, Thread element) {
 //   tree_node.level = level;
 //   return tree_node;
 // }
+
+void die (const char *msg)
+{
+  perror(msg);
+  exit(1);
+}
+
