@@ -9,3 +9,8 @@ https://gist.github.com/mycodeschool/7331785
 
 * debug_print
   http://stackoverflow.com/questions/1644868/c-define-macro-for-debug-printing
+  http://ilostmynotes.blogspot.com/2011/04/ifdef-debug-print-statements-in-c.html
+  http://stackoverflow.com/questions/1941307/c-debug-print-macros
+
+* type safe pointer printing
+  http://stackoverflow.com/questions/9053658/correct-format-specifier-to-print-pointer-address

@@ -3,11 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <inttypes.h>
 
 #define DEBUG 1
 
 #ifdef DEBUG
-#define DEBUG_PRINT(...) fprintf( stderr, __VA_ARGS__ );
+#define DEBUG_PRINT(...) printf( __VA_ARGS__ );
 #else
 #define DEBUG_PRINT(...) do{ } while ( false )
 #endif
@@ -22,13 +23,13 @@ typedef struct Thread {
 typedef struct ThreadNode
 {
   Thread *thread;
-  struct ThreadNode* next;
+  struct ThreadNode *next;
 } ThreadNode;
 
 typedef struct Queue  // FIFO queue //
 {
-  struct ThreadNode* head;
-  struct ThreadNode* tail;
+  struct ThreadNode *head;
+  struct ThreadNode *tail;
   char *name;
 } Queue;
 
@@ -43,7 +44,8 @@ typedef struct Queue  // FIFO queue //
 Queue* make_queue(char *name)
 {
   Queue *q = (Queue *)malloc(sizeof(Queue));
-  q->name = strdup(name);
+  q->name = malloc(strlen(name) + 1);
+  strcpy(q->name, name);
   q->head = NULL;
   q->tail = NULL;
   return q;
@@ -91,7 +93,7 @@ Thread* dequeue(Queue *q)
     // ==3938==    by 0x401241: MyThreadInit (mythread.c:192)
     // ==3938==  Uninitialised value was created by a stack allocation
     // ==3938==    at 0x4E78557: buffered_vfprintf (in /lib64/libc-2.12.so)
-    DEBUG_PRINT("queue is empty\n");
+    DEBUG_PRINT("%s: queue is empty \n", q->name);
     return NULL;
   }
   assert(NULL != q->head);

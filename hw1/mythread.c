@@ -48,7 +48,10 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 
   // debug_print("make_thread: args = %d;", *((void *)args));
   // backtrace_symbols_fd(&start_funct, 1, 1);
-  DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
+  // DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
+  // printf("%x \n", (uintptr_t)thread);
+  // DEBUG_PRINT("%x \n", (uintptr_t)thread);
+  DEBUG_PRINT("make_thread: thread pointer = %x \n", (uintptr_t)thread);
 
   return thread;
 }
