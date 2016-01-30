@@ -66,12 +66,12 @@ void free_thread(Thread *thread) {
 
 Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
-  if(next == NULL) {
+  if(next) {
+    return next
+  } else {
     debug_print("no next thread found\n", NULL);
     setcontext(init_context);
     return NULL;
-  } else {
-    return next;
   }
 }
 
