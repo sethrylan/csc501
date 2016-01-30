@@ -24,11 +24,10 @@ Thread *init_thread;
 // TODO: static
 ucontext_t *init_context;
 
-/*
- *
- *
- *
- */
+//
+//
+//
+//
 Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_context)
 {
   Thread *thread = malloc(sizeof(Thread));
@@ -115,12 +114,10 @@ void MyThreadJoinAll (void)
 
 
 // Terminate invoking thread
-/*
- * 1. Remove current_thread from it's parent thread's children
- * 2. Remove parent thread from blocked queue
- * 3. Add parent thread to ready queue
- * 4. Update current thread to next thread, and setcontext() for the new current thread
- */
+// 1. Remove current_thread from it's parent thread's children
+// 2. Remove parent thread from blocked queue
+// 3. Add parent thread to ready queue
+// 4. Update current thread to next thread, and setcontext() for the new current thread
 void MyThreadExit (void)
 {
   Thread *temp = current_thread;

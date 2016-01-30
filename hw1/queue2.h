@@ -20,7 +20,7 @@ typedef struct ThreadNode
   struct ThreadNode* next;
 } ThreadNode;
 
-typedef struct Queue  /* FIFO queue */
+typedef struct Queue  // FIFO queue //
 {
   struct ThreadNode* head;
   struct ThreadNode* tail;
