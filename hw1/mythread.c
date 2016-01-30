@@ -23,10 +23,7 @@ Thread *init_thread;
 
 static ucontext_t init_context;
 
-//
-//
-//
-//
+// Allocate and initialize new thread
 Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_context)
 {
   Thread *thread = malloc(sizeof(Thread));
@@ -40,6 +37,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
     die("getcontext failed\n");
   }
 
+  // SIGSTKSZ is the "canonical size for a signal stack. It is judged to be sufficient for normal uses."
   context->uc_stack.ss_sp = malloc(SIGSTKSZ * sizeof(char));
   context->uc_stack.ss_size = SIGSTKSZ;
   context->uc_stack.ss_flags = 0;
@@ -48,11 +46,6 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = context;
 
-  // debug_print("make_thread: args = %d;", *((void *)args));
-  // backtrace_symbols_fd(&start_funct, 1, 1);
-  // DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
-  // printf("%x \n", (uintptr_t)thread);
-  // DEBUG_PRINT("%x \n", (uintptr_t)thread);
   DEBUG_PRINT("make_thread: %p \n", (void *)thread);
 
   return thread;
@@ -71,13 +64,17 @@ void free_thread(Thread *thread) {
 Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
   if(!next) {
-    // debug_print("setting context to init context: %p", &init_context);
+    DEBUG_PRINT("setting context to init context: %p", &init_context);
     setcontext(&init_context);
   }
   return next;
 }
 
 // Create a new thread.
+// 1. Call make_thread to allocate and initialize with current_thread context as uc_link
+// 2. Set parent thread of new thread to the current thread
+// 3. Add new thread to parent thread's children
+// 4. Add new thread to ready queue
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
   Thread *thread = make_thread(start_funct, args, current_thread->ctx);
