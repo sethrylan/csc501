@@ -7,7 +7,7 @@
 #define DEBUG 1
 
 #ifdef DEBUG
-#define DEBUG_PRINT(...) printf( __VA_ARGS__ );
+#define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
 #else
 #define DEBUG_PRINT(...) do{ } while ( false )
 #endif
