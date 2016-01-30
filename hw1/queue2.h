@@ -164,14 +164,16 @@ void print_queue (const Queue *q)
   }
 }
 
-Queue* free_queue(Queue *q)
+void free_queue(Queue *q)
 {
+  DEBUG_PRINT("%s: freeing queue with %d remaining nodes\n", q->name, size(q));
   while(q->head)
   {
     dequeue(q);
   }
   free(q->name);
-  return q;
+  free(q);
+  return;
 }
 
 int contains(Queue *q, Thread *thread)
