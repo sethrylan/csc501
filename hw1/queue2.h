@@ -38,7 +38,7 @@ typedef struct Queue  // FIFO queue //
 Queue* make_queue(char *name)
 {
   Queue *q = (Queue *)malloc(sizeof(Queue));
-  q->name = name;
+  q->name = strdup(name);
   q->head = NULL;
   q->tail = NULL;
   return q;
@@ -147,6 +147,7 @@ Queue* free_queue(Queue *q)
   {
     dequeue(q);
   }
+  free(q->name);
   return q;
 }
 
