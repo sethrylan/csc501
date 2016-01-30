@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-#define DEBUG 0
+#define DEBUG 1
 #define debug_print(fmt, ...) \
             do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
@@ -25,6 +25,7 @@ typedef struct Queue  /* FIFO queue */
 {
   struct ThreadNode* head;
   struct ThreadNode* tail;
+  char *name;
 } Queue;
 
 // typedef struct Queue {
@@ -35,13 +36,23 @@ typedef struct Queue  /* FIFO queue */
 //   Thread *elements;
 // } Queue;
 
-
-Queue* make_queue(void)
+Queue* make_queue(char *name)
 {
-  Queue *q = malloc(sizeof(Queue));
+  Queue *q = (Queue *)malloc(sizeof(Queue));
+  q->name = name;
   q->head = NULL;
   q->tail = NULL;
   return q;
+}
+
+int size(Queue *q) {
+  int size = 0;
+  ThreadNode *node = q->head;
+  while(node) {
+    size++;
+    node = node->next;
+  }
+  return size;
 }
 
 int is_empty(Queue *q)
@@ -60,7 +71,7 @@ Thread* dequeue(Queue *q)
   ThreadNode* temp = q->head;
   Thread* thread = NULL;
   if(q->head == NULL) {
-    debug_print("Queue is Empty\n", NULL);
+    debug_print("%s: queue is empty\n", q->name);
     return NULL;
   }
   assert(NULL != q->head);
@@ -75,11 +86,15 @@ Thread* dequeue(Queue *q)
   }
   thread = temp->thread;
   free(temp);
+  debug_print("%s: dequeue thread pointer %p\n", q->name, (void *)&thread);
+  debug_print("%s: size = %d\n", q->name, size(q));
   return thread;
 }
 
 Queue* enqueue(Queue *q, Thread *thread)
 {
+  debug_print("%s: size = %d\n", q->name, size(q));
+
   ThreadNode *node = malloc( 1 * sizeof(ThreadNode) );
   node->thread = thread;
   node->next = NULL;
@@ -88,12 +103,18 @@ Queue* enqueue(Queue *q, Thread *thread)
   {
     q->head = node;
     q->tail = node;
-    return q;
   }
-  assert(NULL != q->head);
-  assert(NULL != q->tail);
-  q->tail->next = node;
-  q->tail = node;
+  else
+  {
+    assert(NULL != q->head);
+    assert(NULL != q->tail);
+    q->tail->next = node;
+    q->tail = node;
+  }
+
+  debug_print("%s: enqueue thread pointer %p\n", q->name, (void *)&thread);
+  debug_print("%s: size = %d\n", q->name, size(q));
+
   return q;
 }
 
@@ -172,6 +193,3 @@ void remove_node(Queue *q, Thread *thread)
     last = node;
   }
 }
-
-
-
