@@ -114,7 +114,7 @@ void MyThreadJoinAll (void)
 
 // Terminate invoking thread
 // 1. Remove current_thread from it's parent thread's children
-// 2. Remove parent thread from blocked queue
+// 2. Unblock parent thread
 // 3. Add parent thread to ready queue
 // 4. Update current thread to next thread, and setcontext() for the new current thread
 void MyThreadExit (void)
@@ -127,7 +127,7 @@ void MyThreadExit (void)
     remove_node(parent->children, current_thread);
   }
 
-  // remove parent from blocked_queue
+  // unblock parent thread
   if(contains(blocked_queue, parent)) {
     if(is_empty(parent->children) || (parent->waiting_for == current_thread)) {
       remove_node(blocked_queue, parent);
@@ -142,11 +142,19 @@ void MyThreadExit (void)
 
   current_thread = get_next_thread();
 
+  if (current_thread)
+  {
+    setcontext(current_thread->ctx);
+  }
+  else
+  {
+    free_queue(ready_queue);
+    free_queue(blocked_queue);
+  }
+
   if (temp) {
     free_thread(temp);
   }
-
-  setcontext(current_thread->ctx);
 
   return;
 }
