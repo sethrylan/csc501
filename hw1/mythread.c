@@ -10,7 +10,7 @@
  *****************************************************************************/
 
 #include "mythread.h"
-#include "queue.h"
+#include "queue2.h"
 #include <signal.h>
 #include <stdlib.h>
 
@@ -24,23 +24,24 @@ static ucontext_t init_context;
 
 Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_context)
 {
-  Thread *thread = (Thread *)malloc(sizeof(Thread));
-  thread->children = make_queue(1000);
+  Thread *thread = malloc(sizeof(Thread));
+  thread->children = make_queue();
   thread->waiting_for = NULL;
   thread->parent = NULL;
 
-  ucontext_t *context = (ucontext_t *)malloc(sizeof(ucontext_t));
+  ucontext_t *context = malloc(sizeof(ucontext_t));
 
   if(getcontext(context) == -1) {
     die("getcontext failed\n");
   }
 
-  (context->uc_stack).ss_sp = (char *)malloc(MINSIGSTKSZ * sizeof(char));
+  (context->uc_stack).ss_sp = malloc(MINSIGSTKSZ * sizeof(char));
   (context->uc_stack).ss_size = MINSIGSTKSZ;
   context->uc_link = uc_context;
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = *context;
 
+  debug_print("make_thread %p\n", (void *)&thread);
   return thread;
 }
 
@@ -48,18 +49,18 @@ void free_thread(Thread *thread) {
   free((thread->ctx).uc_stack.ss_sp);
   free(thread->children);
   // thread->children = NULL;
-  // thread->parent = NULL;
+  thread->parent = NULL;
   free(thread);
   // thread = NULL;
 }
 
 Thread* get_next_thread() {
-  Thread *next = pop(ready_queue);
+  Thread *next = dequeue(ready_queue);
   if(next == NULL) {
+    debug_print("no next found\n", NULL);
     setcontext(&init_context);
     return NULL;
-  }
-  else {
+  } else {
     return next;
   }
 }
@@ -67,7 +68,11 @@ Thread* get_next_thread() {
 // Create a new thread.
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
-  return 0;
+  Thread *thread = make_thread(start_funct, args, &(current_thread->ctx));
+  thread->parent = current_thread;
+  enqueue(ready_queue, thread);
+  enqueue(current_thread->children, thread);
+  return thread;
 }
 
 // Yield invoking thread
@@ -85,19 +90,46 @@ int MyThreadJoin (MyThread thread)
 // Join with all children
 void MyThreadJoinAll (void)
 {
-  return;
+  if (is_empty(current_thread->children)) {
+    return;
+  } else {
+    Thread *temp = current_thread;
+    enqueue(blocked_queue, current_thread);
+    current_thread = get_next_thread();
+    swapcontext(&(temp->ctx), &(current_thread->ctx));
+    return;
+  }
 }
+
 
 // Terminate invoking thread
 void MyThreadExit (void)
 {
-  Thread *this = current_thread;
-
   // remove parent from blocked_queue
+  Thread *parent = current_thread->parent;
+
+  if(parent != NULL) {
+    remove_node(parent->children, current_thread);
+  }
+
+  if(contains(blocked_queue, parent)) {
+    if(is_empty(parent->children) || (parent->waiting_for == current_thread)) {
+      remove_node(blocked_queue, parent);
+      parent->waiting_for = NULL;
+      enqueue(ready_queue, parent);
+    }
+  }
+
   // update children
 
+  // for (int i=thread->children->front; i<thread->children->capacity)
+
+  Thread *temp = current_thread;
+
   current_thread = get_next_thread();
-  free_thread(this);
+  if (temp) {
+    free_thread(temp);
+  }
 
   setcontext(&(current_thread->ctx));
 
@@ -133,8 +165,8 @@ int MySemaphoreDestroy (MySemaphore sem)
 // Create and run the "main" thread
 void MyThreadInit (void(*start_funct)(void *), void *args)
 {
-  ready_queue = make_queue(1000);
-  blocked_queue = make_queue(1000);
+  ready_queue = make_queue();
+  blocked_queue = make_queue();
 
   // init_context = (ucontext_t *)malloc(sizeof(ucontext_t));
 
