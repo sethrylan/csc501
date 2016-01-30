@@ -21,8 +21,7 @@ Queue *blocked_queue;
 Thread *current_thread;
 Thread *init_thread;
 
-// TODO: static
-ucontext_t *init_context;
+static ucontext_t init_context;
 
 //
 //
@@ -66,13 +65,11 @@ void free_thread(Thread *thread) {
 
 Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
-  if(next) {
-    return next
-  } else {
-    debug_print("no next thread found\n", NULL);
-    setcontext(init_context);
-    return NULL;
+  if(!next) {
+    // debug_print("setting context to init context: %p", &init_context);
+    setcontext(&init_context);
   }
+  return next;
 }
 
 // Create a new thread.
@@ -184,17 +181,15 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
   ready_queue = make_queue("ready_queue");
   blocked_queue = make_queue("ready_queue");
 
-  init_context = (ucontext_t *)malloc(sizeof(ucontext_t));
-
   current_thread = make_thread(start_funct, args, NULL);
   init_thread = current_thread;
 
-  if (getcontext(init_context) == -1) {
+  if (getcontext(&init_context) == -1) {
     die("getcontext failed\n");
   }
 
   // save current thread context in initProcesssContext, and make current_thread context active
-  swapcontext(init_context, &(current_thread->ctx));
+  swapcontext(&init_context, &(current_thread->ctx));
 
   // set parent thread to 
 

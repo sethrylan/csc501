@@ -8,7 +8,7 @@
 #define debug_print(fmt, ...) do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
 typedef struct Thread {
-  ucontext_t ctx;
+  ucontext_t *ctx;
   struct Thread *parent;
   struct Queue *children;
   struct Thread *waiting_for;
@@ -70,7 +70,7 @@ Thread* dequeue(Queue *q)
   ThreadNode* temp = q->head;
   Thread* thread = NULL;
   if(q->head == NULL) {
-    debug_print("%s: queue is empty\n", q->name);
+    debug_print("%s : queue is empty \n", q->name);
     return NULL;
   }
   assert(NULL != q->head);
