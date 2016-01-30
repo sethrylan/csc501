@@ -1,0 +1,11 @@
+=== Code Attribution ===
+
+* Linked List FIFO Queue implementation of enqueue and dequeue
+  https://lispmachine.wordpress.com/2009/05/13/queue-in-c/
+  https://gist.github.com/mycodeschool/7510222
+
+https://gist.github.com/mycodeschool/7331785
+
+
+* debug_print
+  http://stackoverflow.com/questions/1644868/c-define-macro-for-debug-printing

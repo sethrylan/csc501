@@ -2,6 +2,11 @@
 #include <ucontext.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+
+#define DEBUG 0
+#define debug_print(fmt, ...) \
+            do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
 
 typedef struct Thread {
   ucontext_t ctx;
@@ -21,8 +26,8 @@ typedef struct Queue  /* FIFO queue */
   struct ThreadNode* head;
   struct ThreadNode* tail;
 } Queue;
- 
-// typedef struct Queue {      
+
+// typedef struct Queue {
 //   int capacity;
 //   int size;
 //   int front;
@@ -41,7 +46,7 @@ Queue* make_queue(void)
 
 int is_empty(Queue *q)
 {
-  return ((q == NULL) || ((q->head == NULL) && (q->tail == NULL)));
+  return ((q->head == NULL) && (q->tail == NULL));
 }
 
 void die (const char *msg)
@@ -52,29 +57,24 @@ void die (const char *msg)
 
 Thread* dequeue(Queue *q)
 {
-  ThreadNode* head = NULL;
-  ThreadNode* temp = NULL;
-  Thread *thread = NULL;
-  if (is_empty(q))
-  {
-    printf("List is empty\n");
+  ThreadNode* temp = q->head;
+  Thread* thread = NULL;
+  if(q->head == NULL) {
+    debug_print("Queue is Empty\n", NULL);
     return NULL;
   }
-  else if (NULL == q->head || NULL == q->tail)
+  assert(NULL != q->head);
+  assert(NULL != q->tail);
+  if (q->head == q->tail)
   {
-    printf("There is something seriously wrong with your list\n");
-    printf("One of the head/tail is empty while other is not \n");
-    return NULL;
+    q->tail = q->head = NULL;
   }
-  head = q->head;
-  thread = head->thread;
-  q->head = head->next;
-  temp = head;
+  else
+  {
+    q->head = q->head->next;
+  }
+  thread = temp->thread;
   free(temp);
-  if (q->head == NULL)
-  {
-    q->tail = q->head;   /* The element tail was pointing to is free(), so we need an update */
-  }
   return thread;
 }
 
@@ -84,31 +84,16 @@ Queue* enqueue(Queue *q, Thread *thread)
   node->thread = thread;
   node->next = NULL;
 
-  if (NULL == q)
-  {
-    printf("Queue not initialized\n");
-    free(node);
-    return q;
-  }
-  else if (is_empty(q))
+  if (is_empty(q))
   {
     q->head = node;
     q->tail = node;
     return q;
   }
-  else if (NULL == q->head || NULL == q->tail)
-  {
-    fprintf(stderr, "There is something seriously wrong with your assignment of head/tail to the list\n");
-    free(node);
-    return NULL;
-  }
-  else
-  {
-    /* printf("List not empty, adding element to tail\n"); */
-    q->tail->next = node;
-    q->tail = node;
-  }
-
+  assert(NULL != q->head);
+  assert(NULL != q->tail);
+  q->tail->next = node;
+  q->tail = node;
   return q;
 }
 
@@ -116,7 +101,7 @@ void print_node (const ThreadNode *node)
 {
   if (node)
   {
-    // printf("Thread = %d\n", p->num);
+    // TODO: printf("Thread = %d\n", p->num);
   }
   else
   {
