@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <inttypes.h>
 
 #define DEBUG 1
 
