@@ -13,6 +13,7 @@
 #include "queue2.h"
 #include <signal.h>
 #include <stdlib.h>
+#include <execinfo.h>
 
 Queue *ready_queue;
 Queue *blocked_queue;
@@ -47,9 +48,10 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = *context;
 
-  // debug_print("make_thread %s\n", ((char *)args));
+  // debug_print("make_thread: args = %d;", *((void *)args));
+  // backtrace_symbols_fd(&start_funct, 1, 1);
+  debug_print("make_thread: thread pointer = %p\n", (void *)&thread);
 
-  debug_print("make_thread %p\n", (void *)&thread);
   return thread;
 }
 
@@ -78,10 +80,11 @@ Thread* get_next_thread() {
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
   Thread *thread = make_thread(start_funct, args, &(current_thread->ctx));
+  debug_print("MyThreadCreate %p\n", thread);
   thread->parent = current_thread;
   enqueue(current_thread->children, thread);
   enqueue(ready_queue, thread);
-  return thread;
+  return (MyThread)thread;
 }
 
 // Yield invoking thread
