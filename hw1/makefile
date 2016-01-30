@@ -1,6 +1,6 @@
 CC      = gcc
 SRC     = mythread.c
-CFLAGS  = -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600
+CFLAGS  = -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
 RM      = rm -f
 DIFF    = diff
 LIB     = mythread.a
