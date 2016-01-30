@@ -1,5 +1,5 @@
 CC      = gcc
-SRC     = mythread.c
+SRC     = mythread.c queue2.h
 CFLAGS  = -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
 RM      = rm -f
 DIFF    = diff
@@ -14,7 +14,8 @@ lib: $(SRC)
 	$(CC) $(CFLAGS) -c $(SRC)
 	ar -rcs $(LIB) *.o
 
-tests: lib tests/*.c
+debug: CFLAGS += -DDEBUG
+debug: lib tests/*.c
 	@$(foreach test, $(TESTS), \
 		$(CC) $(CFLAGS) tests/$(test).c ./mythread.a -o tests/$(test);\
 	)
