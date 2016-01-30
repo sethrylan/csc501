@@ -5,7 +5,12 @@
 #include <assert.h>
 
 #define DEBUG 1
-#define debug_print(fmt, ...) do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
+#ifdef DEBUG
+#define DEBUG_PRINT(...) fprintf( stderr, __VA_ARGS__ );
+#else
+#define DEBUG_PRINT(...) do{ } while ( false )
+#endif
 
 typedef struct Thread {
   ucontext_t *ctx;
@@ -69,7 +74,7 @@ Thread* dequeue(Queue *q)
 {
   ThreadNode* temp = q->head;
   Thread* thread = NULL;
-  if(q->head == NULL) {
+  if (q->head == NULL) {
     // printf here causes
     // ==3938== Conditional jump or move depends on uninitialised value(s)
     // ==3938==    at 0x4F0A557: write (in /lib64/libc-2.12.so)
@@ -86,7 +91,7 @@ Thread* dequeue(Queue *q)
     // ==3938==    by 0x401241: MyThreadInit (mythread.c:192)
     // ==3938==  Uninitialised value was created by a stack allocation
     // ==3938==    at 0x4E78557: buffered_vfprintf (in /lib64/libc-2.12.so)
-    // debug_print("%s : queue is empty \n", q->name);
+    DEBUG_PRINT("queue is empty\n");
     return NULL;
   }
   assert(NULL != q->head);
@@ -101,14 +106,14 @@ Thread* dequeue(Queue *q)
   }
   thread = temp->thread;
   free(temp);
-  debug_print("%s: dequeue thread pointer %p\n", q->name, (void *)&thread);
-  debug_print("%s: size = %d\n", q->name, size(q));
+  DEBUG_PRINT("%s: dequeue thread pointer %p\n", q->name, (void *)thread);
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
   return thread;
 }
 
 Queue* enqueue(Queue *q, Thread *thread)
 {
-  debug_print("%s: size = %d\n", q->name, size(q));
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
 
   ThreadNode *node = malloc( 1 * sizeof(ThreadNode) );
   node->thread = thread;
@@ -127,8 +132,8 @@ Queue* enqueue(Queue *q, Thread *thread)
     q->tail = node;
   }
 
-  debug_print("%s: enqueue thread pointer %p\n", q->name, (void *)&thread);
-  debug_print("%s: size = %d\n", q->name, size(q));
+  DEBUG_PRINT("%s: enqueue thread pointer %p\n", q->name, (void *)thread);
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
 
   return q;
 }

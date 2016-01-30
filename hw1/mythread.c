@@ -48,13 +48,13 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 
   // debug_print("make_thread: args = %d;", *((void *)args));
   // backtrace_symbols_fd(&start_funct, 1, 1);
-  debug_print("make_thread: thread pointer = %p\n", (void *)&thread);
+  DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
 
   return thread;
 }
 
 void free_thread(Thread *thread) {
-  debug_print("free_thread %p\n", (void *)&thread);
+  DEBUG_PRINT("free_thread %p\n", (void *)thread);
   free((thread->ctx->uc_stack).ss_sp);
   free(thread->children);
   // thread->children = NULL;
@@ -76,7 +76,7 @@ Thread* get_next_thread() {
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
   Thread *thread = make_thread(start_funct, args, current_thread->ctx);
-  debug_print("MyThreadCreate %p\n", thread);
+  DEBUG_PRINT("MyThreadCreate %p\n", (void *)thread);
   thread->parent = current_thread;
   enqueue(current_thread->children, thread);
   enqueue(ready_queue, thread);
