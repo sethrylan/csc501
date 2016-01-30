@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 
 #define DEBUG 1
 
@@ -40,7 +41,7 @@ typedef struct Queue  // FIFO queue //
 //   Thread *elements;
 // } Queue;
 
-Queue* make_queue(char *name)
+Queue* make_queue(const char *name)
 {
   Queue *q = (Queue *)malloc(sizeof(Queue));
   q->name = malloc(strlen(name) + 1);
