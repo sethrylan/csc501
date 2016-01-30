@@ -40,9 +40,11 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
     die("getcontext failed\n");
   }
 
-  (context->uc_stack).ss_sp = malloc(MINSIGSTKSZ * sizeof(char));
-  (context->uc_stack).ss_size = MINSIGSTKSZ;
+  context->uc_stack.ss_sp = malloc(SIGSTKSZ * sizeof(char));
+  context->uc_stack.ss_size = SIGSTKSZ;
+  context->uc_stack.ss_flags = 0;
   context->uc_link = uc_context;
+
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = context;
 
@@ -51,7 +53,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
   // DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
   // printf("%x \n", (uintptr_t)thread);
   // DEBUG_PRINT("%x \n", (uintptr_t)thread);
-  DEBUG_PRINT("make_thread: thread pointer = %p \n", (void *)thread);
+  DEBUG_PRINT("make_thread: %p \n", (void *)thread);
 
   return thread;
 }
@@ -79,7 +81,7 @@ Thread* get_next_thread() {
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
   Thread *thread = make_thread(start_funct, args, current_thread->ctx);
-  DEBUG_PRINT("MyThreadCreate %p\n", (void *)thread);
+  DEBUG_PRINT("MyThreadCreate: %p\n", (void *)thread);
   thread->parent = current_thread;
   enqueue(current_thread->children, thread);
   enqueue(ready_queue, thread);
