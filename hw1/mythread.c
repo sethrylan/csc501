@@ -44,7 +44,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
   (context->uc_stack).ss_size = MINSIGSTKSZ;
   context->uc_link = uc_context;
   makecontext(context, (void (*)()) start_funct, 1, args);
-  thread->ctx = *context;
+  thread->ctx = context;
 
   // debug_print("make_thread: args = %d;", *((void *)args));
   // backtrace_symbols_fd(&start_funct, 1, 1);
@@ -55,7 +55,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 
 void free_thread(Thread *thread) {
   debug_print("free_thread %p\n", (void *)&thread);
-  free((thread->ctx).uc_stack.ss_sp);
+  free((thread->ctx->uc_stack).ss_sp);
   free(thread->children);
   // thread->children = NULL;
   thread->parent = NULL;
@@ -75,7 +75,7 @@ Thread* get_next_thread() {
 // Create a new thread.
 MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 {
-  Thread *thread = make_thread(start_funct, args, &(current_thread->ctx));
+  Thread *thread = make_thread(start_funct, args, current_thread->ctx);
   debug_print("MyThreadCreate %p\n", thread);
   thread->parent = current_thread;
   enqueue(current_thread->children, thread);
@@ -104,7 +104,7 @@ void MyThreadJoinAll (void)
     Thread *temp = current_thread;
     enqueue(blocked_queue, current_thread);
     current_thread = get_next_thread();
-    swapcontext(&(temp->ctx), &(current_thread->ctx));
+    swapcontext(temp->ctx, current_thread->ctx);
     return;
   }
 }
@@ -144,7 +144,7 @@ void MyThreadExit (void)
     free_thread(temp);
   }
 
-  setcontext(&(current_thread->ctx));
+  setcontext(current_thread->ctx);
 
   return;
 }
@@ -189,7 +189,7 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
   }
 
   // save current thread context in initProcesssContext, and make current_thread context active
-  swapcontext(&init_context, &(current_thread->ctx));
+  swapcontext(&init_context, current_thread->ctx);
 
   // set parent thread to 
 
