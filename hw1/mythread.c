@@ -64,7 +64,7 @@ void free_thread(Thread *thread) {
 Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
   if(!next) {
-    DEBUG_PRINT("setting context to init context: %p", &init_context);
+    DEBUG_PRINT("setting context to init context: %p \n", &init_context);
     setcontext(&init_context);
   }
   return next;
