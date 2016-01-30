@@ -21,8 +21,9 @@ debug: lib tests/*.c
 	)
 
 clean:
-	rm -rf $(LIB) mythread.o
+	rm -rf $(LIB) mythread.o *.dSYM tests/*.dSYM *.gch
 	find ./tests/ -type f  ! -name "*.*"  -delete
+
 
 # test: clean all
 # 	@$(foreach series, $(SERIES), $(foreach order, $(ORDERS), \
