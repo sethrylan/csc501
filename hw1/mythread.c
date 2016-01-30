@@ -10,7 +10,7 @@
  *****************************************************************************/
 
 #include "mythread.h"
-#include "queue2.h"
+#include "queue.h"
 #include <signal.h>
 #include <stdlib.h>
 #include <execinfo.h>

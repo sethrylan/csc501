@@ -2,31 +2,66 @@
 #include <ucontext.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+#include <string.h>
+
+#ifdef DEBUG
+#define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
+#else
+#define DEBUG_PRINT(...) do{ } while ( 0 )
+#endif
 
 typedef struct Thread {
-  ucontext_t ctx;
+  ucontext_t *ctx;
   struct Thread *parent;
   struct Queue *children;
   struct Thread *waiting_for;
 } Thread;
 
-typedef struct Queue {      /* FIFO queue */
-  int capacity;
-  int size;
-  int front;
-  int rear;
-  Thread *elements;
+typedef struct ThreadNode
+{
+  Thread *thread;
+  struct ThreadNode *next;
+} ThreadNode;
+
+typedef struct Queue  // FIFO queue //
+{
+  struct ThreadNode *head;
+  struct ThreadNode *tail;
+  char *name;
 } Queue;
 
-Queue* make_queue (int max_size) {
-  Queue *Q;
-  Q = malloc(sizeof(Queue));
-  Q->elements = malloc(sizeof(Thread)*max_size);
-  Q->size = 0;
-  Q->capacity = max_size;
-  Q->front = 0;
-  Q->rear = -1;
-  return Q;
+// typedef struct Queue {
+//   int capacity;
+//   int size;
+//   int front;
+//   int rear;
+//   Thread *elements;
+// } Queue;
+
+Queue* make_queue(const char *name)
+{
+  Queue *q = (Queue *)malloc(sizeof(Queue));
+  q->name = malloc(strlen(name) + 1);
+  strcpy(q->name, name);
+  q->head = NULL;
+  q->tail = NULL;
+  return q;
+}
+
+int size(Queue *q) {
+  int size = 0;
+  ThreadNode *node = q->head;
+  while(node) {
+    size++;
+    node = node->next;
+  }
+  return size;
+}
+
+int is_empty(Queue *q)
+{
+  return ((q->head == NULL) && (q->tail == NULL));
 }
 
 void die (const char *msg)
@@ -35,79 +70,149 @@ void die (const char *msg)
   exit(1);
 }
 
-Thread* pop (Queue *q) {
-  Thread *result = NULL;
-  if(q->size != 0) {
-    result = &q->elements[q->front];
-    q->size--;
-
-    q->front = (q->front+1) % q->capacity;
-    // q->front++;
-    /* circle to front of queue */
-    // if(q->front == q->capacity) {
-    //   q->front = 0;
-    // }
+Thread* dequeue(Queue *q)
+{
+  ThreadNode* temp = q->head;
+  Thread* thread = NULL;
+  if (q->head == NULL) {
+    // printf here causes
+    // ==3938== Conditional jump or move depends on uninitialised value(s)
+    // ==3938==    at 0x4F0A557: write (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x4EA0AD2: _IO_file_write@@GLIBC_2.2.5 (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x4EA0999: _IO_file_xsputn@@GLIBC_2.2.5 (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x4E78680: buffered_vfprintf (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x4E7321D: vfprintf (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x4E7E0E7: fprintf (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x40098E: dequeue (queue2.h:73)
+    // ==3938==    by 0x400F49: get_next_thread (mythread.c:67)
+    // ==3938==    by 0x401150: MyThreadExit (mythread.c:141)
+    // ==3938==    by 0x40084E: t0 (one.c:7)
+    // ==3938==    by 0x4E728EF: ??? (in /lib64/libc-2.12.so)
+    // ==3938==    by 0x401241: MyThreadInit (mythread.c:192)
+    // ==3938==  Uninitialised value was created by a stack allocation
+    // ==3938==    at 0x4E78557: buffered_vfprintf (in /lib64/libc-2.12.so)
+    DEBUG_PRINT("%s: queue is empty \n", q->name);
+    return NULL;
   }
-  return result;
-}
-
-void push (Queue *q, Thread element) {
-  if(q->size == q->capacity) {
-    // todo: expandCapacity
-    die("queue full\n");
-  }
-  q->size++;
-
-  q->rear = (q->rear+1) % q->capacity;
-  // q->rear = q->rear + 1;
-  // if(q->rear == q->capacity) {        // circle queue
-  //   q->rear = 0;
-  // }
-  q->elements[q->rear] = element;
-  return;
-}
-
-void removeElement(Queue *q, Thread *thread) {
-  Queue *new_queue = make_queue(q->capacity);
-  while (q->size > 0)
+  assert(NULL != q->head);
+  assert(NULL != q->tail);
+  if (q->head == q->tail)
   {
-    push(new_queue, *pop(q));
+    q->tail = q->head = NULL;
   }
-  free(q->elements);
+  else
+  {
+    q->head = q->head->next;
+  }
+  thread = temp->thread;
+  free(temp);
+  DEBUG_PRINT("%s: dequeue thread pointer %p\n", q->name, (void *)thread);
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
+  return thread;
+}
+
+Queue* enqueue(Queue *q, Thread *thread)
+{
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
+
+  ThreadNode *node = malloc( 1 * sizeof(ThreadNode) );
+  node->thread = thread;
+  node->next = NULL;
+
+  if (is_empty(q))
+  {
+    q->head = node;
+    q->tail = node;
+  }
+  else
+  {
+    assert(NULL != q->head);
+    assert(NULL != q->tail);
+    q->tail->next = node;
+    q->tail = node;
+  }
+
+  DEBUG_PRINT("%s: enqueue thread pointer %p\n", q->name, (void *)thread);
+  DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
+
+  return q;
+}
+
+void print_node (const ThreadNode *node)
+{
+  if (node)
+  {
+    // TODO: printf("Thread = %d\n", p->num);
+  }
+  else
+  {
+    // printf("Can not print NULL struct \n");
+  }
+}
+
+void print_queue (const Queue *q)
+{
+  ThreadNode *node = NULL;
+  if (q)
+  {
+    for (node = q->head; node != NULL; node = node->next )
+    {
+      print_node(node);
+    }
+  }
+}
+
+void free_queue(Queue *q)
+{
+  DEBUG_PRINT("%s: freeing queue with %d remaining nodes\n", q->name, size(q));
+  while(q->head)
+  {
+    dequeue(q);
+  }
+  free(q->name);
   free(q);
-  q = new_queue;
-  // int found = 0;
-  // for(int i=q->front; i<q->capacity; i++)
-  // {
-  //   if (&(q->elements[i]) == thread)
-  //   {
-  //     q->size--;
-  //     q->rear = (q->rear-1) % q->capacity;
-  //     for (int j=i; j<q->capacity-1; j++)
-  //     {
-  //       q->elements[j] = q->elements[j+1];
-  //     }
-  //   }
-  // }
   return;
 }
 
-int contains(Queue *q, Thread *thread) {
-  int i;
-  for(i=0; i<q->capacity; i++)
+int contains(Queue *q, Thread *thread)
+{
+  ThreadNode *node = NULL;
+  for (node = q->head; node != NULL; node = node->next )
   {
-    if (&(q->elements[i]) == thread) {
+    if (node->thread == thread)
+    {
       return 1;
     }
   }
   return 0;
 }
 
-
-// Thread new_tree_node (long offset, int level) {
-//   tree_node tree_node;
-//   tree_node.offset = offset;
-//   tree_node.level = level;
-//   return tree_node;
-// }
-
+void remove_node(Queue *q, Thread *thread)
+{
+  ThreadNode *last = NULL;
+  ThreadNode *node = NULL;
+  for (node = q->head; node != NULL; node = node->next )
+  {
+    if (node->thread == thread)
+    {
+      if(node == q->head && node == q->tail)
+      {
+        q->head = q->tail = NULL;
+      }
+      else if (node == q->tail)
+      {
+        q->tail = last;
+        q->tail->next  = NULL;
+      }
+      else if (node == q->head)
+      {
+        q->head = node->next;
+      }
+      else
+      {
+        last->next = node->next;
+      }
+    }
+    last = node;
+  }
+}

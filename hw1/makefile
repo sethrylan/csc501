@@ -1,5 +1,5 @@
 CC      = gcc
-SRC     = mythread.c queue2.h
+SRC     = mythread.c queue.h
 CFLAGS  = -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
 RM      = rm -f
 DIFF    = diff
