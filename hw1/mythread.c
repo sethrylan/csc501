@@ -55,7 +55,6 @@ void free_thread(Thread *thread) {
   DEBUG_PRINT("free_thread %p\n", (void *)thread);
   free((thread->ctx->uc_stack).ss_sp);
   free_queue(thread->children);
-  free(thread->children);
   // thread->children = NULL;
   thread->parent = NULL;
   free(thread);
@@ -141,7 +140,7 @@ void MyThreadExit (void)
     remove_node(parent->children, current_thread);
   }
 
-  // unblock parent thread
+  // unblock parent thread if it is blocked
   if(contains(blocked_queue, parent)) {
     if(is_empty(parent->children) || (parent->waiting_for == current_thread)) {
       remove_node(blocked_queue, parent);
@@ -156,16 +155,17 @@ void MyThreadExit (void)
 
   current_thread = get_next_thread();
 
+  // if (temp) {
+  //   free_thread(temp);
+  // }
+
   if (current_thread)
   {
     setcontext(current_thread->ctx);
   }
 
-  if (temp) {
-    free_thread(temp);
-  }
-
-  return;
+  // will never get here
+  assert(0);
 }
 
 // ****** SEMAPHORE OPERATIONS ******
