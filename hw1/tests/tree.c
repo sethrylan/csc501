@@ -58,3 +58,121 @@ int main(int argc, char *argv[])
 
   MyThreadInit(t0, NULL);
 }
+
+
+/////////////////////////////////////
+// Output
+/////////////////////////////////////
+// Mode: yield=0, join=0
+// thread(t0(NULL)): "t0 start"
+// thread(t0(NULL)): makeThreads("t0", t1, n)
+// thread(t0(NULL)): "t0 create 0"
+// thread(t0(NULL)): "t0 create 1"
+// thread(t0(NULL)): "t0 create ..."
+// thread(t0(NULL)): "t0 create n"
+// thread(t0(NULL)): "t0 end"
+// thread(t1(0))   : "t1 0 start"
+// thread(t1(0))   : makeThreads("t1 0", t2, m)
+// thread(t1(0))   : "t1 0 end"
+// thread(t2(0..m)): "t2 <0..m> start"
+// thread(t1(1))   : "t1 1 start"
+// thread(t1(1))   : makeThreads("t1 0", t2, m)
+// thread(t1(1))   : "t1 1 end"
+// thread(t2(0..m)): "t2 <0..m> start"
+/////////////////////////////////////
+// Mode: n=2 m=2 yield=1, join=0
+// thread(t0(NULL)): "t0 start"
+// thread(t0(NULL)): makeThreads("t0", t1, n=2)
+// thread(t0(NULL)): "t0 create 0"
+// thread(t0(NULL)): <yield>
+// thread(t1(0))   : "t1 0 start"
+// thread(t1(0))   : makeThreads("t1 0", t2, 2)
+// thread(t1(0))   : "t1 0 create 0"
+// thread(t1(0))   : <yield>
+// thread(t0(NULL)): "t0 create 1"
+// thread(t0(NULL)): <yield>
+// thread(t2(0))   : "t2 0 start"
+// thread(t2(0))   : <exit>
+// thread(t1(0))   : "t1 0 create 1"
+// thread(t1(0))   : <yield>
+// thread(t1(1))   : "t1 1 start"
+// thread(t1(1))   : makeThreads("t1 1", t2, 2)
+// thread(t1(1))   : "t1 1 create 0"
+// thread(t1(1))   : <yield>
+// thread(t0(NULL)): "t0 end"
+// ...
+/////////////////////////////////////
+// Mode: n=2 m=2 yield=0, join=1
+// thread(t0(NULL)): "t0 start"
+// thread(t0(NULL)): makeThreads("t0", t1, n=2)
+// thread(t0(NULL)): "t0 create 0"
+// thread(t0(NULL)): "t0 create 1"
+// thread(t0(NULL)): <join>
+// thread(t1(0))   : "t1 0 start"
+// thread(t1(0))   : makeThreads("t1 0", t2, 2)
+// thread(t1(0))   : "t1 0 create 0"
+// thread(t1(0))   : "t1 0 create 1"
+// thread(t1(0))   : <join>
+// thread(t1(1))   : "t1 1 start"
+// thread(t1(1))   : makeThreads("t1 1", t2, 2)
+// thread(t1(1))   : "t1 1 create 0"
+// thread(t1(1))   : "t1 1 create 1"
+// thread(t1(1))   : <join>
+// thread(t2(0))   : "t2 0 start"
+// thread(t2(0))   : <exit>
+// thread(t2(1))   : "t2 1 start"
+// thread(t2(1))   : <exit>
+// thread(t2(0))   : "t2 0 start"
+// thread(t2(0))   : <exit>
+// thread(t2(1))   : "t2 1 start"
+// thread(t2(1))   : <exit>
+// thread(t1(1))   : <exit>
+// thread(t1(1))   : "t1 1 end"
+// thread(t1(0))   : <exit>
+// thread(t1(0))   : "t1 0 end"
+// thread(t0(NULL)): <exit>
+// thread(t0(NULL)): "t0 end"
+/////////////////////////////////////
+// Mode: n=2 m=2 yield=1, join=1
+// thread(t0(NULL)): "t0 start"
+// thread(t0(NULL)): makeThreads("t0", t1, n=2)
+// thread(t0(NULL)): "t0 create 0"
+// thread(t0(NULL)): <yield>
+// thread(t1(0))   : "t1 0 start"
+// thread(t1(0))   : makeThreads("t1 0", t2, 2)
+// thread(t1(0))   : "t1 0 create 0"
+
+
+
+
+
+
+
+// thread(t0(NULL)): "t0 create 1"
+// thread(t0(NULL)): <join>
+// thread(t1(0))   : "t1 0 start"
+// thread(t1(0))   : makeThreads("t1 0", t2, 2)
+// thread(t1(0))   : "t1 0 create 0"
+// thread(t1(0))   : "t1 0 create 1"
+// thread(t1(0))   : <join>
+// thread(t1(1))   : "t1 1 start"
+// thread(t1(1))   : makeThreads("t1 1", t2, 2)
+// thread(t1(1))   : "t1 1 create 0"
+// thread(t1(1))   : "t1 1 create 1"
+// thread(t1(1))   : <join>
+// thread(t2(0))   : "t2 0 start"
+// thread(t2(0))   : <exit>
+// thread(t2(1))   : "t2 1 start"
+// thread(t2(1))   : <exit>
+// thread(t2(0))   : "t2 0 start"
+// thread(t2(0))   : <exit>
+// thread(t2(1))   : "t2 1 start"
+// thread(t2(1))   : <exit>
+// thread(t1(1))   : <exit>
+// thread(t1(1))   : "t1 1 end"
+// thread(t1(0))   : <exit>
+// thread(t1(0))   : "t1 0 end"
+// thread(t0(NULL)): <exit>
+// thread(t0(NULL)): "t0 end"
+
+
