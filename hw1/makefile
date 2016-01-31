@@ -31,7 +31,12 @@ test: clean tests
 	./tests/fib 0 | $(DIFF) ./tests/fib-0.output -  && echo "OK PASS" && \
 	./tests/fib 2 | $(DIFF) ./tests/fib-2.output -  && echo "OK PASS" && \
 	./tests/fib 3 | $(DIFF) ./tests/fib-3.output -  && echo "OK PASS" && \
-	./tests/fib 9 | $(DIFF) ./tests/fib-9.output -  && echo "OK PASS";
+	./tests/fib 9 | $(DIFF) ./tests/fib-9.output -  && echo "OK PASS" && \
+	./tests/ping 0 | $(DIFF) ./tests/ping-0.output -  && echo "OK PASS" && \
+	./tests/ping 1 | $(DIFF) ./tests/ping-1.output -  && echo "OK PASS" && \
+	./tests/ping 2 | $(DIFF) ./tests/ping-2.output -  && echo "OK PASS" && \
+	./tests/ping 5 | $(DIFF) ./tests/ping-5.output -  && echo "OK PASS" && \
+	./tests/ping 9 | $(DIFF) ./tests/ping-9.output -  && echo "OK PASS";
 
 	# @$(foreach series, $(SERIES), $(foreach order, $(ORDERS), \
 	# 	echo "\n$(series) @ $(order)" && \

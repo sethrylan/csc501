@@ -29,3 +29,15 @@ int main(int argc, char *argv[])
   n = atoi(argv[1]);
   MyThreadInit(t0, 0);
 }
+
+/////////////////////////////////////
+// Output
+/////////////////////////////////////
+// t0(0) --> thread(t1(1)) and t1(0)
+// thread(t(1)): "t1 start"
+//             : "t1 yield" * n
+// thread(t(1)): "t1 end"
+//
+// t1(0)       : "t0 start"
+// t1(0)       : "t0 yield" * n
+// t1(0)       : "t0 end"
