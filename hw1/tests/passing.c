@@ -34,3 +34,51 @@ int main(int argc, char *argv[])
     mode = atoi(argv[2]);
   MyThreadInit(t0, (void *)count);
 }
+
+
+/////////////////////////////////////
+// Output
+/////////////////////////////////////
+// Mode: 0
+// thread(t0(n)): "t0 start <n>"
+// thread(t0(n)): "t0 create"
+// thread(t0(n)): "t0 end"
+// thread(t0(n-1)): "t0 start <n-1>"
+// thread(t0(n-1)): "t0 create"
+// thread(t0(n-1)): "t0 end"
+// ...
+/////////////////////////////////////
+/////////////////////////////////////
+// Mode: 1/Yield
+// thread(t0(n)): "t0 start <n>"
+// thread(t0(n)): "t0 create"
+// thread(t0(n)): <yields>
+// thread(t0(n-1)): "t0 start <n-1>"
+// thread(t0(n-1)): "t0 create"
+// thread(t0(n-1)): <yields>
+// thread(t0(n)): "t0 end"
+// thread(t0(n-2)): "t0 start <n-2>"
+// thread(t0(n-2)): "t0 create"
+// thread(t0(n-2)): <yields>
+// thread(t0(n-1)): "t0 end"
+// ....
+// thread(t0(n-n)): "t0 start 0"
+// thread(t0(n-n)): "t0 end"
+// thread(t0(n-(n-1))): "t0 end"
+/////////////////////////////////////
+/////////////////////////////////////
+// Mode: 2/Join
+// thread(t0(n)): "t0 start <n>"
+// thread(t0(n)): "t0 create"
+// thread(t0(n)): <joins>
+// thread(t0(n-1)): "t0 start <n-1>"
+// thread(t0(n-1)): "t0 create"
+// thread(t0(n-1)): <joins>
+// thread(t0(n-2)): "t0 start <n-2>"
+// thread(t0(n-2)): "t0 create"
+// thread(t0(n-2)): <joins>
+// thread(t0(n-2)): "t0 end"
+// thread(t0(n-1)): "t0 end"
+// thread(t0(n)): "t0 end"
+//
+
