@@ -54,6 +54,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 void free_thread(Thread *thread) {
   DEBUG_PRINT("free_thread %p\n", (void *)thread);
   free((thread->ctx->uc_stack).ss_sp);
+  free_queue(thread->children);
   free(thread->children);
   // thread->children = NULL;
   thread->parent = NULL;
@@ -90,12 +91,13 @@ MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
 // Yield invoking thread
 void MyThreadYield (void)
 {
-  return;
+  die("not yet implemented.");
 }
 
 // Join with a child thread
 int MyThreadJoin (MyThread thread)
 {
+  die("not yet implemented.");
   return 0;
 }
 
@@ -161,24 +163,28 @@ void MyThreadExit (void)
 // Create a semaphore
 MySemaphore MySemaphoreInit (int initialValue)
 {
+  die("not yet implemented.");
   return 0;
 }
 
 // Signal a semaphore
 void MySemaphoreSignal (MySemaphore sem)
 {
+  die("not yet implemented.");
   return;
 }
 
 // Wait on a semaphore
 void MySemaphoreWait (MySemaphore sem)
 {
+  die("not yet implemented.");
   return;
 }
 
 // Destroy on a semaphore
 int MySemaphoreDestroy (MySemaphore sem)
 {
+  die("not yet implemented.");
   return 0;
 }
 
