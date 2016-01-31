@@ -153,20 +153,20 @@ void MyThreadExit (void)
   }
 
   // update children
-  ThreadNode *node = current_thread->children->head;
-  while (node)
-  {
-    if (node->thread != init_thread)
-    {
-      node->thread->parent = init_thread;
-      enqueue(init_thread->children, node->thread);
-      node = node->next;
-    }
-    else
-    {
-      assert(0);
-    }
-  }
+  // ThreadNode *node = current_thread->children->head;
+  // while (node)
+  // {
+  //   if (node->thread != init_thread)
+  //   {
+  //     node->thread->parent = init_thread;
+  //     enqueue(init_thread->children, node->thread);
+  //   }
+  //   else
+  //   {
+  //     assert(0);
+  //   }
+  //   node = node->next;
+  // }
 
   current_thread = get_next_thread();
 
