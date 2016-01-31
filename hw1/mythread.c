@@ -116,6 +116,7 @@ int MyThreadJoin (MyThread thread)
   }
   else
   {
+    assert(t->parent = current_thread);
     current_thread->waiting_for = t;
     enqueue(blocked_queue, current_thread);
     current_thread = get_next_thread();
