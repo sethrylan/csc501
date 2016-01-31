@@ -62,6 +62,8 @@ void free_thread(Thread *thread) {
   // thread = NULL;
 }
 
+// Returns the next thread from the ready queue. If there is no thread, then clean up and
+// the set context to the initial process context
 Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
   if(!next) {
@@ -73,7 +75,10 @@ Thread* get_next_thread() {
   return next;
 }
 
-// Create a new thread.
+// Create a new MyThread using start_func as the function to start executing. This routine
+// does not pre-empt the invoking thread; the parent (invoking) thread will continue to
+// run and the child thread will sit in the ready queue.
+//
 // 1. Call make_thread to allocate and initialize with current_thread context as uc_link
 // 2. Set parent thread of new thread to the current thread
 // 3. Add new thread to parent thread's children
@@ -101,7 +106,11 @@ int MyThreadJoin (MyThread thread)
   return 0;
 }
 
-// Join with all children
+// Blocks until all children have terminated. Returns immediately if there are no active children.
+//
+// If there there are children threads for the current thread, then:
+// 1. Add current thread to blocked queue.
+// 2. swapcontext() with next thread.
 void MyThreadJoinAll (void)
 {
   if (is_empty(current_thread->children)) {
