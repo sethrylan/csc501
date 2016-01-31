@@ -54,6 +54,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
 void free_thread(Thread *thread) {
   DEBUG_PRINT("free_thread %p\n", (void *)thread);
   free((thread->ctx->uc_stack).ss_sp);
+  free(thread->ctx);
   free_queue(thread->children);
   // thread->children = NULL;
   thread->parent = NULL;
@@ -150,8 +151,20 @@ void MyThreadExit (void)
   }
 
   // update children
-
-  // for (int i=thread->children->front; i<thread->children->capacity)
+  ThreadNode *node = current_thread->children->head;
+  while (node)
+  {
+    if (node->thread != init_thread)
+    {
+      node->thread->parent = init_thread;
+      enqueue(init_thread->children, node->thread);
+      node = node->next;
+    }
+    else
+    {
+      assert(0);
+    }
+  }
 
   current_thread = get_next_thread();
 
