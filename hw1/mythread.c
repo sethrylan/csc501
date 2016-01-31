@@ -104,11 +104,24 @@ void MyThreadYield (void)
   swapcontext(temp->ctx, current_thread->ctx);
 }
 
-// Join with a child thread
+// Joins/blocks the invoking thread with the child thread passed as a parameter. Does not
+// block if the child thread is already terminated.
+// Returns 0 on success (after blocking), or -1 on failure if thread parameter is not a child thread
 int MyThreadJoin (MyThread thread)
 {
-  die("not yet implemented.");
-  return 0;
+  Thread *t = (Thread *)thread;
+  if (!contains(current_thread->children, t))
+  {
+    return -1;
+  }
+  else
+  {
+    current_thread->waiting_for = t;
+    enqueue(blocked_queue, current_thread);
+    current_thread = get_next_thread();
+    swapcontext(t->parent->ctx, current_thread->ctx);
+    return 0;
+  }
 }
 
 // Blocks until all children have terminated. Returns immediately if there are no active children.
