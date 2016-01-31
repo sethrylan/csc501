@@ -70,27 +70,12 @@ void die (const char *msg)
   exit(1);
 }
 
+// "every remove is from the head"
 Thread* dequeue(Queue *q)
 {
   ThreadNode* temp = q->head;
   Thread* thread = NULL;
   if (q->head == NULL) {
-    // printf here causes
-    // ==3938== Conditional jump or move depends on uninitialised value(s)
-    // ==3938==    at 0x4F0A557: write (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x4EA0AD2: _IO_file_write@@GLIBC_2.2.5 (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x4EA0999: _IO_file_xsputn@@GLIBC_2.2.5 (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x4E78680: buffered_vfprintf (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x4E7321D: vfprintf (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x4E7E0E7: fprintf (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x40098E: dequeue (queue2.h:73)
-    // ==3938==    by 0x400F49: get_next_thread (mythread.c:67)
-    // ==3938==    by 0x401150: MyThreadExit (mythread.c:141)
-    // ==3938==    by 0x40084E: t0 (one.c:7)
-    // ==3938==    by 0x4E728EF: ??? (in /lib64/libc-2.12.so)
-    // ==3938==    by 0x401241: MyThreadInit (mythread.c:192)
-    // ==3938==  Uninitialised value was created by a stack allocation
-    // ==3938==    at 0x4E78557: buffered_vfprintf (in /lib64/libc-2.12.so)
     DEBUG_PRINT("%s: queue is empty \n", q->name);
     return NULL;
   }
@@ -111,6 +96,7 @@ Thread* dequeue(Queue *q)
   return thread;
 }
 
+// "Every insert is at the tail"
 Queue* enqueue(Queue *q, Thread *thread)
 {
   DEBUG_PRINT("%s: size = %d\n", q->name, size(q));
