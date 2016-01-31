@@ -4,7 +4,7 @@ CFLAGS  = -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
 RM      = rm -f
 DIFF    = diff
 LIB     = mythread.a
-TESTS   = fib one passing
+TESTS   = fib one passing tree ping
 
 # see also https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00107.html
 
