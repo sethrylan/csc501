@@ -93,10 +93,15 @@ MyThread MyThreadCreate (void(*start_funct)(void *), void *args)
   return (MyThread)thread;
 }
 
-// Yield invoking thread
+// Suspends execution of invoking thread and yield to another thread. The invoking thread
+// remains ready to execute—it is not blocked. If there is no other ready thread, the
+// invoking thread will continue to execute.
 void MyThreadYield (void)
 {
-  die("not yet implemented.");
+  Thread *temp = current_thread;
+  enqueue(ready_queue, current_thread);
+  current_thread = get_next_thread();
+  swapcontext(temp->ctx, current_thread->ctx);
 }
 
 // Join with a child thread
@@ -113,14 +118,11 @@ int MyThreadJoin (MyThread thread)
 // 2. swapcontext() with next thread.
 void MyThreadJoinAll (void)
 {
-  if (is_empty(current_thread->children)) {
-    return;
-  } else {
+  if (!is_empty(current_thread->children)) {
     Thread *temp = current_thread;
     enqueue(blocked_queue, current_thread);
     current_thread = get_next_thread();
     swapcontext(temp->ctx, current_thread->ctx);
-    return;
   }
 }
 
