@@ -65,6 +65,8 @@ Thread* get_next_thread() {
   Thread *next = dequeue(ready_queue);
   if(!next) {
     DEBUG_PRINT("setting context to init context: %p \n", &init_context);
+    free_queue(ready_queue);
+    free_queue(blocked_queue);
     setcontext(&init_context);
   }
   return next;
@@ -119,6 +121,7 @@ void MyThreadJoinAll (void)
 // 4. Update current thread to next thread, and setcontext() for the new current thread
 void MyThreadExit (void)
 {
+  DEBUG_PRINT("MyThreadExit: %p \n", (void *)current_thread);
   Thread *temp = current_thread;
   Thread *parent = current_thread->parent;
 
@@ -145,11 +148,6 @@ void MyThreadExit (void)
   if (current_thread)
   {
     setcontext(current_thread->ctx);
-  }
-  else
-  {
-    free_queue(ready_queue);
-    free_queue(blocked_queue);
   }
 
   if (temp) {
