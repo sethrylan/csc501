@@ -23,10 +23,13 @@
 # Executables
 *.exe
 *.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+#*.app
+#*.i*86
+#*.x86_64
+#*.hex
 
 # Debug files
 *.dSYM/
+
+# Vagrant files
+.vagrant/
