@@ -187,7 +187,7 @@ int MySemaphoreDestroy (MySemaphore sem)
 void MyThreadInit (void(*start_funct)(void *), void *args)
 {
   ready_queue = make_queue("ready_queue");
-  blocked_queue = make_queue("ready_queue");
+  blocked_queue = make_queue("blocked_queue");
 
   current_thread = make_thread(start_funct, args, NULL);
   init_thread = current_thread;
