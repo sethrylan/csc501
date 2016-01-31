@@ -184,6 +184,7 @@ void MyThreadExit (void)
 
   current_thread = get_next_thread();
 
+  // TODO: cannot clean up until after switching context
   // if (temp) {
   //   free_thread(temp);
   // }
