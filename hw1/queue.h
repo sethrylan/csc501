@@ -18,14 +18,12 @@ typedef struct Thread {
   struct Thread *waiting_for;
 } Thread;
 
-typedef struct ThreadNode
-{
+typedef struct ThreadNode {
   Thread *thread;
   struct ThreadNode *next;
 } ThreadNode;
 
-typedef struct Queue  // FIFO queue //
-{
+typedef struct Queue { // FIFO queue //
   struct ThreadNode *head;
   struct ThreadNode *tail;
   char *name;
