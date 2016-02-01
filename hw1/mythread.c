@@ -99,12 +99,9 @@ void MyThreadYield (void)
 int MyThreadJoin (MyThread thread)
 {
   Thread *t = (Thread *)thread;
-  if (!contains(current_thread->children, t))
-  {
+  if (!contains(current_thread->children, t)) {
     return -1;
-  }
-  else
-  {
+  } else {
     assert(t->parent = current_thread);
     current_thread->waiting_for = t;
     enqueue(blocked_queue, current_thread);
@@ -178,8 +175,7 @@ void MyThreadExit (void)
   //   free_thread(temp);
   // }
 
-  if (current_thread)
-  {
+  if (current_thread) {
     setcontext(current_thread->ctx);
   }
 

@@ -81,12 +81,9 @@ Thread* dequeue(Queue *q)
   }
   assert(NULL != q->head);
   assert(NULL != q->tail);
-  if (q->head == q->tail)
-  {
+  if (q->head == q->tail) {
     q->tail = q->head = NULL;
-  }
-  else
-  {
+  } else {
     q->head = q->head->next;
   }
   thread = temp->thread;
@@ -105,13 +102,10 @@ Queue* enqueue(Queue *q, Thread *thread)
   node->thread = thread;
   node->next = NULL;
 
-  if (is_empty(q))
-  {
+  if (is_empty(q)) {
     q->head = node;
     q->tail = node;
-  }
-  else
-  {
+  } else {
     assert(NULL != q->head);
     assert(NULL != q->tail);
     q->tail->next = node;
@@ -139,10 +133,8 @@ void print_node (const ThreadNode *node)
 void print_queue (const Queue *q)
 {
   ThreadNode *node = NULL;
-  if (q)
-  {
-    for (node = q->head; node != NULL; node = node->next )
-    {
+  if (q) {
+    for (node = q->head; node != NULL; node = node->next ) {
       print_node(node);
     }
   }
@@ -151,8 +143,7 @@ void print_queue (const Queue *q)
 void free_queue(Queue *q)
 {
   DEBUG_PRINT("%s: freeing queue with %d remaining nodes\n", q->name, size(q));
-  while(q->head)
-  {
+  while(q->head) {
     dequeue(q);
   }
   free(q->name);
@@ -163,10 +154,8 @@ void free_queue(Queue *q)
 int contains(Queue *q, Thread *thread)
 {
   ThreadNode *node = NULL;
-  for (node = q->head; node != NULL; node = node->next )
-  {
-    if (node->thread == thread)
-    {
+  for (node = q->head; node != NULL; node = node->next ) {
+    if (node->thread == thread) {
       return 1;
     }
   }
@@ -177,25 +166,16 @@ void remove_node(Queue *q, Thread *thread)
 {
   ThreadNode *last = NULL;
   ThreadNode *node = NULL;
-  for (node = q->head; node != NULL; node = node->next )
-  {
-    if (node->thread == thread)
-    {
-      if(node == q->head && node == q->tail)
-      {
+  for (node = q->head; node != NULL; node = node->next ) {
+    if (node->thread == thread) {
+      if(node == q->head && node == q->tail) {
         q->head = q->tail = NULL;
-      }
-      else if (node == q->tail)
-      {
+      } else if (node == q->tail) {
         q->tail = last;
         q->tail->next  = NULL;
-      }
-      else if (node == q->head)
-      {
+      } else if (node == q->head) {
         q->head = node->next;
-      }
-      else
-      {
+      } else {
         last->next = node->next;
       }
     }
