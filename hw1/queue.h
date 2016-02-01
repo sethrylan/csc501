@@ -31,13 +31,10 @@ typedef struct Queue  // FIFO queue //
   char *name;
 } Queue;
 
-// typedef struct Queue {
-//   int capacity;
-//   int size;
-//   int front;
-//   int rear;
-//   Thread *elements;
-// } Queue;
+typedef struct Semaphore {
+  int count;
+  struct Queue *wait_queue;
+} Semaphore;
 
 Queue* make_queue(const char *name)
 {

@@ -135,7 +135,7 @@ void MyThreadJoinAll (void)
 void MyThreadExit (void)
 {
   DEBUG_PRINT("MyThreadExit: %p \n", (void *)current_thread);
-  Thread *temp = current_thread;
+  // Thread *temp = current_thread;
   Thread *parent = current_thread->parent;
 
   // remove current_thread from parent's children
@@ -184,32 +184,61 @@ void MyThreadExit (void)
 }
 
 // ****** SEMAPHORE OPERATIONS ******
-// Create a semaphore
+// Create a semaphore and sets initial value, which must be > 0
 MySemaphore MySemaphoreInit (int initialValue)
 {
-  die("not yet implemented.");
-  return 0;
+  Semaphore *semaphore = NULL;
+  if (initialValue < 0) {
+    perror("initialValue must be non-negative");
+  } else {
+    semaphore = malloc(sizeof(Semaphore));
+    semaphore->count = 0;
+    semaphore->wait_queue = make_queue("wait_queue");
+    for (int i=0; i<initialValue; i++) {
+      MySemaphoreSignal(semaphore);
+    }
+  }
+  return (MySemaphore)semaphore;
 }
 
 // Signal a semaphore
 void MySemaphoreSignal (MySemaphore sem)
 {
-  die("not yet implemented.");
+  Semaphore *s = (Semaphore *)sem;
+  s->count++;
+  if (s->count <= 0) {
+    Thread *thread = dequeue(s->wait_queue);
+    enqueue(ready_queue, thread);
+  }
   return;
 }
 
-// Wait on a semaphore
+// Wait on semaphore
 void MySemaphoreWait (MySemaphore sem)
 {
-  die("not yet implemented.");
+  Semaphore *s = (Semaphore *)sem;
+  s->count--;
+  if (s->count < 0) {
+    Thread *temp = current_thread;
+    enqueue(s->wait_queue, current_thread);
+    current_thread = get_next_thread();
+    swapcontext(temp->ctx, current_thread->ctx);
+  }
   return;
 }
 
-// Destroy on a semaphore
+// Destroy semaphore sem. Do not destroy semaphore if any threads are
+// blocked on the queue. Return 0 on success, -1 on failure
 int MySemaphoreDestroy (MySemaphore sem)
 {
-  die("not yet implemented.");
-  return 0;
+  Semaphore *s = (Semaphore *)sem;
+  if (is_empty(s->wait_queue)) {
+    free_queue(s->wait_queue);
+    free(s);
+    return 0;
+  } else {
+    return -1;
+  }
 }
 
 // ****** CALLS ONLY FOR UNIX PROCESS ******

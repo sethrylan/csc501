@@ -14,3 +14,6 @@ https://gist.github.com/mycodeschool/7331785
 
 * type safe pointer printing
   http://stackoverflow.com/questions/9053658/correct-format-specifier-to-print-pointer-address
+
+* basic semaphore data structure
+  http://lxr.free-electrons.com/source/include/linux/semaphore.h
