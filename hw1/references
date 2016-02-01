@@ -1,15 +1,9 @@
 === Code Attribution ===
 
 * Linked List FIFO Queue implementation of enqueue and dequeue
-  https://lispmachine.wordpress.com/2009/05/13/queue-in-c/
   https://gist.github.com/mycodeschool/7510222
 
-https://gist.github.com/mycodeschool/7331785
-
-
 * debug_print
-  http://stackoverflow.com/questions/1644868/c-define-macro-for-debug-printing
-  http://ilostmynotes.blogspot.com/2011/04/ifdef-debug-print-statements-in-c.html
   http://stackoverflow.com/questions/1941307/c-debug-print-macros
 
 * type safe pointer printing
