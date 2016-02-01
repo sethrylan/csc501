@@ -8,9 +8,8 @@ Queue *ready_queue;
 Queue *blocked_queue;
 
 Thread *current_thread;
-// Thread *init_thread;
-
 static ucontext_t init_context;
+// Thread *init_thread;
 
 // Allocate and initialize new thread.
 Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_link)
@@ -45,10 +44,8 @@ void free_thread(Thread *thread) {
   free((thread->ctx->uc_stack).ss_sp);
   free(thread->ctx);
   free_queue(thread->children);
-  // thread->children = NULL;
   thread->parent = NULL;
   free(thread);
-  // thread = NULL;
 }
 
 // Returns the next thread from the ready queue. If there is no thread, then clean up and
