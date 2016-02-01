@@ -26,6 +26,8 @@ clean:
 	rm -rf $(LIB) mythread.o *.dSYM tests/*.dSYM *.gch
 	find ./tests/ -type f  ! -name "*.*"  -delete
 
+# create test data:
+# for n in 0 1 2 5 9; do for m in 0 1 2 5 9; do for yield in 0 1; do for join in 0 1; do echo "n=$n, m=$m, yield=$yield, join=$join" && tests/tree $n $m $yield $join > tests/tree-$n-$m-$yield-$join.output; done; done; done; done;
 test: clean tests
 	./tests/one   | $(DIFF) ./tests/one.output -  && echo "OK PASS" && \
 	./tests/fib 0 | $(DIFF) ./tests/fib-0.output -  && echo "OK PASS" && \
@@ -48,9 +50,27 @@ test: clean tests
 	./tests/passing 0 2 | $(DIFF) ./tests/passing-0-2.output -  && echo "OK PASS" && \
 	./tests/passing 1 2 | $(DIFF) ./tests/passing-1-2.output -  && echo "OK PASS" && \
 	./tests/passing 2 2 | $(DIFF) ./tests/passing-2-2.output -  && echo "OK PASS" && \
-	./tests/passing 9 2 | $(DIFF) ./tests/passing-9-2.output -  && echo "OK PASS";
-
-
+	./tests/passing 9 2 | $(DIFF) ./tests/passing-9-2.output -  && echo "OK PASS" && \
+	./tests/tree 0 0 0 0 | $(DIFF) ./tests/tree-0-0-0-0.output -  && echo "OK PASS" && \
+	./tests/tree 0 0 1 0 | $(DIFF) ./tests/tree-0-0-1-0.output -  && echo "OK PASS" && \
+	./tests/tree 0 0 0 1 | $(DIFF) ./tests/tree-0-0-0-1.output -  && echo "OK PASS" && \
+	./tests/tree 0 0 1 1 | $(DIFF) ./tests/tree-0-0-1-1.output -  && echo "OK PASS" && \
+	./tests/tree 1 1 0 0 | $(DIFF) ./tests/tree-1-1-0-0.output -  && echo "OK PASS" && \
+	./tests/tree 1 1 1 0 | $(DIFF) ./tests/tree-1-1-1-0.output -  && echo "OK PASS" && \
+	./tests/tree 1 1 0 1 | $(DIFF) ./tests/tree-1-1-0-1.output -  && echo "OK PASS" && \
+	./tests/tree 1 1 1 1 | $(DIFF) ./tests/tree-1-1-1-1.output -  && echo "OK PASS" && \
+	./tests/tree 2 2 0 0 | $(DIFF) ./tests/tree-2-2-0-0.output -  && echo "OK PASS" && \
+	./tests/tree 2 2 1 0 | $(DIFF) ./tests/tree-2-2-1-0.output -  && echo "OK PASS" && \
+	./tests/tree 2 2 0 1 | $(DIFF) ./tests/tree-2-2-0-1.output -  && echo "OK PASS" && \
+	./tests/tree 2 2 1 1 | $(DIFF) ./tests/tree-2-2-1-1.output -  && echo "OK PASS" && \
+	./tests/tree 5 5 0 0 | $(DIFF) ./tests/tree-5-5-0-0.output -  && echo "OK PASS" && \
+	./tests/tree 5 5 1 0 | $(DIFF) ./tests/tree-5-5-1-0.output -  && echo "OK PASS" && \
+	./tests/tree 5 5 0 1 | $(DIFF) ./tests/tree-5-5-0-1.output -  && echo "OK PASS" && \
+	./tests/tree 5 5 1 1 | $(DIFF) ./tests/tree-5-5-1-1.output -  && echo "OK PASS" && \
+	./tests/tree 9 9 0 0 | $(DIFF) ./tests/tree-9-9-0-0.output -  && echo "OK PASS" && \
+	./tests/tree 9 9 1 0 | $(DIFF) ./tests/tree-9-9-1-0.output -  && echo "OK PASS" && \
+	./tests/tree 9 9 0 1 | $(DIFF) ./tests/tree-9-9-0-1.output -  && echo "OK PASS" && \
+	./tests/tree 9 9 1 1 | $(DIFF) ./tests/tree-9-9-1-1.output -  && echo "OK PASS";
 
 
 	# @$(foreach series, $(SERIES), $(foreach order, $(ORDERS), \
