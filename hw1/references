@@ -3,11 +3,11 @@
 * Linked List FIFO Queue implementation of enqueue and dequeue
   https://gist.github.com/mycodeschool/7510222
 
-* debug_print
+* DEBUG_PRINT macro
   http://stackoverflow.com/questions/1941307/c-debug-print-macros
 
-* type safe pointer printing
+* type safe pointer printing (%p usages)
   http://stackoverflow.com/questions/9053658/correct-format-specifier-to-print-pointer-address
 
-* basic semaphore data structure
+* basic semaphore data structure (Semaphore struct)
   http://lxr.free-electrons.com/source/include/linux/semaphore.h
