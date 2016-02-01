@@ -6,8 +6,6 @@ DIFF    = diff
 LIB     = mythread.a
 TESTS   = fib one passing tree ping
 
-# see also https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00107.html
-
 default: lib
 
 lib: $(SRC)

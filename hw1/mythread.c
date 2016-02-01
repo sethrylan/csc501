@@ -251,6 +251,7 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
   current_thread = make_thread(start_funct, args, NULL);
   // init_thread = current_thread;
 
+  // getcontext error on Darwin: https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00107.html
   if (getcontext(&init_context) == -1) {
     die("getcontext failed\n");
   }
