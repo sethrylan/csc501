@@ -9,7 +9,6 @@ Queue *blocked_queue;
 
 Thread *current_thread;
 static ucontext_t init_context;
-// Thread *init_thread;
 
 // Allocate and initialize new thread.
 Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_link)
@@ -21,6 +20,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_link
 
   ucontext_t *context = malloc(sizeof(ucontext_t));
 
+  // cf. getcontext error on Darwin: https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00107.html
   if(getcontext(context) == -1) {
     die("getcontext failed\n");
   }
@@ -245,26 +245,14 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
 {
   ready_queue = make_queue("ready_queue");
   blocked_queue = make_queue("blocked_queue");
-
   current_thread = make_thread(start_funct, args, NULL);
-  // init_thread = current_thread;
 
-  // getcontext error on Darwin: https://lists.apple.com/archives/darwin-dev/2008/Feb/msg00107.html
   if (getcontext(&init_context) == -1) {
     die("getcontext failed\n");
   }
 
   // save current thread context in init_context, and make current_thread active
   swapcontext(&init_context, current_thread->ctx);
-
-  // set parent thread to 
-
-  //    getcontext(&(mainthread->threadctx));
-
-  //    makecontext(&(mainthread->threadctx),(void(*)(void))start_funct,1,args);
-
-  // add to ready queue
-  // addToQueue(readyQ, mainthread);
 
   return;
 }
