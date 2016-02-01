@@ -255,7 +255,7 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
     die("getcontext failed\n");
   }
 
-  // save current thread context in initProcesssContext, and make current_thread context active
+  // save current thread context in init_context, and make current_thread active
   swapcontext(&init_context, current_thread->ctx);
 
   // set parent thread to 
@@ -269,7 +269,3 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
 
   return;
 }
-
-
-
-/*........................ end of mythread.c .....................................*/
