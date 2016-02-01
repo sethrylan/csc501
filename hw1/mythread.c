@@ -12,8 +12,8 @@ Thread *current_thread;
 
 static ucontext_t init_context;
 
-// Allocate and initialize new thread
-Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_context)
+// Allocate and initialize new thread.
+Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_link)
 {
   Thread *thread = malloc(sizeof(Thread));
   thread->children = make_queue("children");
@@ -30,7 +30,7 @@ Thread* make_thread (void(*start_funct)(void *), void *args, ucontext_t *uc_cont
   context->uc_stack.ss_sp = malloc(SIGSTKSZ * sizeof(char));
   context->uc_stack.ss_size = SIGSTKSZ;
   context->uc_stack.ss_flags = 0;
-  context->uc_link = uc_context;
+  context->uc_link = uc_link;
 
   makecontext(context, (void (*)()) start_funct, 1, args);
   thread->ctx = context;
