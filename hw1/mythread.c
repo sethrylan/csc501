@@ -184,6 +184,7 @@ void MyThreadExit (void)
 // Create a semaphore and sets initial value, which must be > 0
 MySemaphore MySemaphoreInit (int initialValue)
 {
+  DEBUG_PRINT("MySemaphoreInit(%d)\n", initialValue);
   Semaphore *semaphore = NULL;
   if (initialValue < 0) {
     perror("initialValue must be non-negative");
