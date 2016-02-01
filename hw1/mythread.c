@@ -1,14 +1,3 @@
-/******************************************************************************
- *
- *  File Name........: mythread.c
- *
- *  Description......:
- *
- *  Created by vin on 11/21/06
- *
- *
- *****************************************************************************/
-
 #include "mythread.h"
 #include "queue.h"
 #include <signal.h>
@@ -19,7 +8,7 @@ Queue *ready_queue;
 Queue *blocked_queue;
 
 Thread *current_thread;
-Thread *init_thread;
+// Thread *init_thread;
 
 static ucontext_t init_context;
 
@@ -235,7 +224,7 @@ void MyThreadInit (void(*start_funct)(void *), void *args)
   blocked_queue = make_queue("blocked_queue");
 
   current_thread = make_thread(start_funct, args, NULL);
-  init_thread = current_thread;
+  // init_thread = current_thread;
 
   if (getcontext(&init_context) == -1) {
     die("getcontext failed\n");
