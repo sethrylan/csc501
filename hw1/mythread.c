@@ -194,7 +194,8 @@ MySemaphore MySemaphoreInit (int initialValue)
     semaphore = malloc(sizeof(Semaphore));
     semaphore->count = 0;
     semaphore->wait_queue = make_queue("wait_queue");
-    for (int i=0; i<initialValue; i++) {
+    int i;
+    for (i=0; i<initialValue; i++) {
       MySemaphoreSignal(semaphore);
     }
   }
