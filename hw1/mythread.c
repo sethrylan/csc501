@@ -115,8 +115,8 @@ int MyThreadJoin (MyThread thread)
 // 2. swapcontext() with next thread.
 void MyThreadJoinAll (void)
 {
+  Thread *temp = current_thread;
   if (!is_empty(current_thread->children)) {
-    Thread *temp = current_thread;
     enqueue(blocked_queue, current_thread);
     current_thread = get_next_thread();
     swapcontext(temp->ctx, current_thread->ctx);
