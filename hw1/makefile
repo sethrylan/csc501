@@ -8,6 +8,9 @@ TESTS   = fib one passing tree ping talkie
 
 default: lib
 
+tar: $(SRC)
+	tar -cvf hw1-srgainey.tar ./*.[ch] references makefile readme.md ./tests/*
+
 lib: $(SRC)
 	$(CC) $(CFLAGS) -c $(SRC)
 	ar -rcs $(LIB) *.o
