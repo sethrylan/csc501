@@ -8,21 +8,25 @@ MySemaphore alice, bob;
 char *message;
 
 void alice_says() {
+  char *temp = malloc(1000);
+  strcpy(temp, "alice says:");
+
   int i;
   for (i=0; i<10; i++) {
     printf("alice here\n");
     MySemaphoreWait(alice); // wait for semaphore to be available
     // assert(strcmp(message, "from bob") == 0);
     printf("alice reads message = %s\n", message);
-    strcpy(message, "from alice");
+    strcat(temp, " hi");
+    strcpy(message, temp);
     MySemaphoreSignal(bob);    // tell bob to read message
   }
   MyThreadExit();
 }
 
 void bob_says() {
-  // char *temp = malloc(100);
-  // strcpy(temp, "bob says: ");
+  char *temp = malloc(1000);
+  strcpy(temp, "bob says: ");
 
   int i;
   for (i=0; i<10; i++) {
@@ -30,8 +34,8 @@ void bob_says() {
     MySemaphoreWait(bob);     // wait for sempahore to be available
     // assert(strcmp(message, "from alice") == 0);
     printf("bob reads message = %s\n", message);
-    // strcat(temp, "hi ");
-    strcpy(message, "from bob");
+    strcat(temp, " hi ");
+    strcpy(message, temp);
     MySemaphoreSignal(alice);    // tell alice to read message
   }
   MyThreadExit();
@@ -54,7 +58,7 @@ int main(int argc, char **argv)
   int m = atoi(argv[2]);
   alice = MySemaphoreInit(n);
   bob = MySemaphoreInit(m);
-  message = malloc(100 * sizeof(char));
+  message = malloc(1000 * sizeof(char));
   MyThreadInit(talking, NULL);
   MySemaphoreDestroy(alice);
   MySemaphoreDestroy(bob);
