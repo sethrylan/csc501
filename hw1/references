@@ -6,7 +6,7 @@
 * DEBUG_PRINT macro
   http://stackoverflow.com/questions/1941307/c-debug-print-macros
 
-* type safe pointer printing (%p usages)
+* type safe pointer printing (%p)
   http://stackoverflow.com/questions/9053658/correct-format-specifier-to-print-pointer-address
 
 * basic semaphore data structure (Semaphore struct)

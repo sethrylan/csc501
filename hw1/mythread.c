@@ -187,15 +187,11 @@ MySemaphore MySemaphoreInit (int initialValue)
   DEBUG_PRINT("MySemaphoreInit(%d)\n", initialValue);
   Semaphore *semaphore = NULL;
   if (initialValue < 0) {
-    perror("initialValue must be non-negative");
+    perror("initialValue must be > 0");
   } else {
     semaphore = malloc(sizeof(Semaphore));
-    semaphore->count = 0;
+    semaphore->count = initialValue;
     semaphore->wait_queue = make_queue("wait_queue");
-    int i;
-    for (i=0; i<initialValue; i++) {
-      MySemaphoreSignal(semaphore);
-    }
   }
   return (MySemaphore)semaphore;
 }
