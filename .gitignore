@@ -33,3 +33,6 @@
 
 # Vagrant files
 .vagrant/
+
+# miscellaneous
+ush
