@@ -18,7 +18,7 @@
 //
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
 //
-static void prCmd(Cmd c) {
+static void evaluate_command(Cmd c) {
   int i;
 
   if ( c ) {
@@ -70,7 +70,7 @@ static void prCmd(Cmd c) {
 //
 // A pipeline is a sequence of one or more simple commands separated by | or |&.
 //
-static void evaluate(Pipe p) {
+static void evaluate_pipe(Pipe p) {
   int i = 0;
   Cmd c;
 
@@ -81,10 +81,10 @@ static void evaluate(Pipe p) {
   printf("Begin pipe%s\n", p->type == Pout ? "" : " Error");
   for ( c = p->head; c != NULL; c = c->next ) {
     printf("  Cmd #%d: ", ++i);
-    prCmd(c);
+    evaluate_command(c);
   }
   printf("End pipe\n");
-  evaluate(p->next);
+  evaluate_pipe(p->next);
 }
 
 int main(int argc, char *argv[]) {
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
   while ( 1 ) {
     printf("%s%% ", hostname);
     p = parse();
-    evaluate(p);
+    evaluate_pipe(p);
     freePipe(p);
   }
 }
