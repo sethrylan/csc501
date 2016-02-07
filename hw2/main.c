@@ -14,6 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "parse.h"
+#include "ush.h"
 
 //
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
@@ -22,7 +23,7 @@ static void evaluate_command(Cmd c) {
   int i;
 
   if ( c ) {
-    printf("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
+    DEBUG_PRINT("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
     if ( c->in == Tin ){
       printf("<(%s) ", c->infile);
     }
@@ -53,11 +54,11 @@ static void evaluate_command(Cmd c) {
     }
 
     if ( c->nargs > 1 ) {
-      printf("[");
+      DEBUG_PRINT("[");
       for ( i = 1; c->args[i] != NULL; i++ ){
-        printf("%d:%s,", i, c->args[i]);
+        DEBUG_PRINT("%d:%s,", i, c->args[i]);
       }
-      printf("\b]");
+      DEBUG_PRINT("\b]");
     }
     putchar('\n');
     // this driver understands one command
@@ -78,12 +79,12 @@ static void evaluate_pipe(Pipe p) {
     return;
   }
 
-  printf("Begin pipe%s\n", p->type == Pout ? "" : " Error");
+  DEBUG_PRINT("Begin pipe%s\n", p->type == Pout ? "" : " Error");
   for ( c = p->head; c != NULL; c = c->next ) {
-    printf("  Cmd #%d: ", ++i);
+    DEBUG_PRINT("  Cmd #%d: ", ++i);
     evaluate_command(c);
   }
-  printf("End pipe\n");
+  DEBUG_PRINT("End pipe\n");
   evaluate_pipe(p->next);
 }
 
@@ -92,11 +93,11 @@ int main(int argc, char *argv[]) {
   char *hostname = malloc(_POSIX_HOST_NAME_MAX);
   int got_host = gethostname(hostname, _POSIX_HOST_NAME_MAX);
   if (got_host != 0) {
-    perror("could not get hostname\n");
+    die("could not get hostname\n");
   }
 
   while ( 1 ) {
-    printf("%s%% ", hostname);
+    DEBUG_PRINT("%s%% ", hostname);
     p = parse();
     evaluate_pipe(p);
     freePipe(p);
