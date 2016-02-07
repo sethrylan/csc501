@@ -11,9 +11,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 #include <unistd.h>
 #include "parse.h"
 
+//
+// A simple command is a sequence of words, the first of which specifies the command to be executed.
+//
 static void prCmd(Cmd c) {
   int i;
 
@@ -63,7 +67,10 @@ static void prCmd(Cmd c) {
   }
 }
 
-static void prPipe(Pipe p) {
+//
+// A pipeline is a sequence of one or more simple commands separated by | or |&.
+//
+static void evaluate(Pipe p) {
   int i = 0;
   Cmd c;
 
@@ -77,7 +84,7 @@ static void prPipe(Pipe p) {
     prCmd(c);
   }
   printf("End pipe\n");
-  prPipe(p->next);
+  evaluate(p->next);
 }
 
 int main(int argc, char *argv[]) {
@@ -91,7 +98,7 @@ int main(int argc, char *argv[]) {
   while ( 1 ) {
     printf("%s%% ", hostname);
     p = parse();
-    prPipe(p);
+    evaluate(p);
     freePipe(p);
   }
 }
