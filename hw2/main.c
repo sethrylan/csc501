@@ -10,6 +10,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
 #include "parse.h"
 
 static void prCmd(Cmd c) {
@@ -80,10 +82,14 @@ static void prPipe(Pipe p) {
 
 int main(int argc, char *argv[]) {
   Pipe p;
-  char *host = "armadillo";
+  char *hostname = malloc(_POSIX_HOST_NAME_MAX);
+  int got_host = gethostname(hostname, _POSIX_HOST_NAME_MAX);
+  if (got_host != 0) {
+    perror("could not get hostname\n");
+  }
 
   while ( 1 ) {
-    printf("%s%% ", host);
+    printf("%s%% ", hostname);
     p = parse();
     prPipe(p);
     freePipe(p);
