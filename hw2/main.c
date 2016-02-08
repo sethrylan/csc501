@@ -16,14 +16,29 @@
 #include "parse.h"
 #include "ush.h"
 
-char *hostname;
+char *hostname, *home_directory;
 
 
 // notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
 
+// Writes each word to the shell’s standard output,
+// separated by spaces and terminated with a newline.
+int echo(Cmd command) {
+  int i;
+  for (i=1; i<command->nargs; i++) {
+    printf("%s ", command->args[i]);
+  }
+  printf("\n");
+  return EXIT_SUCCESS;
+}
+
+
+// Change the working directory of the shell to dir, provided it is a directory and the shell has the
+// appropriate permissions. Without an argument, it changes the working directory to the original
+// (home) directory
 int cd(char *path) {
   if (!path) {
-    path = getenv("HOME");
+    path = home_directory;
   }
   if (chdir(path) != 0) {
     printf("error: could not change to directory %s \n", path);
@@ -33,8 +48,7 @@ int cd(char *path) {
 
 int pwd() {
   char* cwd;
-  char buff[PATH_MAX + 1];
-  cwd = getcwd(buff, PATH_MAX + 1 );
+  cwd = getcwd(NULL, PATH_MAX + 1 );
   if(cwd != NULL) {
     printf("%s\n", cwd);
   }
@@ -102,6 +116,10 @@ static void evaluate_command(Cmd c) {
     if (matches(c->args[0], "cd")) {
       cd(c->args[1]);
     }
+    if (matches(c->args[0], "echo")) {
+      echo(c);
+    }
+
 
   }
 }
@@ -128,6 +146,8 @@ static void evaluate_pipe(Pipe p) {
 
 int main(int argc, char *argv[]) {
   Pipe p;
+  // char buff[PATH_MAX + 1];
+  home_directory = getcwd(NULL, PATH_MAX + 1 );
   hostname = malloc(_POSIX_HOST_NAME_MAX);
   int got_host = gethostname(hostname, _POSIX_HOST_NAME_MAX);
   if (got_host != 0) {
