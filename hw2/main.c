@@ -10,11 +10,28 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
+#include <limits.h> // _POSIX_HOST_NAME_MAX, PATH_MAX
 #include <string.h>
 #include <unistd.h>
 #include "parse.h"
 #include "ush.h"
+
+char *hostname;
+
+int pwd() {
+  char* cwd;
+  char buff[PATH_MAX + 1];
+  cwd = getcwd(buff, PATH_MAX + 1 );
+  if(cwd != NULL) {
+    printf("%s\n", cwd);
+  }
+  return EXIT_SUCCESS;
+}
+
+void logout() {
+  free(hostname);
+  exit(EXIT_SUCCESS);
+}
 
 //
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
@@ -49,7 +66,7 @@ static void evaluate_command(Cmd c) {
           break;
         default:
           fprintf(stderr, "Shouldn't get here\n");
-          exit(-1);
+          exit(EXIT_FAILURE);
       }
     }
 
@@ -64,7 +81,10 @@ static void evaluate_command(Cmd c) {
 
     // this driver understands one command
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
-      exit(0);
+      logout();
+    }
+    if (matches(c->args[0], "pwd")) {
+      pwd();
     }
   }
 }
@@ -91,7 +111,7 @@ static void evaluate_pipe(Pipe p) {
 
 int main(int argc, char *argv[]) {
   Pipe p;
-  char *hostname = malloc(_POSIX_HOST_NAME_MAX);
+  hostname = malloc(_POSIX_HOST_NAME_MAX);
   int got_host = gethostname(hostname, _POSIX_HOST_NAME_MAX);
   if (got_host != 0) {
     die("could not get hostname\n");
