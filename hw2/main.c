@@ -18,6 +18,19 @@
 
 char *hostname;
 
+
+// notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
+
+int cd(char *path) {
+  if (!path) {
+    path = getenv("HOME");
+  }
+  if (chdir(path) != 0) {
+    printf("error: could not change to directory %s \n", path);
+  }
+  return EXIT_SUCCESS;
+}
+
 int pwd() {
   char* cwd;
   char buff[PATH_MAX + 1];
@@ -86,6 +99,10 @@ static void evaluate_command(Cmd c) {
     if (matches(c->args[0], "pwd")) {
       pwd();
     }
+    if (matches(c->args[0], "cd")) {
+      cd(c->args[1]);
+    }
+
   }
 }
 
