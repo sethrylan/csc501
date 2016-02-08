@@ -63,7 +63,7 @@ static void evaluate_command(Cmd c) {
     putchar('\n');
 
     // this driver understands one command
-    if (matches(c->args[0], "end")){
+    if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
       exit(0);
     }
   }
