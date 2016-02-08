@@ -22,6 +22,14 @@ extern char **environ;
 
 // notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
 
+int _unsetenv(Cmd command) {
+  if (command->nargs == 2) {
+    if (unsetenv(command->args[1]) != 0) {
+      exit(EXIT_FAILURE);
+    }
+  }
+  exit(EXIT_SUCCESS);
+}
 
 int _setenv(Cmd command) {
   if (command->nargs == 1) {
@@ -140,6 +148,10 @@ static void evaluate_command(Cmd c) {
     if (matches(c->args[0], "setenv")) {
       _setenv(c);
     }
+    if (matches(c->args[0], "unsetenv")) {
+      _unsetenv(c);
+    }
+
 
   }
 }
