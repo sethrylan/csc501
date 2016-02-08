@@ -9,6 +9,6 @@ void die (const char *msg) {
   exit(1);
 }
 
-int matches (const char *string) {
-  return !strcmp(string, "end");
+int matches (const char *string, const char *compare) {
+  return !strcmp(string, compare);
 }
