@@ -18,14 +18,32 @@
 
 char *hostname, *home_directory;
 
+extern char **environ;
 
 // notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
 
+
+int _setenv(Cmd command) {
+  if (command->nargs == 1) {
+    int i;
+    char *variable = *environ;
+    for (i=1; variable; i++) {
+      printf("%s\n", variable);
+      variable = *(environ + i);
+    }
+  } else {
+    if (setenv(command->args[1], command->args[2] ? command->args[2] : "", 1) != 0) {
+      exit(EXIT_FAILURE);
+    }
+  }
+  exit(EXIT_SUCCESS);
+}
+
 // Writes each word to the shell’s standard output,
 // separated by spaces and terminated with a newline.
-int echo(Cmd command) {
+int _echo(Cmd command) {
   int i;
-  for (i=1; i<command->nargs; i++) {
+  for (i = 1; i < command->nargs; i++) {
     printf("%s ", command->args[i]);
   }
   printf("\n");
@@ -36,7 +54,7 @@ int echo(Cmd command) {
 // Change the working directory of the shell to dir, provided it is a directory and the shell has the
 // appropriate permissions. Without an argument, it changes the working directory to the original
 // (home) directory
-int cd(char *path) {
+int _cd(char *path) {
   if (!path) {
     path = home_directory;
   }
@@ -46,7 +64,7 @@ int cd(char *path) {
   return EXIT_SUCCESS;
 }
 
-int pwd() {
+int _pwd() {
   char* cwd;
   cwd = getcwd(NULL, PATH_MAX + 1 );
   if(cwd != NULL) {
@@ -55,7 +73,7 @@ int pwd() {
   return EXIT_SUCCESS;
 }
 
-void logout() {
+void _logout() {
   free(hostname);
   exit(EXIT_SUCCESS);
 }
@@ -108,18 +126,20 @@ static void evaluate_command(Cmd c) {
 
     // this driver understands one command
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
-      logout();
+      _logout();
     }
     if (matches(c->args[0], "pwd")) {
-      pwd();
+      _pwd();
     }
     if (matches(c->args[0], "cd")) {
-      cd(c->args[1]);
+      _cd(c->args[1]);
     }
     if (matches(c->args[0], "echo")) {
-      echo(c);
+      _echo(c);
     }
-
+    if (matches(c->args[0], "setenv")) {
+      _setenv(c);
+    }
 
   }
 }
