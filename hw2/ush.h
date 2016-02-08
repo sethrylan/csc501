@@ -8,3 +8,7 @@ void die (const char *msg) {
   perror(msg);
   exit(1);
 }
+
+int matches (const char *string) {
+  return !strcmp(string, "end");
+}

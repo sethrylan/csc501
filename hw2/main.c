@@ -61,8 +61,9 @@ static void evaluate_command(Cmd c) {
       DEBUG_PRINT("\b]");
     }
     putchar('\n');
+
     // this driver understands one command
-    if ( !strcmp(c->args[0], "end") ){
+    if ( matches("end") ){
       exit(0);
     }
   }
