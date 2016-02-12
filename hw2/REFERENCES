@@ -15,3 +15,6 @@ http://man7.org/linux/man-pages/man2/syscalls.2.html
 
 System Call Quick Reference
 http://www.digilife.be/quickreferences/qrc/linux%20system%20call%20quick%20reference.pdf
+
+execvp implementation for finding executables in PATH
+http://lxr.free-electrons.com/source/arch/um/os-Linux/execvp.c

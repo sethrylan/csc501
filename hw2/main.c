@@ -13,6 +13,7 @@
 #include <limits.h> // _POSIX_HOST_NAME_MAX, PATH_MAX
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include "parse.h"
 #include "ush.h"
 
@@ -21,6 +22,58 @@ char *hostname, *home_directory;
 extern char **environ;
 
 // notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
+
+void search_path(const char *file) {
+  char buf[PATH_MAX];
+  if (*file == '\0') {
+    return;
+  }
+
+  // if (strchr (file, '/') != NULL) {
+  int got_eacces;
+  size_t len, pathlen;
+  char *name, *p;
+  char *path = getenv("PATH");
+  if (path == NULL)
+    path = ":/bin:/usr/bin";
+
+  len = strlen(file) + 1;
+  pathlen = strlen(path);
+  /* Copy the file name at the top.  */
+  name = memcpy(buf + pathlen + 1, file, len);
+  /* And add the slash.  */
+  *--name = '/';
+
+  got_eacces = 0;
+  p = path;
+  do {
+    char *startp;
+    path = p;
+    p = strchr(path, ':');
+    if (!p){
+      p = strchr(path, '\0');
+    }
+
+    if (p == path) {
+      /* Two adjacent colons, or a colon at the beginning or the end
+         of `PATH' means to search the current directory.  */
+      startp = name + 1;
+    } else {
+      startp = memcpy(name - (p - path), path, p - path);
+    }
+
+    if (access(startp, X_OK) == 0) {
+      printf("%s\n", startp);
+    }
+  } while (*p++ != '\0');
+}
+
+int _where(const Cmd command) {
+  // TODO: check for arg
+  char *name = strdup(command->args[1]);
+  search_path(name);
+  return(EXIT_SUCCESS);
+}
 
 int _unsetenv(Cmd command) {
   if (command->nargs == 2) {
@@ -151,6 +204,10 @@ static void evaluate_command(Cmd c) {
     if (matches(c->args[0], "unsetenv")) {
       _unsetenv(c);
     }
+    if (matches(c->args[0], "where")) {
+      _where(c);
+    }
+
 
 
   }
