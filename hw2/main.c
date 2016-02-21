@@ -143,7 +143,7 @@ static void evaluate_command(Cmd c) {
       }
       DEBUG_PRINT("\b]");
     }
-    // putchar('\n');
+    DEBUG_PRINT("\n");
 
     // this driver understands one command
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
