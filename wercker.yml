@@ -24,6 +24,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
-          apt-get install make
+          apt-get install build-essential
           make clean test
 
