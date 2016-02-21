@@ -20,16 +20,14 @@ tar:
 clean:
 	$(RM) $(OBJ) ush
 
-test: replacehost testwhere testecho
-
-replacehost:
-	HOSTNAME=`hostname` sed -i '' "s/eastbridge/$${HOSTNAME}/g" tests/*.output
+test: export HOSTNAME=eastbridge
+test: testwhere testecho
 
 testwhere: ush
-	./ush <<< "where" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
-	./ush <<< "where ls" | $(DIFF) ./tests/wherels.output -  && echo "OK PASS" && \
-	./ush <<< "where where" | $(DIFF) ./tests/wherewhere.output -  && echo "OK PASS"
+	./ush <<< "where; end" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
+	./ush <<< "where ls; end" | $(DIFF) ./tests/wherels.output -  && echo "OK PASS" && \
+	./ush <<< "where where; end" | $(DIFF) ./tests/wherewhere.output -  && echo "OK PASS"
 
 testecho: ush
-	./ush <<< "echo" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
-	./ush <<< "echo echo" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS"
+	./ush <<< "echo; end" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
+	./ush <<< "echo echo; end" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS"

@@ -94,7 +94,7 @@ int _pwd() {
 }
 
 void _logout() {
-  free(hostname);
+  // free(hostname);
   printf("\n");
   exit(EXIT_SUCCESS);
 }
@@ -196,9 +196,14 @@ int main(int argc, char *argv[]) {
   // char buff[PATH_MAX + 1];
   home_directory = getcwd(NULL, PATH_MAX + 1 );
   hostname = malloc(_POSIX_HOST_NAME_MAX);
-  int got_host = gethostname(hostname, _POSIX_HOST_NAME_MAX);
-  if (got_host != 0) {
-    die("could not get hostname\n");
+
+  // replace with $HOSTNAME if set in environment
+  if (getenv("HOSTNAME")) {
+    hostname = getenv("HOSTNAME");
+  } else {
+    if (gethostname(hostname, _POSIX_HOST_NAME_MAX) != 0) {
+      die("could not get hostname\n");
+    }
   }
 
   while ( 1 ) {
