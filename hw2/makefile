@@ -21,7 +21,7 @@ clean:
 	$(RM) $(OBJ) ush *.gch *.o
 
 test: export HOSTNAME=eastbridge
-test: testwhere testecho
+test: testwhere testecho testexecute
 
 testwhere: ush
 	./ush <<< "where; end" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
@@ -31,3 +31,6 @@ testwhere: ush
 testecho: ush
 	./ush <<< "echo; end" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
 	./ush <<< "echo echo; end" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS"
+
+testexecute: ush
+	./ush <<< "expr 1 + 1; end" | $(DIFF) ./tests/execexpr.output -  && echo "OK PASS"
