@@ -24,6 +24,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
-          sudo apt-get update; sudo apt-get install build-essential
+          sudo apt-get update; sudo apt-get -y install build-essential
           make clean test
 
