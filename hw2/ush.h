@@ -21,12 +21,19 @@ void execute (char *file, char **argv) {
 
   if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
-  } else if (pid == 0) {
+  } else if (pid == 0) {            // fork() returns a value of 0 to the child process
+
+    // todo: > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
+
+    // todo: >& >>& redirection; same, but for stderr (index 2)
+
+    // todo: < redirection; open() file and set to filedescriptor array index 0 (stdin)
+
     // todo: replace with execv()
-    if (execvp(file, argv) < 0) {  // execute the command
+    if (execvp(file, argv) < 0) {   // execute the command
       die("exec failed\n");
     }
-  } else {
+  } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
   }
 }
