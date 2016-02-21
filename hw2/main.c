@@ -175,6 +175,8 @@ static void evaluate_command(Cmd c) {
       return;
     }
 
+    execute(c->args[0], c->args);
+    return;
   }
 }
 

@@ -15,20 +15,19 @@ int matches (const char *string, const char *compare) {
   return !strcmp(string, compare);
 }
 
-void execute (char **argv) {
+void execute (char *file, char **argv) {
   pid_t pid;          // child process pid
   int status;
 
-  if ((pid = fork()) < 0) {     // fork child process
+  if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
   } else if (pid == 0) {
     // todo: replace with execv()
-    if (execvp(*argv, argv) < 0) {  // execute the command
+    if (execvp(file, argv) < 0) {  // execute the command
       die("exec failed\n");
     }
   } else {
-    while (wait(&status) != pid) // wait/join for child process
-    ;
+    waitpid(pid, &status, 0);       // wait/join for child process
   }
 }
 
