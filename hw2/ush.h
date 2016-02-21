@@ -15,14 +15,15 @@ int matches (const char *string, const char *compare) {
   return !strcmp(string, compare);
 }
 
-void  execute (char **argv) {
+void execute (char **argv) {
   pid_t pid;          // child process pid
   int status;
 
   if ((pid = fork()) < 0) {     // fork child process
     die("fork() for child process failed\n");
   } else if (pid == 0) {
-    if (execvp(*argv, argv) < 0) {     /* execute the command  */
+    // todo: replace with execv()
+    if (execvp(*argv, argv) < 0) {  // execute the command
       die("exec failed\n");
     }
   } else {

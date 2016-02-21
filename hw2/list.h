@@ -24,24 +24,19 @@ void push(node *head, char *value) {
   while (current->next != NULL) {
     current = current->next;
   }
-  // todo: replace with make_node
-  current->next = malloc(sizeof(node));
-  current->next->value = strdup(value);
-  current->next->next = NULL;
+  current->next = make_node(value);
 }
 
 // remove head and return value
 char* pop(node **head) {
   char* return_value = NULL;
   node *next_node = NULL;
-
   if (*head != NULL) {
     next_node = (*head)->next;
     return_value = strdup((*head)->value);
     free(*head);
     *head = next_node;
   }
-
   return return_value;
 }
 
