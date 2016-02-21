@@ -20,7 +20,7 @@ tar:
 clean:
 	$(RM) $(OBJ) ush
 
-test: testwhere testecho
+test: replacehost testwhere testecho
 
 replacehost:
 	HOSTNAME=`hostname` sed -i '' "s/eastbridge/$${HOSTNAME}/g" tests/*.output
