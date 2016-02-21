@@ -24,5 +24,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
+          hostname eastbridge
           make clean test
 
