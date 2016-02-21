@@ -24,6 +24,5 @@ build:
         cwd: hw2/
         name: make test
         code: |
-          sudo hostname eastbridge
           make clean test
 
