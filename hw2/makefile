@@ -3,7 +3,8 @@ CFLAGS		= -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
 SRC				= main.c parse.c parse.h
 OBJ				=	main.o parse.o
 rm				= rm -f
-DIFF    = diff
+DIFF			= diff
+SHELL			= /bin/bash
 
 default: ush
 
