@@ -24,5 +24,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
+          apt-get install make
           make clean test
 
