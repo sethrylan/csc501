@@ -19,8 +19,12 @@ tar:
 clean:
 	$(RM) $(OBJ) ush
 
-test: testwhere
+test: testwhere testecho
 
 testwhere: ush
 	./ush <<< "where ls" | $(DIFF) ./tests/wherels.output -  && echo "OK PASS" && \
 	./ush <<< "where where" | $(DIFF) ./tests/wherewhere.output -  && echo "OK PASS"
+
+testecho: ush
+	./ush <<< "echo" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
+	./ush <<< "echo echo" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS"
