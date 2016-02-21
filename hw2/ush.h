@@ -89,10 +89,31 @@ int execute (Cmd c) {
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
     // todo: > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
+    if (c->out == Tout) {
+      // set c->outfile to stdout
+    }
+
+    if (c->out == Tapp) {
+      // set c->outfile to stdout (append)
+    }
+
+
+    if (c->out == ToutErr) {
+      // set c->outfile to stderr (append)
+    }
+
+    if (c->out == TappErr) {
+      // set c->outfile to stderr (append)
+    }
+
 
     // todo: >& >>& redirection; same, but for stderr (index 2)
 
-    // todo: < redirection; open() file and set to filedescriptor array index 0 (stdin)
+    // < redirection; open() file and set to filedescriptor array index 0 (stdin)
+    if ( c->in == Tin ){
+      // todo:  c->infile to stdin
+    }
+
 
     // todo: replace with execv()
     if (execvp(exec_list->value, c->args) < 0) {   // execute the command; doesn't return unless there is an error

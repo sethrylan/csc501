@@ -184,7 +184,6 @@ static void evaluate_command(Cmd c) {
 // A pipeline is a sequence of one or more simple commands separated by | or |&.
 //
 static void evaluate_pipe(Pipe p) {
-  // int i = 0;
   Cmd c;
 
   if ( p == NULL ){
@@ -192,8 +191,10 @@ static void evaluate_pipe(Pipe p) {
   }
 
   DEBUG_PRINT("Begin pipe%s\n", p->type == Pout ? "" : " Error");
+  int i = 0;
   for ( c = p->head; c != NULL; c = c->next ) {
-    DEBUG_PRINT("  Cmd #%d: ", ++i);
+    i++;
+    DEBUG_PRINT("  Cmd #%d: ", i);
     evaluate_command(c);
   }
   DEBUG_PRINT("End pipe\n");
