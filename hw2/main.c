@@ -95,6 +95,7 @@ int _pwd() {
 
 void _logout() {
   free(hostname);
+  printf("\n");
   exit(EXIT_SUCCESS);
 }
 
