@@ -81,7 +81,7 @@ int _unsetenv(Cmd command) {
       exit(EXIT_FAILURE);
     }
   }
-  exit(EXIT_SUCCESS);
+  return(EXIT_SUCCESS);
 }
 
 int _setenv(Cmd command) {
@@ -97,7 +97,7 @@ int _setenv(Cmd command) {
       exit(EXIT_FAILURE);
     }
   }
-  exit(EXIT_SUCCESS);
+  return(EXIT_SUCCESS);
 }
 
 // Writes each word to the shell’s standard output,
@@ -207,8 +207,6 @@ static void evaluate_command(Cmd c) {
     if (matches(c->args[0], "where")) {
       _where(c);
     }
-
-
 
   }
 }
