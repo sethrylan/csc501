@@ -1,3 +1,5 @@
+#include "list.h"
+
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
 #else
@@ -29,15 +31,17 @@ void  execute (char **argv) {
   }
 }
 
+// Returns an array of executable paths that match the passed filename
 // see implementation from execvp.c
-void search_path (const char *file) {
+node* search_path (const char *file) {
+  node *list = NULL;
   char buf[PATH_MAX];
-  if (*file == '\0') {
-    return;
+  if (file == NULL || *file == '\0') {
+    return NULL;
   }
 
   if (strchr (file, '/') != NULL) {
-    // todo: don't search and return file
+    return make_node(file);
   }
   int got_eacces;
   size_t len, pathlen;
@@ -73,7 +77,13 @@ void search_path (const char *file) {
     }
 
     if (access(startp, X_OK) == 0) {
-      printf("%s\n", startp);
+      if (list == NULL) {
+        list = make_node(startp);
+      } else {
+        push(list, startp);
+      }
+      // printf("Found %s\n", startp);
     }
   } while (*p++ != '\0');
+  return list;
 }

@@ -18,3 +18,6 @@ http://www.digilife.be/quickreferences/qrc/linux%20system%20call%20quick%20refer
 
 execvp implementation for finding executables in PATH
 http://lxr.free-electrons.com/source/arch/um/os-Linux/execvp.c
+
+linked list implementation
+http://www.learn-c.org/en/Linked_lists

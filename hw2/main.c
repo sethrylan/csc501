@@ -25,15 +25,19 @@ extern char **environ;
 
 int _where(const Cmd command) {
   // TODO: check for arg
-  char *name = strdup(command->args[1]);
-  search_path(name);
-  return(EXIT_SUCCESS);
+  if (command->nargs == 2) {
+    char *name = strdup(command->args[1]);
+    print_list(search_path(name));
+    return(EXIT_SUCCESS);
+  } else {
+    return(EXIT_FAILURE);
+  }
 }
 
 int _unsetenv(Cmd command) {
   if (command->nargs == 2) {
     if (unsetenv(command->args[1]) != 0) {
-      exit(EXIT_FAILURE);
+      return(EXIT_FAILURE);
     }
   }
   return(EXIT_SUCCESS);
@@ -49,7 +53,7 @@ int _setenv(Cmd command) {
     }
   } else {
     if (setenv(command->args[1], command->args[2] ? command->args[2] : "", 1) != 0) {
-      exit(EXIT_FAILURE);
+      return(EXIT_FAILURE);
     }
   }
   return(EXIT_SUCCESS);
