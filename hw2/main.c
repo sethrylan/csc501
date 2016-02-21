@@ -148,24 +148,31 @@ static void evaluate_command(Cmd c) {
     // this driver understands one command
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
       _logout();
+      return;
     }
     if (matches(c->args[0], "pwd")) {
       _pwd();
+      return;
     }
     if (matches(c->args[0], "cd")) {
       _cd(c->args[1]);
+      return;
     }
     if (matches(c->args[0], "echo")) {
       _echo(c);
+      return;
     }
     if (matches(c->args[0], "setenv")) {
       _setenv(c);
+      return;
     }
     if (matches(c->args[0], "unsetenv")) {
       _unsetenv(c);
+      return;
     }
     if (matches(c->args[0], "where")) {
       _where(c);
+      return;
     }
 
   }
