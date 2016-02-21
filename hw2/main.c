@@ -142,7 +142,7 @@ static void evaluate_command(Cmd c) {
       }
       DEBUG_PRINT("\b]");
     }
-    putchar('\n');
+    // putchar('\n');
 
     // this driver understands one command
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
   }
 
   while ( 1 ) {
-    DEBUG_PRINT("%s%% ", hostname);
+    printf("%s%% ", hostname);
     p = parse();
     evaluate_pipe(p);
     freePipe(p);
