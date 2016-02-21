@@ -1,7 +1,6 @@
-README for ush parser. 
+[![wercker status](https://app.wercker.com/status/d1a0628aad11353e604099e1bbf2edc6/m "wercker status")](https://app.wercker.com/project/bykey/d1a0628aad11353e604099e1bbf2edc6)
 
-Vincent W. Freeh
-=====================
+README for ush parser.
 
 This a parser for a csh-like syntax.  It is to be used for the ush
 shell project.
@@ -17,5 +16,4 @@ There are five files:
 To use in your program, you must include parse.h and call the function
 parse(), which return a Pipe data structure.  (See main.c)  The Pipe
 contains all the information in a line of input to a shell.
-
 
