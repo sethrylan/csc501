@@ -23,6 +23,7 @@ clean:
 test: testwhere testecho
 
 testwhere: ush
+	./ush <<< "where" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
 	./ush <<< "where ls" | $(DIFF) ./tests/wherels.output -  && echo "OK PASS" && \
 	./ush <<< "where where" | $(DIFF) ./tests/wherewhere.output -  && echo "OK PASS"
 
