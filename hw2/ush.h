@@ -84,7 +84,8 @@ int execute (Cmd c) {
   }
 
   if ((pid = fork()) < 0) {         // fork child process
-    die("fork() for child process failed\n");
+    fprintf(stderr, "fork() for child process failed\n");
+    return 1;
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
     // todo: > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
@@ -94,12 +95,13 @@ int execute (Cmd c) {
     // todo: < redirection; open() file and set to filedescriptor array index 0 (stdin)
 
     // todo: replace with execv()
-    if (execvp(exec_list->value, c->args) < 0) {   // execute the command
-      printf("exec failed\n");
-      return -1;
+    if (execvp(exec_list->value, c->args) < 0) {   // execute the command; doesn't return unless there is an error
+      fprintf(stderr, "exec failed\n");
+      return 126;
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
     return status;
   }
+  return 0;
 }

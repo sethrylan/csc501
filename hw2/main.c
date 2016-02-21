@@ -184,7 +184,7 @@ static void evaluate_command(Cmd c) {
 // A pipeline is a sequence of one or more simple commands separated by | or |&.
 //
 static void evaluate_pipe(Pipe p) {
-  int i = 0;
+  // int i = 0;
   Cmd c;
 
   if ( p == NULL ){
@@ -200,7 +200,7 @@ static void evaluate_pipe(Pipe p) {
   evaluate_pipe(p->next);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   Pipe p;
   // char buff[PATH_MAX + 1];
   home_directory = getcwd(NULL, PATH_MAX + 1 );
