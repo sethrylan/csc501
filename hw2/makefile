@@ -18,7 +18,7 @@ tar:
 	tar czvf ush.tar.gz $(SRC) makefile README
 
 clean:
-	$(RM) $(OBJ) ush
+	$(RM) $(OBJ) ush *.gch *.o
 
 test: export HOSTNAME=eastbridge
 test: testwhere testecho
