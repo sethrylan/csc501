@@ -24,5 +24,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
+          sudo yum -y install build-essential
           make clean test
 
