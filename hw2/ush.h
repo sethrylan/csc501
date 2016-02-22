@@ -99,6 +99,8 @@ int execute (Cmd c) {
       int out = open(c->outfile, (append ? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
       // set c->outfile to stdout
 
+      fflush(stdout);               // flush anything buffered in stdout so that it doesn't go to output file
+
       if (c->out == Tout || c->out == Tapp) {
         dup2(out, STDOUT_FILENO);
       }
@@ -107,10 +109,13 @@ int execute (Cmd c) {
         //    program &>word
         //    program >&word
         //    program >word 2>&1
+
         dup2(STDERR_FILENO, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
         dup2(out, STDERR_FILENO);              // redirect stderr (2) to output file
       }
       close(out);
+
+      // clearerr(stdout);
     }
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
