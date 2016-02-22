@@ -1,5 +1,6 @@
 #include "list.h"
 #include <sys/fcntl.h>
+#include <sys/wait.h> // for waitpid
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
