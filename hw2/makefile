@@ -37,16 +37,16 @@ testexecute: ush
 	./ush <<< "expr 1 + 1; end" | $(DIFF) ./tests/execexpr.output -  && echo "OK PASS"
 
 testredirect: ush
-	./ush <<< "shasum < tests/shasum.input > test.output" && $(DIFF) ./tests/shasum.output test.output  && echo "OK PASS" && \
+	./ush <<< "cat < tests/cat.input > test.output" && $(DIFF) ./tests/cat.output test.output  && echo "OK PASS" && \
 	rm test.output && \
-	./ush <<< "shasum < tests/shasum.input >> test.output" && $(DIFF) ./tests/shasum.output test.output  && echo "OK PASS" && \
-	./ush <<< "shasum < tests/shasum.input >> test.output" && $(DIFF) ./tests/shasum.append.output test.output  && echo "OK PASS" && \
+	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.output test.output  && echo "OK PASS" && \
+	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.appendx1.output test.output  && echo "OK PASS" && \
 	rm test.output
 
 testerrredirect: ush
-	./ush <<< "./tests/stderr.sh >& test.output; end" && $(DIFF) ./tests/stderr.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/stderr.sh >>& test.output; end" && $(DIFF) ./tests/stderr.appendx1.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/stderr.sh >>& test.output; end" && $(DIFF) ./tests/stderr.appendx2.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >& test.output" && $(DIFF) ./tests/stderr.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx1.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx2.output test.output  && echo "OK PASS" && \
 	rm test.output
 
 testseparator: ush
