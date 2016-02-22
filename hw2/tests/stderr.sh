@@ -1,1 +1,1 @@
-echo "danger" > /dev/fd/2
+awk "BEGIN { print \"danger\" > \"/dev/fd/2\" }"
