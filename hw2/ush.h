@@ -111,6 +111,9 @@ int execute (Cmd c) {
         dup2(out, STDERR_FILENO);              // redirect stderr (2) to output file
       }
       close(out);
+
+      // clearerr(stdout);
+      fflush(stdout);
     }
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
