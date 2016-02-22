@@ -92,20 +92,23 @@ int execute (Cmd c) {
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
     if (c->out != Tnil) {
-      int fd = -1;
-      if (c->out == Tout || c->out == Tapp) {
-        fd = 1;
-      }
-
-      if (c->out == ToutErr || c->out == TappErr) {
-        fd = 2;
-      }
-
       // open outfile; create it doesn't exist, truncate or append depending on out token
       // create file in mode 644, -rw-r--r--
-      int out = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+      int append = (c->out == Tapp || c->out == TappErr);
+      int out = open(c->outfile, (append ? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
       // set c->outfile to stdout
-      dup2(out, fd);
+
+      if (c->out == Tout || c->out == Tapp) {
+        dup2(out, 1);
+      }
+      if (c->out == ToutErr || c->out == TappErr) {
+        // in bash, equivalent to any of the forms of input redirection
+        //    program &>word
+        //    program >&word
+        //    program >word 2>&1
+        dup2(out, 1);
+        dup2(out, 2);
+      }
       close(out);
     }
 

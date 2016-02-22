@@ -18,7 +18,7 @@ tar:
 	tar czvf ush.tar.gz $(SRC) makefile README
 
 clean:
-	$(RM) $(OBJ) ush *.gch *.o
+	$(RM) $(OBJ) ush *.gch *.o test.output
 
 test: export HOSTNAME=eastbridge
 test: testwhere testecho testexecute testredirect testerrredirect testseparator
@@ -43,8 +43,9 @@ testredirect: ush
 	rm test.output
 
 testerrredirect: ush
-	./ush <<< "ls nowhere >& test.output" && $(DIFF) ./tests/lserr.output test.output  && echo "OK PASS" && \
-	./ush <<< "ls nowhere >>& test.output" && $(DIFF) ./tests/lserr.output test.output  && echo "OK PASS" && \
+	./ush <<< "printf >& test.output; end" && $(DIFF) ./tests/printferr.output test.output  && echo "OK PASS" && \
+	./ush <<< "printf >>& test.output; end" && $(DIFF) ./tests/printferr.append.output test.output  && echo "OK PASS" && \
+	./ush <<< "printf >>& test.output; end" && $(DIFF) ./tests/printferr.appendx2.output test.output  && echo "OK PASS" && \
 	rm test.output
 
 testseparator: ush
