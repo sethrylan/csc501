@@ -1,4 +1,5 @@
 #include "list.h"
+#include <sys/fcntl.h>
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
@@ -88,32 +89,30 @@ int execute (Cmd c) {
     return 1;
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
-    // todo: > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
-    if (c->out == Tout) {
+    // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
+    if (c->out == Tout || c->out == Tapp) {
+      printf("opening %s\n", c->outfile);
+      // open outfile; create it doesn't exist, truncate or append depending on out token
+      // create file in mode 644, -rw-r--r--
+      int fd = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
       // set c->outfile to stdout
+      dup2(fd, 1);
+      close(fd);
     }
 
-    if (c->out == Tapp) {
-      // set c->outfile to stdout (append)
+    // >& and >>& redirection; same, but for stderr (index 2)
+    if (c->out == ToutErr || c->out == TappErr) {
+      int fd = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+      dup2(fd, 2);
+      close(fd);
     }
-
-
-    if (c->out == ToutErr) {
-      // set c->outfile to stderr (append)
-    }
-
-    if (c->out == TappErr) {
-      // set c->outfile to stderr (append)
-    }
-
-
-    // todo: >& >>& redirection; same, but for stderr (index 2)
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
     if ( c->in == Tin ){
-      // todo:  c->infile to stdin
+      int fd = open(c->infile, O_RDONLY);
+      dup2(fd, 0);
+      close(fd);
     }
-
 
     // todo: replace with execv()
     if (execvp(exec_list->value, c->args) < 0) {   // execute the command; doesn't return unless there is an error
