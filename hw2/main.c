@@ -146,6 +146,7 @@ static void evaluate_command(Cmd c) {
     DEBUG_PRINT("\n");
 
     // this driver understands one command
+    // TODO: spawn new ush to handle in/out
     if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
       _logout();
       return;
