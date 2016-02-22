@@ -212,7 +212,7 @@ int _cd(char *path) {
     path = home_directory;
   }
   if (chdir(path) != 0) {
-    printf("error: could not change to directory %s \n", path);
+    fprintf(stderr, "error: could not change to directory %s \n", path);
   }
   return EXIT_SUCCESS;
 }
