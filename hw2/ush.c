@@ -118,7 +118,7 @@ int execute (Cmd c) {
         //    program >&word
         //    program >word 2>&1
 
-        dup2(STDERR_FILENO, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
+        dup2(out, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
         dup2(out, STDERR_FILENO);              // redirect stderr (2) to output file
       }
       close(out);
