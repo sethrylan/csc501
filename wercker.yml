@@ -2,7 +2,7 @@
 # Docker Hub https://registry.hub.docker.com/_/debian/
 # Read more about containers on our dev center
 # http://devcenter.wercker.com/docs/containers/index.html
-box: kayu28/docker-centos-openjdk
+box: inginform/c-dev-env
 # You can also use services such as databases. Read more on our dev center:
 # http://devcenter.wercker.com/docs/services/index.html
 # services:
@@ -24,6 +24,5 @@ build:
         cwd: hw2/
         name: make test
         code: |
-          yum -y update && sudo yum -y install build-essential
           make clean test
 
