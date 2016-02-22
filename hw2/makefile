@@ -44,9 +44,9 @@ testredirect: ush
 	rm test.output
 
 testerrredirect: ush
-	./ush <<< "./tests/error.sh >& test.output; end" && $(DIFF) ./tests/error.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/error.sh >>& test.output; end" && $(DIFF) ./tests/error.appendx1.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/error.sh >>& test.output; end" && $(DIFF) ./tests/error.appendx2.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >& test.output; end" && $(DIFF) ./tests/stderr.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >>& test.output; end" && $(DIFF) ./tests/stderr.appendx1.output test.output  && echo "OK PASS" && \
+	./ush <<< "./tests/stderr.sh >>& test.output; end" && $(DIFF) ./tests/stderr.appendx2.output test.output  && echo "OK PASS" && \
 	rm test.output
 
 testseparator: ush
