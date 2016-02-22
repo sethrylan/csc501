@@ -90,21 +90,23 @@ int execute (Cmd c) {
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
-    if (c->out == Tout || c->out == Tapp) {
-      printf("opening %s\n", c->outfile);
+    // >& and >>& redirection; same, but for stderr (index 2)
+    if (c->out != Tnil) {
+      int fd = -1;
+      if (c->out == Tout || c->out == Tapp) {
+        fd = 1;
+      }
+
+      if (c->out == ToutErr || c->out == TappErr) {
+        fd = 2;
+      }
+
       // open outfile; create it doesn't exist, truncate or append depending on out token
       // create file in mode 644, -rw-r--r--
-      int fd = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+      int out = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
       // set c->outfile to stdout
-      dup2(fd, 1);
-      close(fd);
-    }
-
-    // >& and >>& redirection; same, but for stderr (index 2)
-    if (c->out == ToutErr || c->out == TappErr) {
-      int fd = open(c->outfile, (c->out==Tapp? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-      dup2(fd, 2);
-      close(fd);
+      dup2(out, fd);
+      close(out);
     }
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
