@@ -1,7 +1,7 @@
 CC				= gcc
 CFLAGS		= -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
-SRC				= main.c parse.c parse.h
-OBJ				=	main.o parse.o
+SRC				= main.c parse.c ush.c parse.h
+OBJ				=	main.o parse.o ush.o list.o
 rm				= rm -f
 DIFF			= diff -w
 SHELL			= /bin/bash
