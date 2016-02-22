@@ -99,15 +99,15 @@ int execute (Cmd c) {
       // set c->outfile to stdout
 
       if (c->out == Tout || c->out == Tapp) {
-        dup2(out, 1);
+        dup2(out, STDOUT_FILENO);
       }
       if (c->out == ToutErr || c->out == TappErr) {
         // in bash, equivalent to any of the forms of input redirection
         //    program &>word
         //    program >&word
         //    program >word 2>&1
-        dup2(out, 1);
-        dup2(out, 2);
+        dup2(STDERR_FILENO, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
+        dup2(out, STDERR_FILENO);              // redirect stderr (2) to output file
       }
       close(out);
     }
