@@ -108,27 +108,27 @@ static void evaluate_command(Cmd c) {
   if ( c ) {
     DEBUG_PRINT("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
     if ( c->in == Tin ){
-      printf("<(%s) ", c->infile);
+      DEBUG_PRINT("<(%s) ", c->infile);
     }
     if ( c->out != Tnil ) {
       switch ( c->out ) {
         case Tout:
-          printf(">(%s) ", c->outfile);
+          DEBUG_PRINT(">(%s) ", c->outfile);
           break;
         case Tapp:
-          printf(">>(%s) ", c->outfile);
+          DEBUG_PRINT(">>(%s) ", c->outfile);
           break;
         case ToutErr:
-          printf(">&(%s) ", c->outfile);
+          DEBUG_PRINT(">&(%s) ", c->outfile);
           break;
         case TappErr:
-          printf(">>&(%s) ", c->outfile);
+          DEBUG_PRINT(">>&(%s) ", c->outfile);
           break;
         case Tpipe:
-          printf("| ");
+          DEBUG_PRINT("| ");
           break;
         case TpipeErr:
-          printf("|& ");
+          DEBUG_PRINT("|& ");
           break;
         default:
           fprintf(stderr, "Shouldn't get here\n");
