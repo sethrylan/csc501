@@ -108,6 +108,7 @@ int execute (Cmd c) {
       // set c->outfile to stdout
 
       fflush(stdout);               // flush anything buffered in stdout so that it doesn't go to output file
+      fflush(stderr);
 
       if (c->out == Tout || c->out == Tapp) {
         dup2(out, STDOUT_FILENO);
