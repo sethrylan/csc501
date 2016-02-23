@@ -108,7 +108,6 @@ int execute (Cmd c) {
       // set c->outfile to stdout
 
       fflush(stdout);               // flush anything buffered in stdout so that it doesn't go to output file
-      fflush(stderr);
 
       if (c->out == Tout || c->out == Tapp) {
         dup2(out, STDOUT_FILENO);
@@ -120,7 +119,7 @@ int execute (Cmd c) {
         //    program >word 2>&1
 
         dup2(out, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
-        dup2(out, STDERR_FILENO);              // redirect stderr (2) to output file
+        dup2(out, STDERR_FILENO);    // redirect stderr (2) to output file
       }
       close(out);
 
