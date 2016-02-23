@@ -22,7 +22,7 @@ clean:
 	$(RM) $(OBJ) ush *.gch *.o test.output
 
 test: export HOSTNAME=eastbridge
-test: testwhere testecho testexecute testredirect testfilterstdout testerrredirect testseparator
+test: testwhere testecho testexecute testredirect testerrredirect testseparator
 
 testwhere: ush
 	./ush <<< "where; end" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
