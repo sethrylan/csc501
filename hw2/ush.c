@@ -117,17 +117,15 @@ int execute (Cmd c) {
         //    program &>word
         //    program >&word
         //    program >word 2>&1
-
-        dup2(out, STDOUT_FILENO);    // redirect stdout (1) to stderr (2); safer than the other way, since stderr is unbuffered
+        dup2(out, STDOUT_FILENO);
         dup2(out, STDERR_FILENO);    // redirect stderr (2) to output file
       }
       close(out);
-
-      // clearerr(stdout);
     }
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
     if ( c->in == Tin ){
+      clearerr(stdin);
       int fd = open(c->infile, O_RDONLY);
       dup2(fd, 0);
       close(fd);
