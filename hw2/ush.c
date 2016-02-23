@@ -170,8 +170,11 @@ int _where(const Cmd command) {
 int _unsetenv(Cmd command) {
   if (command->nargs == 2) {
     if (unsetenv(command->args[1]) != 0) {
+      fprintf(stderr, "unsetenv: could not unset variable\n");
       return(EXIT_FAILURE);
     }
+  } else {
+    fprintf(stderr, "unsetenv: wrong number of arguments\n");
   }
   return(EXIT_SUCCESS);
 }
