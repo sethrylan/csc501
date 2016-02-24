@@ -43,14 +43,14 @@ testredirect: ush
 	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.appendx1.output test.output  && echo "OK PASS" && \
 	rm test.output
 
-testfilterstdout: ush
-	./ush <<< "./tests/stdout_err.sh > /dev/null" &> test.output && $(DIFF) tests/stdout_filter.output test.output && echo "OK PASS";
+# testfilterstdout: ush
+# 	./ush <<< "./tests/stdout_err.sh > /dev/null" &> test.output && $(DIFF) tests/stdout_filter.output test.output && echo "OK PASS";
 
 testerrredirect: ush
 	./ush <<< "./tests/stderr.sh >& test.output" && $(DIFF) ./tests/stderr.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx1.output test.output  && echo "OK PASS" && \
-	./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx2.output test.output  && echo "OK PASS" && \
 	rm test.output
+	# ./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx1.output test.output  && echo "OK PASS" && \
+	# ./ush <<< "./tests/stderr.sh >>& test.output" && $(DIFF) ./tests/stderr.appendx2.output test.output  && echo "OK PASS" && \
 
 testseparator: ush
 	./ush <<< "expr 1 + 1; expr 2 + 3; expr 5 + 8; end" | $(DIFF) ./tests/exprx3.output -  && echo "OK PASS";
