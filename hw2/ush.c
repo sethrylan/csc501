@@ -14,6 +14,9 @@
 extern char **environ;
 extern char *hostname, *home_directory;
 
+
+#define is_file(t) ((t)==Tout||(t)==Tapp||(t)==ToutErr||(t)==TappErr)
+
 void die (const char *msg) {
   perror(msg);
   exit(EXIT_FAILURE);
@@ -83,7 +86,11 @@ node* search_path (const char *filename) {
   return list;
 }
 
+
 int execute (Cmd c) {
+
+  int stdout_orig, stdin_orig;
+  int inFile;
 
   // execute special case builtins (no fork)
   if (matches(c->args[0], "end") || matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
@@ -100,7 +107,9 @@ int execute (Cmd c) {
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
-    if (c->out != Tnil) {
+    if (is_file(c->out)) {
+
+      stdout_orig = dup(STDOUT_FILENO);
       // open outfile; create it doesn't exist, truncate or append depending on out token
       // create file in mode 644, -rw-r--r--
       int append = (c->out == Tapp || c->out == TappErr);
@@ -126,9 +135,9 @@ int execute (Cmd c) {
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
     if ( c->in == Tin ){
       clearerr(stdin);
-      int fd = open(c->infile, O_RDONLY);
-      dup2(fd, 0);
-      close(fd);
+      stdin_orig = dup(STDIN_FILENO);
+      int inFile = open(c->infile, O_RDONLY);
+      dup2(inFile, 0);
     }
 
     int retval = builtin(c);
@@ -149,6 +158,17 @@ int execute (Cmd c) {
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
+    if ( c->in == Tin ){
+      dup2(stdin_orig, STDIN_FILENO);
+      close(stdin_orig);
+      close(inFile);
+    }
+
+    if (c->out == Tout || c->out == Tapp) {
+      dup2(stdout_orig, STDOUT_FILENO);
+      close(stdout_orig);
+    }
+
     return status;
   }
   return 0;
