@@ -89,7 +89,11 @@ node* search_path (const char *filename) {
 
 int execute (Cmd c) {
 
-  int stdout_orig, stdin_orig;
+  int stdout_orig, stdin_orig, stderr_orig;
+  stderr_orig = dup(STDERR_FILENO);
+  stdout_orig = dup(STDOUT_FILENO);
+  stdin_orig = dup(STDIN_FILENO);
+
   int inFile;
 
   // execute special case builtins (no fork)
@@ -109,7 +113,6 @@ int execute (Cmd c) {
     // >& and >>& redirection; same, but for stderr (index 2)
     if (is_file(c->out)) {
 
-      stdout_orig = dup(STDOUT_FILENO);
       // open outfile; create it doesn't exist, truncate or append depending on out token
       // create file in mode 644, -rw-r--r--
       int append = (c->out == Tapp || c->out == TappErr);
@@ -135,7 +138,6 @@ int execute (Cmd c) {
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
     if ( c->in == Tin ){
       clearerr(stdin);
-      stdin_orig = dup(STDIN_FILENO);
       int inFile = open(c->infile, O_RDONLY);
       dup2(inFile, 0);
     }
@@ -167,6 +169,13 @@ int execute (Cmd c) {
     if (c->out == Tout || c->out == Tapp) {
       dup2(stdout_orig, STDOUT_FILENO);
       close(stdout_orig);
+    }
+
+    if (c->out == ToutErr || TappErr) {
+      dup2(stdout_orig, STDOUT_FILENO);
+      dup2(stderr_orig, STDERR_FILENO);
+      close(stdout_orig);
+      close(stderr_orig);
     }
 
     return status;
