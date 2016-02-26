@@ -23,51 +23,9 @@ char *hostname, *home_directory;
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
 //
 static void evaluate_command(Cmd c) {
-  int i;
-
-  if ( c ) {
-    DEBUG_PRINT("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
-    if ( c->in == Tin ){
-      DEBUG_PRINT("<(%s) ", c->infile);
-    }
-    if ( c->out != Tnil ) {
-      switch ( c->out ) {
-        case Tout:
-          DEBUG_PRINT(">(%s) ", c->outfile);
-          break;
-        case Tapp:
-          DEBUG_PRINT(">>(%s) ", c->outfile);
-          break;
-        case ToutErr:
-          DEBUG_PRINT(">&(%s) ", c->outfile);
-          break;
-        case TappErr:
-          DEBUG_PRINT(">>&(%s) ", c->outfile);
-          break;
-        case Tpipe:
-          DEBUG_PRINT("| ");
-          break;
-        case TpipeErr:
-          DEBUG_PRINT("|& ");
-          break;
-        default:
-          fprintf(stderr, "Shouldn't get here\n");
-          exit(EXIT_FAILURE);
-      }
-    }
-
-    if ( c->nargs > 1 ) {
-      DEBUG_PRINT("[");
-      for ( i = 1; c->args[i] != NULL; i++ ){
-        DEBUG_PRINT("%d:%s,", i, c->args[i]);
-      }
-      DEBUG_PRINT("\b]");
-    }
-    DEBUG_PRINT("\n");
-
-    execute(c);
-    return;
-  }
+  print_command_info(c);
+  execute(c);
+  return;
 }
 
 //
