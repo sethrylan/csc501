@@ -160,23 +160,23 @@ int execute (Cmd c) {
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
-    if ( c->in == Tin ){
-      dup2(stdin_orig, STDIN_FILENO);
-      close(stdin_orig);
-      close(inFile);
-    }
+    // if ( c->in == Tin ){
+    //   dup2(stdin_orig, STDIN_FILENO);
+    //   close(stdin_orig);
+    //   close(inFile);
+    // }
 
-    if (c->out == Tout || c->out == Tapp) {
-      dup2(stdout_orig, STDOUT_FILENO);
-      close(stdout_orig);
-    }
+    // if (c->out == Tout || c->out == Tapp) {
+    //   dup2(stdout_orig, STDOUT_FILENO);
+    //   close(stdout_orig);
+    // }
 
-    if (c->out == ToutErr || TappErr) {
-      dup2(stdout_orig, STDOUT_FILENO);
-      dup2(stderr_orig, STDERR_FILENO);
-      close(stdout_orig);
-      close(stderr_orig);
-    }
+    // if (c->out == ToutErr || TappErr) {
+    //   dup2(stdout_orig, STDOUT_FILENO);
+    //   dup2(stderr_orig, STDERR_FILENO);
+    //   close(stdout_orig);
+    //   close(stderr_orig);
+    // }
 
     return status;
   }
