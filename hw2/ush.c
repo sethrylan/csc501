@@ -18,6 +18,8 @@ int stdout_orig, stdin_orig, stderr_orig;
 
 int pipefd[2];
 
+// static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
+
 #define is_file(t) ((t)==Tout||(t)==Tapp||(t)==ToutErr||(t)==TappErr)
 #define is_pipe(t) (((t)==Tpipe||(t)==TpipeErr))
 
