@@ -152,11 +152,6 @@ int execute (Cmd c) {
 
   int inFile;
 
-  // execute special case builtins (no fork)
-  if (matches(c->args[0], "end") || matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
-    return builtin(c);
-  }
-
   pid_t pid;          // child process pid
   int status;
 
@@ -307,7 +302,7 @@ int builtin(Cmd c) {
   }
   if (matches(c->args[0], "pwd")) {
     _pwd();
-    return 0;
+    exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "cd")) {
     _cd(c->args[1]);
@@ -315,19 +310,19 @@ int builtin(Cmd c) {
   }
   if (matches(c->args[0], "echo")) {
     _echo(c);
-    return 0;
+    exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "setenv")) {
     _setenv(c);
-    return 0;
+    exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "unsetenv")) {
     _unsetenv(c);
-    return 0;
+    exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "where")) {
     _where(c);
-    return 0;
+    exit(EXIT_SUCCESS);
   }
   return 127;
 }
