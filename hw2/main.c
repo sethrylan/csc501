@@ -40,7 +40,7 @@ static void evaluate_pipe(Pipe command_line_pipe) {
 
   save_std_streams();
 
-  DEBUG_PRINT("Begin pipe%s\n", p->type == Pout ? "" : " Error");
+  DEBUG_PRINT("Begin pipe%s\n", command_line_pipe->type == Pout ? "" : " Error");
   int i = 0;
   for ( c = command_line_pipe->head; c != NULL; c = c->next ) {
     i++;

@@ -1,5 +1,8 @@
 #include "list.h"
 
+static char *builtins[] = { "cd", "echo", "logout", "end", "nice", "pwd", "setenv", "unsetenv", "where" };
+static int num_builtins = 9;
+
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
 #else
@@ -23,3 +26,10 @@ int execute (Cmd c);
 
 node* search_path (const char *filename);
 
+
+void save_std_streams();
+void restore_std_streams();
+
+int contains(char **list, char* string, size_t length);
+
+void print_command_info (Cmd c);

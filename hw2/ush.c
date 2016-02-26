@@ -16,9 +16,7 @@ extern char *hostname, *home_directory;
 
 int stdout_orig, stdin_orig, stderr_orig;
 
-int pipefd[2];
-
-// static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
+int pipefd[2][2];
 
 #define is_file(t) ((t)==Tout||(t)==Tapp||(t)==ToutErr||(t)==TappErr)
 #define is_pipe(t) (((t)==Tpipe||(t)==TpipeErr))
@@ -26,6 +24,29 @@ int pipefd[2];
 void die (const char *msg) {
   perror(msg);
   exit(EXIT_FAILURE);
+}
+
+int contains(char **list, char *string, size_t length) {
+  size_t i = 0;
+  for( i = 0; i < length; i++) {
+    if(!strcmp(list[i], string)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+void make_pipe (int pipe_ref) {
+  if (pipe(pipefd[pipe_ref]) < 0) {
+    die("Pipe creation failed\n");
+  }
+}
+
+void setup_pipe_redirection (int pipe_ref, int fd) {
+  close(pipefd[pipe_ref][!fd]);
+  if(dup2(pipefd[pipe_ref][fd],fd) < 0) {
+    die("Pipe redirect failed\n");
+  }
 }
 
 void setup_signals () {
@@ -140,8 +161,7 @@ int execute (Cmd c) {
   int status;
 
   if ((pid = fork()) < 0) {         // fork child process
-    fprintf(stderr, "fork() for child process failed\n");
-    return 1;
+    die("fork() for child process failed\n");
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
