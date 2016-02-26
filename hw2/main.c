@@ -73,26 +73,29 @@ static void evaluate_command(Cmd c) {
 //
 // A pipeline is a sequence of one or more simple commands separated by | or |&.
 //
-static void evaluate_pipe(Pipe p) {
+static void evaluate_pipe(Pipe command_line_pipe) {
   Cmd c;
 
-  if ( p == NULL ){
+  if ( command_line_pipe == NULL ){
     return;
   }
 
+  save_std_streams();
+
   DEBUG_PRINT("Begin pipe%s\n", p->type == Pout ? "" : " Error");
   int i = 0;
-  for ( c = p->head; c != NULL; c = c->next ) {
+  for ( c = command_line_pipe->head; c != NULL; c = c->next ) {
     i++;
     DEBUG_PRINT("  Cmd #%d: ", i);
     evaluate_command(c);
   }
   DEBUG_PRINT("End pipe\n");
-  evaluate_pipe(p->next);
+  restore_std_streams();
+  evaluate_pipe(command_line_pipe->next);
 }
 
 int main() {
-  Pipe command_pipe;
+  Pipe command_line_pipe;
   // char buff[PATH_MAX + 1];
   home_directory = getcwd(NULL, PATH_MAX + 1 );
   hostname = malloc(_POSIX_HOST_NAME_MAX);
@@ -108,9 +111,9 @@ int main() {
 
   while ( 1 ) {
     printf("%s%% ", hostname);
-    command_pipe = parse();
-    evaluate_pipe(command_pipe);
-    freePipe(command_pipe);
+    command_line_pipe = parse();
+    evaluate_pipe(command_line_pipe);
+    freePipe(command_line_pipe);
   }
 }
 

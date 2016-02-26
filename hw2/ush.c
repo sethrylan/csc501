@@ -127,7 +127,7 @@ node* search_path (const char *filename) {
 
 int execute (Cmd c) {
 
-  save_std_streams();
+  // save_std_streams();
 
   int inFile;
 
@@ -195,9 +195,6 @@ int execute (Cmd c) {
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
-
-    restore_std_streams();
-
     return status;
   }
   return 0;
