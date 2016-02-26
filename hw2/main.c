@@ -92,7 +92,7 @@ static void evaluate_pipe(Pipe p) {
 }
 
 int main() {
-  Pipe p;
+  Pipe command_pipe;
   // char buff[PATH_MAX + 1];
   home_directory = getcwd(NULL, PATH_MAX + 1 );
   hostname = malloc(_POSIX_HOST_NAME_MAX);
@@ -108,9 +108,9 @@ int main() {
 
   while ( 1 ) {
     printf("%s%% ", hostname);
-    p = parse();
-    evaluate_pipe(p);
-    freePipe(p);
+    command_pipe = parse();
+    evaluate_pipe(command_pipe);
+    freePipe(command_pipe);
   }
 }
 
