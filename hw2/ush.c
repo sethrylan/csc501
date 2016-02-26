@@ -28,6 +28,12 @@ void die (const char *msg) {
   exit(EXIT_FAILURE);
 }
 
+void setup_signals () {
+  signal(SIGTSTP,SIG_IGN);  //CTRL+Z
+  signal(SIGQUIT,SIG_IGN);  //CTRL+\/
+  // signal(SIGINT,handle_sigint); //CTRL+C
+}
+
 void save_std_streams () {
   stdin_orig = dup(STDIN_FILENO);
   stdout_orig = dup(STDOUT_FILENO);
