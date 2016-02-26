@@ -10,16 +10,46 @@
 #include "parse.h"
 #include "ush.h"
 
-
 extern char **environ;
+
 extern char *hostname, *home_directory;
 
+int stdout_orig, stdin_orig, stderr_orig;
+
+int pipefd[2];
 
 #define is_file(t) ((t)==Tout||(t)==Tapp||(t)==ToutErr||(t)==TappErr)
+#define is_pipe(t) (((t)==Tpipe||(t)==TpipeErr))
 
 void die (const char *msg) {
   perror(msg);
   exit(EXIT_FAILURE);
+}
+
+void save_std_streams () {
+  stdin_orig = dup(STDIN_FILENO);
+  stdout_orig = dup(STDOUT_FILENO);
+  stderr_orig = dup(STDERR_FILENO);
+
+  if (stdin_orig < 0 || stdout_orig < 0 || stderr_orig < 0) {
+    die("could not save streams");
+  }
+}
+
+void restore_std_streams () {
+  DEBUG_PRINT("restore_std_streams\n");
+  if(dup2(stdin_orig, STDIN_FILENO) < 0) {
+    die("restore stdin failed\n");
+  }
+  close(stdin_orig);
+  if(dup2(stdout_orig, STDOUT_FILENO) < 0) {
+    die("restore stdout failed\n");
+  }
+  close(stdout_orig);
+  if(dup2(stderr_orig, STDERR_FILENO) < 0) {
+    die("restore stderr failed\n");
+  }
+  close(stderr_orig);
 }
 
 int matches (const char *string, const char *compare) {
@@ -89,10 +119,7 @@ node* search_path (const char *filename) {
 
 int execute (Cmd c) {
 
-  int stdout_orig, stdin_orig, stderr_orig;
-  stderr_orig = dup(STDERR_FILENO);
-  stdout_orig = dup(STDOUT_FILENO);
-  stdin_orig = dup(STDIN_FILENO);
+  save_std_streams();
 
   int inFile;
 
@@ -160,23 +187,8 @@ int execute (Cmd c) {
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
-    // if ( c->in == Tin ){
-    //   dup2(stdin_orig, STDIN_FILENO);
-    //   close(stdin_orig);
-    //   close(inFile);
-    // }
 
-    // if (c->out == Tout || c->out == Tapp) {
-    //   dup2(stdout_orig, STDOUT_FILENO);
-    //   close(stdout_orig);
-    // }
-
-    // if (c->out == ToutErr || TappErr) {
-    //   dup2(stdout_orig, STDOUT_FILENO);
-    //   dup2(stderr_orig, STDERR_FILENO);
-    //   close(stdout_orig);
-    //   close(stderr_orig);
-    // }
+    restore_std_streams();
 
     return status;
   }
