@@ -26,5 +26,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
+          sudo yum update && yum -y install make
           make clean test
 
