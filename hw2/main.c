@@ -36,29 +36,6 @@ static int evaluate_command(Cmd c) {
     exit(0);
   }
 
-  if (contains(builtins, c->args[0], num_builtins)) {
-    // execute special case builtins (no subshell)
-    if (matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
-      return builtin(c);
-    } else {
-      // create subshell for builtin
-        // // todo: make_pipe(pipe_ref);
-      if ((subshell_pid = fork()) < 0) {         // fork child process
-        die("fork() for subshell process failed\n");
-      } else if (subshell_pid == 0) {
-        // child process
-        // todo: setup_pipe_redirection(pipe_ref,STDIN_FILENO);
-        DEBUG_PRINT("in subshell\n");
-        return builtin(c);
-      } else {                          // fork() returns the process ID of the child process to the parent process
-        // todo: setup_pipe_redirection(pipe_ref,STDOUT_FILENO);
-        DEBUG_PRINT("in parent shell. waiting...\n");
-        waitpid(subshell_pid, &status, 0);       // wait/join for subshell
-        return status;
-      }
-    }
-  }
-
   execute(c);
   return 0;
 }

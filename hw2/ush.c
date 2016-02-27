@@ -151,6 +151,11 @@ int execute (Cmd c) {
   pid_t pid;          // child process pid
   int status;
 
+  // execute special case builtins (no subshell)
+  if (matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
+    return builtin(c);
+  }
+
   if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
