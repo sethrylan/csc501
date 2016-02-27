@@ -25,11 +25,16 @@ char *hostname, *home_directory;
 static int evaluate_command(Cmd c) {
   int subshell_pid, status;
 
+  // exit at EOF
+  if ( !strcmp(c->args[0], "end") ) {
+    exit(0);
+  }
+
   fflush(stdout);
 
   if (contains(builtins, c->args[0], num_builtins)) {
     // execute special case builtins (no subshell)
-    if (matches(c->args[0], "end") || matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
+    if (matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
       return builtin(c);
     } else {
       // create subshell for builtin

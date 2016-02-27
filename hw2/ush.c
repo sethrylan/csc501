@@ -200,13 +200,13 @@ int execute (Cmd c) {
     node *exec_list = search_path(c->args[0]);
     if (exec_list == NULL) {
       printf("-ush: %s: command not found\n", c->args[0]);
-      return 127;
+      exit(127);
     }
 
     // todo: replace with execv()
     if (execvp(exec_list->value, c->args) < 0) {   // execute the command; doesn't return unless there is an error
       fprintf(stderr, "exec failed\n");
-      return 126;
+      exit(126);
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     waitpid(pid, &status, 0);       // wait/join for child process
@@ -296,7 +296,7 @@ void _logout() {
 
 int builtin(Cmd c) {
   // TODO: return actual values from builtins
-  if (matches(c->args[0], "end") || matches(c->args[0], "logout")) {
+  if (matches(c->args[0], "logout")) {
     _logout();
     return 0;
   }

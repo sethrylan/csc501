@@ -1,7 +1,7 @@
 #include "list.h"
 
-static char *builtins[] = { "cd", "echo", "logout", "end", "nice", "pwd", "setenv", "unsetenv", "where" };
-static int num_builtins = 9;
+static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
+static int num_builtins = 8;
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
