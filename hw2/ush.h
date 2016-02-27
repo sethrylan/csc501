@@ -11,6 +11,8 @@ static char *rc_filename = "/.ushrc";
 #define DEBUG_PRINT(...) do{ } while ( 0 )
 #endif
 
+#define is_file(t) ((t)==Tout||(t)==Tapp||(t)==ToutErr||(t)==TappErr)
+#define is_pipe(t) (((t)==Tpipe||(t)==TpipeErr))
 
 int builtin(Cmd c);
 int _where(const Cmd command);
