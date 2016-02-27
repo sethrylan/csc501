@@ -26,13 +26,15 @@ char *hostname, *home_directory;
 static int evaluate_command(Cmd c) {
   int subshell_pid, status;
 
+  print_command_info(c);
+
+  fflush(stdout);
+
   // exit at EOF
   if (!strcmp(c->args[0], "end")) {
     printf("\n");
     exit(0);
   }
-
-  fflush(stdout);
 
   if (contains(builtins, c->args[0], num_builtins)) {
     // execute special case builtins (no subshell)
@@ -57,7 +59,6 @@ static int evaluate_command(Cmd c) {
     }
   }
 
-  print_command_info(c);
   execute(c);
   return 0;
 }

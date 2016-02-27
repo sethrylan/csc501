@@ -185,7 +185,7 @@ int execute (Cmd c) {
     if ( c->in == Tin ){
       clearerr(stdin);
       int inFile = open(c->infile, O_RDONLY);
-      dup2(inFile, 0);  // todo: replace with STDIN_FILENO
+      dup2(inFile, STDIN_FILENO);
     }
 
     int retval = builtin(c);
