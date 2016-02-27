@@ -130,7 +130,6 @@ void process_rc() {
 }
 
 
-
 int main() {
   Pipe command_line_pipe;
   // char buff[PATH_MAX + 1];
@@ -146,7 +145,7 @@ int main() {
     }
   }
 
-  // TODO: process_rc();
+  process_rc();
 
   while ( 1 ) {
     printf("%s%% ", hostname);
