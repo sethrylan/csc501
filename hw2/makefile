@@ -27,7 +27,7 @@ test: testwhere testecho testexecute testredirect testerrredirect testseparator
 testwhere: ush
 	./ush <<< "where; logout" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
 	./ush <<< "where where; logout" | $(DIFF) ./tests/wherewhere.output -  && echo "OK PASS" && \
-	./ush <<< "where gcc; logout" | $(DIFF) ./tests/wheregcc.output -  && echo "OK PASS"
+	./ush <<< "where cat; logout" | $(DIFF) ./tests/wherecat.output -  && echo "OK PASS"
 
 testecho: ush
 	./ush <<< "echo; logout" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
