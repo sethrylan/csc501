@@ -1,6 +1,6 @@
 CC				= gcc
 CFLAGS		= -Wall -Wextra -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
-SRC				= main.c parse.c ush.c parse.h
+SRC				= main.c parse.c parse.h ush.c ush.h list.c list.h
 OBJ				=	main.o parse.o ush.o list.o
 rm				= rm -f
 DIFF			= diff -w
@@ -16,7 +16,7 @@ debug: CFLAGS += -DDEBUG
 debug: ush
 
 tar:
-	tar czvf ush.tar.gz $(SRC) makefile README
+	tar czvf ush.tar.gz $(SRC) makefile README REFERENCES
 
 clean:
 	$(RM) $(OBJ) ush *.gch *.o test.output
