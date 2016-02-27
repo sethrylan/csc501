@@ -26,6 +26,6 @@ build:
         cwd: hw2/
         name: make test
         code: |
-          sudo yum update && yum -y install build-essential
+          sudo yum update && yum -y install make gcc
           make clean test
 
