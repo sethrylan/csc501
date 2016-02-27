@@ -14,6 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include "parse.h"
 #include "ush.h"
 
@@ -26,7 +27,8 @@ static int evaluate_command(Cmd c) {
   int subshell_pid, status;
 
   // exit at EOF
-  if ( !strcmp(c->args[0], "end") ) {
+  if (!strcmp(c->args[0], "end")) {
+    printf("\n");
     exit(0);
   }
 
@@ -84,6 +86,51 @@ static void evaluate_pipe(Pipe command_line_pipe) {
   evaluate_pipe(command_line_pipe->next);
 }
 
+void process_rc() {
+  DEBUG_PRINT("process_rc start\n");
+  int rc_file;
+  int rc_stdin_orig;
+
+  char rc_full_path[PATH_MAX];
+  char *home_dir = getenv("HOME");
+  strcpy(rc_full_path, home_dir);
+  strcat(rc_full_path, rc_filename);
+
+  if((rc_file = open(rc_full_path, O_RDONLY)) > 0) {
+    // freopen(rc_full_path, "r", stdin);
+    rc_stdin_orig = dup(STDIN_FILENO);
+    DEBUG_PRINT("rc_stdin_orig = %d\n", rc_stdin_orig);
+    if(rc_stdin_orig == -1) {
+      die("dup failed");
+    }
+    if(dup2(rc_file, STDIN_FILENO)==-1) {
+      die("dup failed");
+    }
+
+    close(rc_file);
+
+    Pipe p;
+    while (1) {
+      p = parse();
+      if (p==NULL || !strcmp(p->head->args[0], "end")){
+        freePipe(p);
+        break;
+      }
+      evaluate_pipe(p);
+      freePipe(p);
+    }
+
+    DEBUG_PRINT("rc_stdin_orig = %d\n", rc_stdin_orig);
+    if(dup2(rc_stdin_orig, STDIN_FILENO)==-1) {
+      die("dup failed");
+    }
+    close(rc_stdin_orig);
+    fflush(NULL);
+  }
+}
+
+
+
 int main() {
   Pipe command_line_pipe;
   // char buff[PATH_MAX + 1];
@@ -99,6 +146,8 @@ int main() {
     }
   }
 
+  // TODO: process_rc();
+
   while ( 1 ) {
     printf("%s%% ", hostname);
     command_line_pipe = parse();
@@ -106,5 +155,6 @@ int main() {
     freePipe(command_line_pipe);
   }
 }
+
 
 /*........................ end of main.c ....................................*/

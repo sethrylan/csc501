@@ -56,6 +56,7 @@ void setup_signals () {
 }
 
 void save_std_streams () {
+  DEBUG_PRINT("save_std_streams\n");
   stdin_orig = dup(STDIN_FILENO);
   stdout_orig = dup(STDOUT_FILENO);
   stderr_orig = dup(STDERR_FILENO);
@@ -147,11 +148,6 @@ node* search_path (const char *filename) {
 
 
 int execute (Cmd c) {
-
-  // save_std_streams();
-
-  int inFile;
-
   pid_t pid;          // child process pid
   int status;
 
@@ -189,7 +185,7 @@ int execute (Cmd c) {
     if ( c->in == Tin ){
       clearerr(stdin);
       int inFile = open(c->infile, O_RDONLY);
-      dup2(inFile, 0);
+      dup2(inFile, 0);  // todo: replace with STDIN_FILENO
     }
 
     int retval = builtin(c);

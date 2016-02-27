@@ -3,6 +3,8 @@
 static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
 static int num_builtins = 8;
 
+static char *rc_filename = "/.ushrc";
+
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
 #else
