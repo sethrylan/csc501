@@ -30,7 +30,7 @@ static int evaluate_command(Cmd c) {
 
   print_command_info(c);
 
-  fflush(stdout);
+  fflush(NULL);  /// flush all streams
 
   // exit at EOF
   if (!strcmp(c->args[0], "end")) {
@@ -47,6 +47,14 @@ static int evaluate_command(Cmd c) {
     die("fork() for child process failed\n");
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
 
+    // if (is_pipe(c->out)) {
+    //   make_pipe(pipe_index);
+    //   if (c->out == TerrPipe) {
+    //     dup2(pipefd[pipe_index][1], STDERR_FILENO);
+    //   }
+    //   dup2(pipefd[pipe_index][1], STDOUT_FILENO);
+    // }
+
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
     if (is_file(c->out)) {
@@ -56,8 +64,6 @@ static int evaluate_command(Cmd c) {
       int append = (c->out == Tapp || c->out == TappErr);
       int out = open(c->outfile, (append ? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
       // set c->outfile to stdout
-
-      fflush(stdout);               // flush anything buffered in stdout so that it doesn't go to output file
 
       if (c->out == Tout || c->out == Tapp) {
         dup2(out, STDOUT_FILENO);
@@ -167,7 +173,7 @@ void process_rc() {
       die("dup failed");
     }
     close(rc_stdin_orig);
-    fflush(NULL);
+    fflush(NULL);     // flush all streams
   }
 }
 
