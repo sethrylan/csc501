@@ -5,18 +5,18 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-
 #include <limits.h>
 #include "parse.h"
 #include "ush.h"
 
-extern char **environ;
 
-extern char *hostname, *home_directory;
-
-int stdout_orig, stdin_orig, stderr_orig;
-
-int pipefd[2][2];
+void make_pipe (int pipe_ref) {
+  if (pipe(pipefd[pipe_ref]) < 0) {
+    die("Pipe creation failed\n");
+  }
+  // pipe_fds[pipe_index][1] is now writable
+  // pipe_fds[pipe_index][0] is now readable
+}
 
 void die (const char *msg) {
   perror(msg);
@@ -31,12 +31,6 @@ int contains(char **list, char *string, size_t length) {
     }
   }
   return 0;
-}
-
-void make_pipe (int pipe_ref) {
-  if (pipe(pipefd[pipe_ref]) < 0) {
-    die("Pipe creation failed\n");
-  }
 }
 
 void setup_pipe_redirection (int pipe_ref, int fd) {

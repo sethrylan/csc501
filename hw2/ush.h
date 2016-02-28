@@ -1,9 +1,14 @@
 #include "list.h"
 
-static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
-static int num_builtins = 8;
-
+// static char *builtins[] = { "cd", "echo", "logout", "nice", "pwd", "setenv", "unsetenv", "where" };
+// static int num_builtins = 8;
 static char *rc_filename = "/.ushrc";
+
+extern char **environ;
+extern char *hostname, *home_directory;
+
+int stdout_orig, stdin_orig, stderr_orig;
+int pipefd[2][2];
 
 #ifdef DEBUG
 #define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );

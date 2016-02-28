@@ -107,6 +107,7 @@ static int evaluate_command(Cmd c) {
 //
 static void evaluate_pipe(Pipe command_line_pipe) {
   Cmd c;
+  int pipe_index = 0;
 
   if ( command_line_pipe == NULL ){
     return;
