@@ -30,7 +30,9 @@ testwhere: ush
 
 testecho: ush
 	./ush <<< "echo; logout" | $(DIFF) ./tests/echo.output -  && echo "OK PASS" && \
-	./ush <<< "echo echo; logout" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS"
+	./ush <<< "echo echo; logout" | $(DIFF) ./tests/echoecho.output -  && echo "OK PASS" && \
+	./ush <<< "echo echo > test.output" && $(DIFF) ./tests/echoredirect.output test.output && echo "OK PASS" && \
+	rm test.output
 
 testexecute: ush
 	./ush <<< "expr 1 + 1; logout" | $(DIFF) ./tests/execexpr.output -  && echo "OK PASS"
