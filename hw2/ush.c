@@ -9,6 +9,12 @@
 #include "parse.h"
 #include "ush.h"
 
+extern char **environ;
+
+extern char *hostname, *home_directory;
+
+int stdout_orig, stdin_orig, stderr_orig;
+int pipefd[2][2];
 
 void make_pipe (int pipe_ref) {
   if (pipe(pipefd[pipe_ref]) < 0) {

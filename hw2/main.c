@@ -18,6 +18,7 @@
 #include "parse.h"
 #include "ush.h"
 
+// variables defined in main.c, but declared also in ush.c
 char *hostname, *home_directory;
 
 //
