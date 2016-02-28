@@ -22,7 +22,7 @@ clean:
 	$(RM) $(OBJ) ush *.gch *.o test.output ush.tar.gz
 
 test: export HOSTNAME=eastbridge
-test: testwhere testecho testexecute testredirect testerrredirect testseparator
+test: testwhere testecho testexecute testredirect testerrredirect testseparator testls
 
 testwhere: ush
 	./ush <<< "where; logout" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
@@ -43,6 +43,10 @@ testredirect: ush
 	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.output test.output  && echo "OK PASS" && \
 	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.appendx1.output test.output  && echo "OK PASS" && \
 	rm test.output
+
+testls: ush
+	./ush <<< "ls makefile > test.output" && $(DIFF) ./tests/lsredirect.output test.output && echo "OK PASS" && \
+	rm test.output;
 
 testfilterstdout: ush
 	./ush <<< "./tests/stdout_err.sh > /dev/null" &> test.output && $(DIFF) tests/stdout_filter.output test.output && echo "OK PASS";
