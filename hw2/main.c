@@ -20,6 +20,24 @@
 
 // variables defined in main.c, but declared also in ush.c
 char *hostname, *home_directory;
+int pipefd[2][2];
+int pipe_index = 0;
+
+
+void setup_pipe (int pipe_index, int fileno) {
+  close(pipefd[pipe_index][!fileno]);
+  if (dup2(pipefd[pipe_index][fileno], fileno) < 0) {
+    die("Pipe redirect failed\n");
+  }
+}
+
+void make_pipe (int pipe_ref) {
+  if (pipe(pipefd[pipe_ref]) < 0) {
+    die("Pipe creation failed\n");
+  }
+  // pipe_fds[pipe_index][1] is now writable
+  // pipe_fds[pipe_index][0] is now readable
+}
 
 //
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
@@ -43,17 +61,38 @@ static int evaluate_command(Cmd c) {
     return builtin(c);
   }
 
+  // if (is_pipe(c->in)) {
+  //   // copy pipe (old index) to STDIN
+  //   DEBUG_PRINT("before fork: duping pipefd[%d] from STDIN\n", pipe_index);
+  //   dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+
+  //   // close pipe (old index) file descriptors
+  //   DEBUG_PRINT("before fork: closing all pipefd[%d]\n", pipe_index);
+  //   // close(pipefd[pipe_index][STDIN_FILENO]);
+  // }
+
+  // if (is_pipe(c->out)) {
+  //   DEBUG_PRINT("before fork: make_pipe[%d]\n", pipe_index);
+  //   make_pipe(pipe_index);
+
+  //   DEBUG_PRINT("before fork: duping pipefd[%d] from STDOUT\n", pipe_index);
+  //   dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
+  //   if (c->out == TpipeErr) {
+  //     DEBUG_PRINT("before fork: duping pipefd[%d] from STDERR\n", pipe_index);
+  //     dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
+  //   }
+  // }
+
+  // if (is_pipe(c->in)) {
+  //   DEBUG_PRINT("before fork: toggling pipe index\n");
+  //   pipe_index = !pipe_index;                            // toggle index
+  // }
+
   if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
-
-    // if (is_pipe(c->out)) {
-    //   make_pipe(pipe_index);
-    //   if (c->out == TerrPipe) {
-    //     dup2(pipefd[pipe_index][1], STDERR_FILENO);
-    //   }
-    //   dup2(pipefd[pipe_index][1], STDOUT_FILENO);
-    // }
+    DEBUG_PRINT("child: %s\n", c->args[0]);
+    DEBUG_PRINT("child: pid is %d\n", pid);
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
@@ -103,7 +142,12 @@ static int evaluate_command(Cmd c) {
       exit(126);
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
+    DEBUG_PRINT("parent: %s\n", c->args[0]);
+    DEBUG_PRINT("parent: wait for %d\n", pid);
+    DEBUG_PRINT("parent: pipe_index = %d\n", pipe_index);
+
     waitpid(pid, &status, 0);       // wait/join for child process
+
     return status;
   }
   return 0;
@@ -113,14 +157,15 @@ static int evaluate_command(Cmd c) {
 // A pipeline is a sequence of one or more simple commands separated by | or |&.
 //
 static void evaluate_pipe(Pipe command_line_pipe) {
+  DEBUG_PRINT("start evaluate_pipe\n");
   Cmd c;
-  int pipe_index = 0;
+  pipe_index = 0;
 
   if ( command_line_pipe == NULL ){
     return;
   }
 
-  save_std_streams();
+  // save_std_streams();
 
   DEBUG_PRINT("Begin pipe%s\n", command_line_pipe->type == Pout ? "" : " Error");
   int i = 0;
@@ -130,7 +175,7 @@ static void evaluate_pipe(Pipe command_line_pipe) {
     evaluate_command(c);
   }
   DEBUG_PRINT("End pipe\n");
-  restore_std_streams();
+  // restore_std_streams();
   evaluate_pipe(command_line_pipe->next);
 }
 
