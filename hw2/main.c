@@ -25,10 +25,11 @@ int pipe_index = 0;
 
 
 void setup_pipe (int pipe_index, int fileno) {
-  close(pipefd[pipe_index][!fileno]);
+  DEBUG_PRINT("setup_pipe[%d, %d]\n", pipe_index, fileno);
   if (dup2(pipefd[pipe_index][fileno], fileno) < 0) {
     die("Pipe redirect failed\n");
   }
+  close(pipefd[pipe_index][!fileno]);
 }
 
 void make_pipe (int pipe_ref) {
@@ -60,6 +61,8 @@ static int evaluate_command(Cmd c) {
   if (matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
     return builtin(c);
   }
+
+  pipe_index = !pipe_index;
 
   // if (is_pipe(c->in)) {
   //   // copy pipe (old index) to STDIN
@@ -93,6 +96,10 @@ static int evaluate_command(Cmd c) {
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
     DEBUG_PRINT("child: %s\n", c->args[0]);
     DEBUG_PRINT("child: pid is %d\n", pid);
+
+    if (is_pipe(c->out)) {
+      setup_pipe(pipe_index, STDOUT_FILENO);
+    }
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
@@ -147,6 +154,10 @@ static int evaluate_command(Cmd c) {
     DEBUG_PRINT("parent: pipe_index = %d\n", pipe_index);
 
     waitpid(pid, &status, 0);       // wait/join for child process
+
+    if (is_pipe(c->in)) {
+      setup_pipe(pipe_index, STDIN_FILENO);
+    }
 
     return status;
   }
