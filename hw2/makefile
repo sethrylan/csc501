@@ -19,7 +19,7 @@ tar:
 	tar czvf ush.tar.gz $(SRC) makefile README REFERENCES
 
 clean:
-	$(RM) $(OBJ) ush *.gch *.o test.output
+	$(RM) $(OBJ) ush *.gch *.o test.output ush.tar.gz
 
 test: export HOSTNAME=eastbridge
 test: testwhere testecho testexecute testredirect testerrredirect testseparator
