@@ -14,6 +14,7 @@ static char *rc_filename = "/.ushrc";
 #define is_pipe(t) (((t)==Tpipe||(t)==TpipeErr))
 
 int builtin(Cmd c);
+int is_subshell_builtin(Cmd c);
 int _where(const Cmd command);
 int _unsetenv(Cmd command);
 int _setenv(Cmd command);

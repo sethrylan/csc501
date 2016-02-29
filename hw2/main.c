@@ -113,7 +113,7 @@ static int evaluate_command(Cmd c) {
   }
 
   // execute special case builtins (no subshell)
-  if (matches(c->args[0], "logout") || matches(c->args[0], "cd") ) {
+  if (!is_subshell_builtin(c)) {
     return builtin(c);
   }
 

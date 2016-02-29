@@ -22,7 +22,7 @@ clean:
 	$(RM) $(OBJ) ush *.gch *.o test.output ush.tar.gz
 
 test: export HOSTNAME=eastbridge
-test: testwhere testecho testexecute testredirect testerrredirect testseparator testls testpipe testpipeerr
+test: testwhere testecho testexecute testredirect testerrredirect testseparator testls testpipe testpipeerr testsetenv
 
 testwhere: ush
 	./ush <<< "where; logout" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
@@ -73,3 +73,9 @@ testpipeerr: ush
 	rm test.output && \
 	./ush <<< "./tests/stderr.sh |& grep 'danger' | wc -l > test.output" && $(DIFF) test.output <(echo "1") && echo "OK PASS" && \
 	rm test.output;
+
+testsetenv: ush
+	./ush <<< "setenv PEANUTTY paradoxography & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(echo "PEANUTTY=paradoxography") && echo "OK PASS" && \
+	rm test.output;
+	# ./ush <<< "setenv PEANUTTY paradoxography & unsetenv PEANUTTY & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(echo "") && echo "OK PASS" && \
+	# rm test.output;

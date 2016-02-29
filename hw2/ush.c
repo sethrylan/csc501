@@ -22,6 +22,11 @@ void die (const char *msg) {
   exit(EXIT_FAILURE);
 }
 
+int is_subshell_builtin (Cmd c) {
+  int setenv_output_only = (matches(c->args[0], "setenv") && c->nargs > 1);
+  return !(matches(c->args[0], "logout") || matches(c->args[0], "cd") || setenv_output_only);
+}
+
 int contains(char **list, char *string, size_t length) {
   size_t i = 0;
   for( i = 0; i < length; i++) {
@@ -216,8 +221,15 @@ int builtin(Cmd c) {
     return _cd(c->args[1]);
   }
   if (matches(c->args[0], "setenv")) {
-    _setenv(c);
-    exit(EXIT_SUCCESS);
+    // special case:
+    //    if no arguments, then print in subshell,
+    //    else setenv/putenv in parent shell
+    int retval = _setenv(c);
+    if (c->nargs == 1) {
+      exit(EXIT_SUCCESS);
+    } else {
+      return  retval;
+    }
   }
   if (matches(c->args[0], "pwd")) {
     _pwd();
