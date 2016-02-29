@@ -56,6 +56,39 @@ void make_pipe (int pipe_ref) {
   // pipe_fds[pipe_index][0] is now readable
 }
 
+void setup_file_output (Cmd c) {
+  // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
+  // >& and >>& redirection; same, but for stderr (index 2)
+  if (is_file(c->out)) {
+    // open outfile; create it doesn't exist, truncate or append depending on out token
+    // create file in mode 644, -rw-r--r--
+    int append = (c->out == Tapp || c->out == TappErr);
+    int out = open(c->outfile, (append ? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+
+    if (c->out == Tout || c->out == Tapp) {
+      dup2(out, STDOUT_FILENO);               // set c->outfile to stdout
+    }
+    if (c->out == ToutErr || c->out == TappErr) {
+      // in bash, equivalent to any of the forms of input redirection
+      //    program &>word
+      //    program >&word
+      //    program >word 2>&1
+      dup2(out, STDOUT_FILENO);
+      dup2(out, STDERR_FILENO);               // redirect stderr (2) to output file
+    }
+    close(out);
+  }
+}
+
+void setup_file_input (Cmd c) {
+  // < redirection; open() file and set to filedescriptor array index 0 (stdin)
+  if (c->in == Tin) {
+    clearerr(stdin);
+    int inFile = open(c->infile, O_RDONLY);
+    dup2(inFile, STDIN_FILENO);
+  }
+}
+
 //
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
 //
@@ -91,37 +124,8 @@ static int evaluate_command(Cmd c) {
 
     setup_pipe_input(pipe_index, c);
     setup_pipe_output(pipe_index, c);
-
-    // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
-    // >& and >>& redirection; same, but for stderr (index 2)
-    if (is_file(c->out)) {
-
-      // open outfile; create it doesn't exist, truncate or append depending on out token
-      // create file in mode 644, -rw-r--r--
-      int append = (c->out == Tapp || c->out == TappErr);
-      int out = open(c->outfile, (append ? O_APPEND : O_TRUNC) | O_WRONLY | O_CREAT, S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
-      // set c->outfile to stdout
-
-      if (c->out == Tout || c->out == Tapp) {
-        dup2(out, STDOUT_FILENO);
-      }
-      if (c->out == ToutErr || c->out == TappErr) {
-        // in bash, equivalent to any of the forms of input redirection
-        //    program &>word
-        //    program >&word
-        //    program >word 2>&1
-        dup2(out, STDOUT_FILENO);
-        dup2(out, STDERR_FILENO);    // redirect stderr (2) to output file
-      }
-      close(out);
-    }
-
-    // < redirection; open() file and set to filedescriptor array index 0 (stdin)
-    if (c->in == Tin) {
-      clearerr(stdin);
-      int inFile = open(c->infile, O_RDONLY);
-      dup2(inFile, STDIN_FILENO);
-    }
+    setup_file_output(c);
+    setup_file_input(c);
 
     int retval = builtin(c);
     if (retval != 127) {
