@@ -83,10 +83,12 @@ static int evaluate_command(Cmd c) {
     DEBUG_PRINT("child: pid is %d\n", pid);
 
     if (is_pipe(c->out)) {
+      DEBUG_PRINT("child: dup2[pipe_index=%d][fd=%d]\n", pipe_index, STDOUT_FILENO);
       dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
     }
 
     if (is_pipe(c->in)) {
+      DEBUG_PRINT("child: dup2[pipe_index=%d][fd=%d]\n", pipe_index, STDIN_FILENO);
       dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
     }
 
@@ -145,7 +147,13 @@ static int evaluate_command(Cmd c) {
     waitpid(pid, &status, 0);       // wait/join for child process
 
     if (is_pipe(c->out)) {
+      DEBUG_PRINT("parent: close[pipe_index=%d][fd=%d]\n", pipe_index, STDOUT_FILENO);
       close(pipefd[pipe_index][STDOUT_FILENO]);
+    }
+
+    if (is_pipe(c->in)) {
+      DEBUG_PRINT("parent: close[pipe_index=%d][fd=%d]\n", pipe_index, STDIN_FILENO);
+      close(pipefd[pipe_index][STDIN_FILENO]);
     }
 
     return status;
