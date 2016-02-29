@@ -29,7 +29,6 @@ void setup_pipe (int pipe_index, int fileno) {
   if (dup2(pipefd[pipe_index][fileno], fileno) < 0) {
     die("Pipe redirect failed\n");
   }
-  close(pipefd[pipe_index][!fileno]);
 }
 
 void make_pipe (int pipe_ref) {
@@ -62,8 +61,6 @@ static int evaluate_command(Cmd c) {
     return builtin(c);
   }
 
-  pipe_index = !pipe_index;
-
   // if (is_pipe(c->in)) {
   //   // copy pipe (old index) to STDIN
   //   DEBUG_PRINT("before fork: duping pipefd[%d] from STDIN\n", pipe_index);
@@ -74,22 +71,10 @@ static int evaluate_command(Cmd c) {
   //   // close(pipefd[pipe_index][STDIN_FILENO]);
   // }
 
-  // if (is_pipe(c->out)) {
-  //   DEBUG_PRINT("before fork: make_pipe[%d]\n", pipe_index);
-  //   make_pipe(pipe_index);
-
-  //   DEBUG_PRINT("before fork: duping pipefd[%d] from STDOUT\n", pipe_index);
-  //   dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
-  //   if (c->out == TpipeErr) {
-  //     DEBUG_PRINT("before fork: duping pipefd[%d] from STDERR\n", pipe_index);
-  //     dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
-  //   }
-  // }
-
-  // if (is_pipe(c->in)) {
-  //   DEBUG_PRINT("before fork: toggling pipe index\n");
-  //   pipe_index = !pipe_index;                            // toggle index
-  // }
+  if (is_pipe(c->out)) {
+    DEBUG_PRINT("before fork: make_pipe[%d]\n", pipe_index);
+    make_pipe(pipe_index);
+  }
 
   if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
@@ -98,7 +83,11 @@ static int evaluate_command(Cmd c) {
     DEBUG_PRINT("child: pid is %d\n", pid);
 
     if (is_pipe(c->out)) {
-      setup_pipe(pipe_index, STDOUT_FILENO);
+      dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
+    }
+
+    if (is_pipe(c->in)) {
+      dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
     }
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
@@ -155,8 +144,8 @@ static int evaluate_command(Cmd c) {
 
     waitpid(pid, &status, 0);       // wait/join for child process
 
-    if (is_pipe(c->in)) {
-      setup_pipe(pipe_index, STDIN_FILENO);
+    if (is_pipe(c->out)) {
+      close(pipefd[pipe_index][STDOUT_FILENO]);
     }
 
     return status;
