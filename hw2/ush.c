@@ -132,7 +132,7 @@ node* search_path (const char *filename) {
       } else {
         push(list, startp);
       }
-      // printf("Found %s\n", startp);
+      DEBUG_PRINT("Found %s\n", startp);
     }
   } while (*p++ != '\0');
   return list;
