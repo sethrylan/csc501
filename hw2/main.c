@@ -24,10 +24,27 @@ int pipefd[2][2];
 int pipe_index = 0;
 
 
-void setup_pipe (int pipe_index, int fileno) {
-  DEBUG_PRINT("setup_pipe[%d, %d]\n", pipe_index, fileno);
-  if (dup2(pipefd[pipe_index][fileno], fileno) < 0) {
-    die("Pipe redirect failed\n");
+void setup_pipe_input (int pipe_index, Cmd c) {
+  int is_followed = is_pipe(c->out);
+  if (is_pipe(c->in)) {
+    if (is_followed) {
+      // preempt pipe_index, which was toggled for next command
+      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], !pipe_index);
+      dup2(pipefd[!pipe_index][STDIN_FILENO], STDIN_FILENO);
+    } else {
+      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
+      dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+    }
+  }
+}
+
+void setup_pipe_output (int pipe_index, Cmd c) {
+  if (is_pipe(c->out)) {
+    DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> pipe_index=%d]\n", c->args[0], pipe_index);
+    dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
+    if (c->out == TpipeErr) {
+      dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
+    }
   }
 }
 
@@ -61,20 +78,8 @@ static int evaluate_command(Cmd c) {
     return builtin(c);
   }
 
-  // if (is_pipe(c->in)) {
-  //   // copy pipe (old index) to STDIN
-  //   DEBUG_PRINT("before fork: duping pipefd[%d] from STDIN\n", pipe_index);
-  //   dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
-
-  //   // close pipe (old index) file descriptors
-  //   DEBUG_PRINT("before fork: closing all pipefd[%d]\n", pipe_index);
-  //   // close(pipefd[pipe_index][STDIN_FILENO]);
-  // }
-
   if (is_pipe(c->out)) {
-    DEBUG_PRINT("before fork(%s): toggle pipe_index[%d to %d]\n", c->args[0], pipe_index, !pipe_index);
     pipe_index = !pipe_index;
-
     DEBUG_PRINT("before fork(%s): make_pipe[%d]\n", c->args[0], pipe_index);
     make_pipe(pipe_index);
   }
@@ -84,24 +89,8 @@ static int evaluate_command(Cmd c) {
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
     DEBUG_PRINT("child(%s): pid=%d\n", c->args[0], pid);
 
-    if (is_pipe(c->in)) {
-      if (is_pipe(c->out)) {
-        // preempt pipe_index, which was toggled for next command
-        DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], !pipe_index);
-        dup2(pipefd[!pipe_index][STDIN_FILENO], STDIN_FILENO);
-      } else {
-        DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
-        dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
-      }
-    }
-
-    if (is_pipe(c->out)) {
-      DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> pipe_index=%d]\n", c->args[0], pipe_index);
-      dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
-      if (c->out == TpipeErr) {
-        dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
-      }
-    }
+    setup_pipe_input(pipe_index, c);
+    setup_pipe_output(pipe_index, c);
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
     // >& and >>& redirection; same, but for stderr (index 2)
