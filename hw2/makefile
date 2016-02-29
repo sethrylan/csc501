@@ -22,7 +22,7 @@ clean:
 	$(RM) $(OBJ) ush *.gch *.o test.output ush.tar.gz
 
 test: export HOSTNAME=eastbridge
-test: testwhere testecho testexecute testredirect testerrredirect testseparator testls testpipe
+test: testwhere testecho testexecute testredirect testerrredirect testseparator testls testpipe testpipeerr
 
 testwhere: ush
 	./ush <<< "where; logout" | $(DIFF) ./tests/where.output -  && echo "OK PASS" && \
