@@ -23,33 +23,32 @@ char *hostname, *home_directory;
 int pipefd[2][2];
 int pipe_index = 0;
 
-
-void setup_pipe_input (int pipe_index, Cmd c) {
+void setup_pipe_input (int index, Cmd c) {
   int is_followed = is_pipe(c->out);
   if (is_pipe(c->in)) {
     if (is_followed) {
       // preempt pipe_index, which was toggled for next command
-      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], !pipe_index);
-      dup2(pipefd[!pipe_index][STDIN_FILENO], STDIN_FILENO);
+      DEBUG_PRINT("child(%s): dup2[index=%d -> STDIN_FILENO]\n", c->args[0], !index);
+      dup2(pipefd[!index][STDIN_FILENO], STDIN_FILENO);
     } else {
-      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
-      dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+      DEBUG_PRINT("child(%s): dup2[index=%d -> STDIN_FILENO]\n", c->args[0], index);
+      dup2(pipefd[index][STDIN_FILENO], STDIN_FILENO);
     }
   }
 }
 
-void setup_pipe_output (int pipe_index, Cmd c) {
+void setup_pipe_output (int index, Cmd c) {
   if (is_pipe(c->out)) {
-    DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> pipe_index=%d]\n", c->args[0], pipe_index);
-    dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
+    DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> index=%d]\n", c->args[0], index);
+    dup2(pipefd[index][STDOUT_FILENO], STDOUT_FILENO);
     if (c->out == TpipeErr) {
-      dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
+      dup2(pipefd[index][STDOUT_FILENO], STDERR_FILENO);
     }
   }
 }
 
-void make_pipe (int pipe_ref) {
-  if (pipe(pipefd[pipe_ref]) < 0) {
+void make_pipe (int index) {
+  if (pipe(pipefd[index]) < 0) {
     die("Pipe creation failed\n");
   }
   // pipe_fds[pipe_index][1] is now writable
@@ -86,6 +85,24 @@ void setup_file_input (Cmd c) {
     clearerr(stdin);
     int inFile = open(c->infile, O_RDONLY);
     dup2(inFile, STDIN_FILENO);
+  }
+}
+
+void close_pipes (int index, Cmd c) {
+  if (is_pipe(c->out)) {
+    DEBUG_PRINT("parent(%s): close[index=%d][STDOUT_FILENO]\n", c->args[0], index);
+    close(pipefd[index][STDOUT_FILENO]);
+  }
+
+  if (is_pipe(c->in)) {
+    if (is_pipe(c->out)) {
+      // preempt pipe_index, which was toggled for next command
+      DEBUG_PRINT("parent(%s): close[index=%d][STDIN_FILENO]\n", c->args[0], !index);
+      close(pipefd[!index][STDIN_FILENO]);
+    } else {
+      DEBUG_PRINT("parent(%s): close[index=%d][STDIN_FILENO]\n", c->args[0], index);
+      close(pipefd[index][STDIN_FILENO]);
+    }
   }
 }
 
@@ -148,21 +165,7 @@ static int evaluate_command(Cmd c) {
 
     waitpid(pid, &status, 0);       // wait/join for child process
 
-    if (is_pipe(c->out)) {
-      DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDOUT_FILENO]\n", c->args[0], pipe_index);
-      close(pipefd[pipe_index][STDOUT_FILENO]);
-    }
-
-    if (is_pipe(c->in)) {
-      if (is_pipe(c->out)) {
-        // preempt pipe_index, which was toggled for next command
-        DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], !pipe_index);
-        close(pipefd[!pipe_index][STDIN_FILENO]);
-      } else {
-        DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], pipe_index);
-        close(pipefd[pipe_index][STDIN_FILENO]);
-      }
-    }
+    close_pipes(pipe_index, c);
 
     return status;
   }
