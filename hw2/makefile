@@ -39,7 +39,7 @@ testexecute: ush
 
 testredirect: ush
 	./ush <<< "cat < tests/cat.input > test.output" && $(DIFF) ./tests/cat.output test.output  && echo "OK PASS" && \
-	rm test.output && \
+	rm test.output;
 	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.output test.output  && echo "OK PASS" && \
 	./ush <<< "cat < tests/cat.input >> test.output" && $(DIFF) ./tests/cat.appendx1.output test.output  && echo "OK PASS" && \
 	rm test.output
@@ -63,14 +63,14 @@ testseparator: ush
 testpipe: ush
 	./ush <<< "ls | grep makefile" | $(DIFF) ./tests/ls_grep.output - && echo "OK PASS" && \
 	./ush <<< "ls | grep makefile > test.output" && $(DIFF) ./tests/ls_grep_redirect.output test.output && echo "OK PASS" && \
-	rm test.output && \
+	rm test.output;
 	./ush <<< "seq 50 | head -n10 | wc -l" | $(DIFF) ./tests/seq_head_wc.output - && echo "OK PASS" && \
 	./ush <<< "seq 50 | head -n10 | wc -l > test.output" && $(DIFF) <(printf "      10") test.output && echo "OK PASS" && \
 	rm test.output;
 
 testpipeerr: ush
 	./ush <<< "./tests/stderr.sh | grep 'danger' | wc -l > test.output" && $(DIFF) test.output <(echo "0") && echo "OK PASS" && \
-	rm test.output && \
+	rm test.output;
 	./ush <<< "./tests/stderr.sh |& grep 'danger' | wc -l > test.output" && $(DIFF) test.output <(echo "1") && echo "OK PASS" && \
 	rm test.output;
 
