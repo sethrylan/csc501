@@ -1,13 +1,3 @@
-/******************************************************************************
- *
- *  File Name........: main.c
- *
- *  Description......: Simple driver program for ush's parser
- *
- *  Author...........: Vincent W. Freeh
- *
- *****************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h> // _POSIX_HOST_NAME_MAX, PATH_MAX
@@ -110,15 +100,14 @@ void close_pipes (int index, Cmd c) {
 // A simple command is a sequence of words, the first of which specifies the command to be executed.
 //
 static int evaluate_command(Cmd c) {
-  pid_t pid;          // child process pid
+  pid_t pid;                           // child process pid
   int status;
 
   print_command_info(c);
 
-  fflush(NULL);  /// flush all streams
+  fflush(NULL);                        // flush all streams
 
-  // exit at EOF
-  if (!strcmp(c->args[0], "end")) {
+  if (!strcmp(c->args[0], "end")) {    // exit at EOF
     printf("\n");
     exit(0);
   }
@@ -162,11 +151,8 @@ static int evaluate_command(Cmd c) {
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
     DEBUG_PRINT("parent(%s): wait for %d\n", c->args[0], pid);
-
     waitpid(pid, &status, 0);       // wait/join for child process
-
     close_pipes(pipe_index, c);
-
     return status;
   }
   return 0;
