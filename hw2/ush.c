@@ -15,6 +15,8 @@ extern char *hostname, *home_directory;
 
 int stdout_orig, stdin_orig, stderr_orig;
 
+int stdstream_orig[3];
+
 void die (const char *msg) {
   perror(msg);
   exit(EXIT_FAILURE);
@@ -36,31 +38,30 @@ void setup_signals () {
   // signal(SIGINT,handle_sigint); //CTRL+C
 }
 
-void save_std_streams () {
-  DEBUG_PRINT("save_std_streams\n");
-  stdin_orig = dup(STDIN_FILENO);
-  stdout_orig = dup(STDOUT_FILENO);
-  stderr_orig = dup(STDERR_FILENO);
-
-  if (stdin_orig < 0 || stdout_orig < 0 || stderr_orig < 0) {
-    die("could not save streams");
+void save_std_stream (int fd) {
+  stdstream_orig[fd] = dup(fd);
+  if (stdstream_orig[fd]) {
+    die("could not save stream");
   }
 }
 
+void restore_std_stream (int fd) {
+  if(dup2(stdstream_orig[fd], fd) < 0) {
+    die("restore std stream failed");
+  }
+  close(stdstream_orig[fd]);
+}
+
+void save_std_streams () {
+  save_std_streams(STDIN_FILENO);
+  save_std_streams(STDOUT_FILENO);
+  save_std_streams(STDERR_FILENO);
+}
+
 void restore_std_streams () {
-  DEBUG_PRINT("restore_std_streams\n");
-  if(dup2(stdin_orig, STDIN_FILENO) < 0) {
-    die("restore stdin failed\n");
-  }
-  close(stdin_orig);
-  if(dup2(stdout_orig, STDOUT_FILENO) < 0) {
-    die("restore stdout failed\n");
-  }
-  close(stdout_orig);
-  if(dup2(stderr_orig, STDERR_FILENO) < 0) {
-    die("restore stderr failed\n");
-  }
-  close(stderr_orig);
+  restore_std_streams(STDIN_FILENO);
+  restore_std_streams(STDOUT_FILENO);
+  restore_std_streams(STDERR_FILENO);
 }
 
 int matches (const char *string, const char *compare) {
