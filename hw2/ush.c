@@ -79,7 +79,6 @@ int matches (const char *string, const char *compare) {
 }
 
 // notes on path_resolution: http://man7.org/linux/man-pages/man7/path_resolution.7.html
-
 // Returns an array of executable paths that match the passed filename
 // see implementation from execvp.c
 node* search_path (const char *filename) {
