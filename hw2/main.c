@@ -72,24 +72,26 @@ static int evaluate_command(Cmd c) {
   // }
 
   if (is_pipe(c->out)) {
-    DEBUG_PRINT("before fork: make_pipe[%d]\n", pipe_index);
+    DEBUG_PRINT("before fork(%s): toggle pipe_index[%d to %d]\n", c->args[0], pipe_index, !pipe_index);
+    pipe_index = !pipe_index;
+
+    DEBUG_PRINT("before fork(%s): make_pipe[%d]\n", c->args[0], pipe_index);
     make_pipe(pipe_index);
   }
 
   if ((pid = fork()) < 0) {         // fork child process
     die("fork() for child process failed\n");
   } else if (pid == 0) {            // fork() returns a value of 0 to the child process
-    DEBUG_PRINT("child: %s\n", c->args[0]);
-    DEBUG_PRINT("child: pid is %d\n", pid);
-
-    if (is_pipe(c->out)) {
-      DEBUG_PRINT("child: dup2[pipe_index=%d][fd=%d]\n", pipe_index, STDOUT_FILENO);
-      dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
-    }
+    DEBUG_PRINT("child(%s): pid=%d\n", c->args[0], pid);
 
     if (is_pipe(c->in)) {
-      DEBUG_PRINT("child: dup2[pipe_index=%d][fd=%d]\n", pipe_index, STDIN_FILENO);
+      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
       dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+    }
+
+    if (is_pipe(c->out)) {
+      DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> pipe_index=%d]\n", c->args[0], pipe_index);
+      dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
     }
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
@@ -140,19 +142,17 @@ static int evaluate_command(Cmd c) {
       exit(126);
     }
   } else {                          // fork() returns the process ID of the child process to the parent process
-    DEBUG_PRINT("parent: %s\n", c->args[0]);
-    DEBUG_PRINT("parent: wait for %d\n", pid);
-    DEBUG_PRINT("parent: pipe_index = %d\n", pipe_index);
+    DEBUG_PRINT("parent(%s): wait for %d\n", c->args[0], pid);
 
     waitpid(pid, &status, 0);       // wait/join for child process
 
     if (is_pipe(c->out)) {
-      DEBUG_PRINT("parent: close[pipe_index=%d][fd=%d]\n", pipe_index, STDOUT_FILENO);
+      DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDOUT_FILENO]\n", c->args[0], pipe_index);
       close(pipefd[pipe_index][STDOUT_FILENO]);
     }
 
     if (is_pipe(c->in)) {
-      DEBUG_PRINT("parent: close[pipe_index=%d][fd=%d]\n", pipe_index, STDIN_FILENO);
+      DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], pipe_index);
       close(pipefd[pipe_index][STDIN_FILENO]);
     }
 
