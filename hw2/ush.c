@@ -38,10 +38,14 @@ int contains(char **list, char *string, size_t length) {
   return 0;
 }
 
+// Ignore QUIT signals. Background jobs are immune to signals generated from the keyboard,
+// including hangups (HUP). Other signals have the values that ush inherited from its environment.
+// Catches the TERM signal.
 void setup_signals () {
-  signal(SIGTSTP,SIG_IGN);  //CTRL+Z
-  signal(SIGQUIT,SIG_IGN);  //CTRL+\/
-  // signal(SIGINT,handle_sigint); //CTRL+C
+  // signal(SIGTSTP, SIG_IGN);  // CTRL+Z
+  signal(SIGQUIT, SIG_IGN);  // CTRL+/
+  signal(SIGTERM, SIG_IGN);
+  // TODO: signal(SIGTERM, handle_sigint); //CTRL+C
 }
 
 void save_std_stream (int fd) {

@@ -30,7 +30,7 @@ int execute (Cmd c);
 
 node* search_path (const char *filename);
 
-
+void setup_signals();
 void save_std_streams();
 void restore_std_streams();
 
