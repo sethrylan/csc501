@@ -67,3 +67,8 @@ testpipe: ush
 	# ./ush <<< "ls -l | grep makefile | cut -d' ' -f1" | $(DIFF) ./tests/ls_grep_cut.output - && echo "OK PASS" && \
 	# ./ush <<< "ls -l | grep makefile | cut -d' ' -f1 > test.output" && $(DIFF) ./tests/ls_grep_cut_redirect.output test.output && echo "OK PASS" && \
 
+testpipeerr: ush
+	./ush <<< "./tests/stderr.sh | grep 'danger' | wc -l > test.output" && $(DIFF) test.output <(echo "0") && echo "OK PASS" && \
+	rm test.output && \
+	./ush <<< "./tests/stderr.sh |& grep 'danger' | wc -l > test.output" && $(DIFF) test.output <(echo "1") && echo "OK PASS" && \
+	rm test.output;

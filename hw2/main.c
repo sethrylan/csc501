@@ -98,6 +98,9 @@ static int evaluate_command(Cmd c) {
     if (is_pipe(c->out)) {
       DEBUG_PRINT("child(%s): dup2[STDOUT_FILENO -> pipe_index=%d]\n", c->args[0], pipe_index);
       dup2(pipefd[pipe_index][STDOUT_FILENO], STDOUT_FILENO);
+      if (c->out == TpipeErr) {
+        dup2(pipefd[pipe_index][STDOUT_FILENO], STDERR_FILENO);
+      }
     }
 
     // > and >> redirection; open() file and set to filedescriptor array index 1 (stdout)
