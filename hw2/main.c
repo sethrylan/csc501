@@ -115,7 +115,7 @@ static int evaluate_command(Cmd c) {
     }
 
     // < redirection; open() file and set to filedescriptor array index 0 (stdin)
-    if ( c->in == Tin ){
+    if (c->in == Tin) {
       clearerr(stdin);
       int inFile = open(c->infile, O_RDONLY);
       dup2(inFile, STDIN_FILENO);
