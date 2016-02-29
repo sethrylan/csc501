@@ -65,7 +65,7 @@ testpipe: ush
 	./ush <<< "ls | grep makefile > test.output" && $(DIFF) ./tests/ls_grep_redirect.output test.output && echo "OK PASS" && \
 	rm test.output && \
 	./ush <<< "seq 50 | head -n10 | wc -l" | $(DIFF) ./tests/seq_head_wc.output - && echo "OK PASS" && \
-	./ush <<< "seq 50 | head -n10 | wc -l > test.output" && $(DIFF) ./tests/seq_head_wc_redirect.output test.output && echo "OK PASS" && \
+	./ush <<< "seq 50 | head -n10 | wc -l > test.output" && $(DIFF) <(printf "      10") test.output && echo "OK PASS" && \
 	rm test.output;
 
 testpipeerr: ush
@@ -75,7 +75,7 @@ testpipeerr: ush
 	rm test.output;
 
 testsetenv: ush
-	./ush <<< "setenv PEANUTTY paradoxography & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(echo "PEANUTTY=paradoxography") && echo "OK PASS" && \
+	./ush <<< "setenv PEANUTTY paradoxography & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(printf "PEANUTTY=paradoxography") && echo "OK PASS" && \
 	rm test.output;
-	# ./ush <<< "setenv PEANUTTY paradoxography & unsetenv PEANUTTY & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(echo "") && echo "OK PASS" && \
-	# rm test.output;
+	./ush <<< "setenv PEANUTTY paradoxography & unsetenv PEANUTTY & setenv | grep PEANUTTY > test.output" && $(DIFF) test.output <(printf "") && echo "OK PASS" && \
+	rm test.output;

@@ -22,9 +22,10 @@ void die (const char *msg) {
   exit(EXIT_FAILURE);
 }
 
+// builtins that execute in a subsell must call exit().
 int is_subshell_builtin (Cmd c) {
   int setenv_output_only = (matches(c->args[0], "setenv") && c->nargs > 1);
-  return !(matches(c->args[0], "logout") || matches(c->args[0], "cd") || setenv_output_only);
+  return !(matches(c->args[0], "logout") || matches(c->args[0], "cd") || matches(c->args[0], "unsetenv") || setenv_output_only);
 }
 
 int contains(char **list, char *string, size_t length) {
@@ -231,16 +232,15 @@ int builtin(Cmd c) {
       return  retval;
     }
   }
+  if (matches(c->args[0], "unsetenv")) {
+    return(_unsetenv(c));
+  }
   if (matches(c->args[0], "pwd")) {
     _pwd();
     exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "echo")) {
     _echo(c);
-    exit(EXIT_SUCCESS);
-  }
-  if (matches(c->args[0], "unsetenv")) {
-    _unsetenv(c);
     exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "where")) {
