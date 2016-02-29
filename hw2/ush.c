@@ -211,22 +211,20 @@ int builtin(Cmd c) {
   // TODO: return actual values from builtins
   if (matches(c->args[0], "logout")) {
     _logout();
-    return 0;
+  }
+  if (matches(c->args[0], "cd")) {
+    return _cd(c->args[1]);
+  }
+  if (matches(c->args[0], "setenv")) {
+    _setenv(c);
+    exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "pwd")) {
     _pwd();
     exit(EXIT_SUCCESS);
   }
-  if (matches(c->args[0], "cd")) {
-    _cd(c->args[1]);
-    return 0;
-  }
   if (matches(c->args[0], "echo")) {
     _echo(c);
-    exit(EXIT_SUCCESS);
-  }
-  if (matches(c->args[0], "setenv")) {
-    _setenv(c);
     exit(EXIT_SUCCESS);
   }
   if (matches(c->args[0], "unsetenv")) {
