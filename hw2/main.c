@@ -85,8 +85,14 @@ static int evaluate_command(Cmd c) {
     DEBUG_PRINT("child(%s): pid=%d\n", c->args[0], pid);
 
     if (is_pipe(c->in)) {
-      DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
-      dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+      if (is_pipe(c->out)) {
+        // preempt pipe_index, which was toggled for next command
+        DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], !pipe_index);
+        dup2(pipefd[!pipe_index][STDIN_FILENO], STDIN_FILENO);
+      } else {
+        DEBUG_PRINT("child(%s): dup2[pipe_index=%d -> STDIN_FILENO]\n", c->args[0], pipe_index);
+        dup2(pipefd[pipe_index][STDIN_FILENO], STDIN_FILENO);
+      }
     }
 
     if (is_pipe(c->out)) {
@@ -152,8 +158,14 @@ static int evaluate_command(Cmd c) {
     }
 
     if (is_pipe(c->in)) {
-      DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], pipe_index);
-      close(pipefd[pipe_index][STDIN_FILENO]);
+      if (is_pipe(c->out)) {
+        // preempt pipe_index, which was toggled for next command
+        DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], !pipe_index);
+        close(pipefd[!pipe_index][STDIN_FILENO]);
+      } else {
+        DEBUG_PRINT("parent(%s): close[pipe_index=%d][STDIN_FILENO]\n", c->args[0], pipe_index);
+        close(pipefd[pipe_index][STDIN_FILENO]);
+      }
     }
 
     return status;
