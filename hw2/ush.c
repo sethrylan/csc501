@@ -243,22 +243,24 @@ int builtin(Cmd c) {
 
 void print_command_info (Cmd c) {
   if ( c ) {
-    DEBUG_PRINT("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
     if ( c->in != Tnil ) {
       switch ( c->in ) {
         case Tin:
           DEBUG_PRINT("<(%s) ", c->infile);
           break;
         case Tpipe:
-          DEBUG_PRINT("| (in)");
+          DEBUG_PRINT("| ");
           break;
         case TpipeErr:
-          DEBUG_PRINT("|& (in)");
+          DEBUG_PRINT("|& ");
           break;
         default:
           break;
       }
     }
+
+    DEBUG_PRINT("%s%s ", c->exec == Tamp ? "BG " : "", c->args[0]);
+
     if ( c->out != Tnil ) {
       switch ( c->out ) {
         case Tout:
