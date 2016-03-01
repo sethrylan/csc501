@@ -56,6 +56,12 @@ void setup_signals () {
   signal(SIGINT, SIG_IGN);   //CTRL+C
 }
 
+void ignore_signals () {
+  signal(SIGTSTP, SIG_IGN);  // CTRL+Z
+  signal(SIGQUIT, SIG_IGN);  // CTRL+/
+  signal(SIGINT, SIG_IGN);   //CTRL+C
+}
+
 void save_std_stream (int fd) {
   stdstream_orig[fd] = dup(fd);
   if (stdstream_orig[fd]) {
