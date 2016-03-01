@@ -22,10 +22,14 @@ Cmd make_command_from_args(Cmd c) {
   cTemp = malloc(sizeof(Cmd));
   cTemp->in = c->in;
   cTemp->out = c->out;
+  cTemp->exec = c->exec;
+  cTemp->next = c->next;
+  cTemp->maxargs = c->maxargs;
   cTemp->nargs = c->nargs - 2;
   cTemp->args = malloc(c->maxargs * sizeof(char*));
   int i;
   for (i = 0; i < cTemp->nargs; i++) {
+    DEBUG_PRINT("copying arg: %s\n", c->args[i+2]);
     cTemp->args[i] = malloc(strlen(c->args[i+2]));
     strcpy(cTemp->args[i], c->args[i+2]);
   }
