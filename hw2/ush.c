@@ -1,6 +1,6 @@
 #include <sys/fcntl.h>
 #include <sys/wait.h>
-// #include <errno.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -38,18 +38,22 @@ int contains(char **list, char *string, size_t length) {
   return 0;
 }
 
-void handle_sigtstp() {
-  // TODO:
+void handle_sigtstp(int signo) {
+  DEBUG_PRINT("sending SIGTSTP to %d\n", getpid());
+  kill(getpgrp(), SIGTSTP);
+  signal(SIGTSTP, SIG_IGN);
+  signal(SIGINT, SIG_IGN);
 }
+
 
 // Ignore QUIT signals. Background jobs are immune to signals generated from the keyboard,
 // including hangups (HUP). Other signals have the values that ush inherited from its environment.
 // Catches the TERM signal.
 void setup_signals () {
+  DEBUG_PRINT("setup signals\n");
   signal(SIGTSTP, handle_sigtstp);  // CTRL+Z
   signal(SIGQUIT, SIG_IGN);  // CTRL+/
-  signal(SIGTERM, SIG_IGN);
-  // TODO: signal(SIGTERM, handle_sigint); //CTRL+C
+  signal(SIGINT, SIG_IGN);   //CTRL+C
 }
 
 void save_std_stream (int fd) {

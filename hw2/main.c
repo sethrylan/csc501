@@ -286,7 +286,9 @@ int main() {
   home_directory = getcwd(NULL, PATH_MAX + 1 );
   hostname = malloc(_POSIX_HOST_NAME_MAX);
 
-  setup_signals();
+  signal(SIGTSTP, SIG_IGN);  // CTRL+Z
+  signal(SIGQUIT, SIG_IGN);  // CTRL+/
+  signal(SIGINT, SIG_IGN);   //CTRL+C
 
   // replace with $HOSTNAME if set in environment
   if (getenv("HOSTNAME")) {
