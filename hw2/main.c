@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/resource.h>
 #include "parse.h"
 #include "ush.h"
 
@@ -12,6 +13,48 @@
 char *hostname, *home_directory;
 int pipefd[2][2];
 int pipe_index = 0;
+
+static int evaluate_command(Cmd c);
+
+
+Cmd make_command_from_args(Cmd c) {
+  Cmd cTemp;
+  cTemp = malloc(sizeof(Cmd));
+  cTemp->in = c->in;
+  cTemp->out = c->out;
+  cTemp->nargs = c->nargs - 2;
+  cTemp->args = malloc(c->maxargs * sizeof(char*));
+  int i;
+  for (i = 0; i < cTemp->nargs; i++) {
+    cTemp->args[i] = malloc(strlen(c->args[i+2]));
+    strcpy(cTemp->args[i], c->args[i+2]);
+  }
+  return cTemp;
+}
+
+int _nice(Cmd c) {
+  int priority = 4;
+  if(c->args[1] != NULL) {
+    priority = atoi(c->args[1]);
+    if(priority < -20) {
+      priority = -20;
+    } else if(priority > 20) {
+      priority = 20;
+    }
+  }
+
+  DEBUG_PRINT("priority = %d\n", priority);
+  setpriority(PRIO_PROCESS, 0, priority);
+
+  if(c->args[2] != NULL) {
+    Cmd cNew = make_command_from_args(c);
+    evaluate_command(cNew);
+    free(cNew->args);
+    free(cNew);
+  }
+
+  return EXIT_SUCCESS;
+}
 
 void setup_pipe_input (int index, Cmd c) {
   int is_followed = is_pipe(c->out);
@@ -102,6 +145,11 @@ void close_pipes (int index, Cmd c) {
 static int evaluate_command(Cmd c) {
   pid_t pid;                           // child process pid
   int status;
+
+  // DEBUG_PRINT("nargs = %d\n", c->nargs);
+  if (matches(c->args[0], "nice")) {
+    return _nice(c);
+  }
 
   print_command_info(c);
 

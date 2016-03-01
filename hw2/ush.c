@@ -307,7 +307,7 @@ void print_command_info (Cmd c) {
     if ( c->nargs > 1 ) {
       DEBUG_PRINT("[");
       int i;
-      for ( i = 1; c->args[i] != NULL; i++ ){
+      for ( i = 1; i < c->nargs; i++ ){
         DEBUG_PRINT("%d:%s,", i, c->args[i]);
       }
       DEBUG_PRINT("\b]");
