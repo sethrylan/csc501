@@ -40,7 +40,7 @@ int contains(char **list, char *string, size_t length) {
 
 void handle_sigtstp(int signo) {
   DEBUG_PRINT("sending SIGTSTP to %d\n", getpid());
-  kill(getpgrp(), SIGTSTP);
+  kill(getpgrp(), signo);
   signal(SIGTSTP, SIG_IGN);
   signal(SIGINT, SIG_IGN);
 }
