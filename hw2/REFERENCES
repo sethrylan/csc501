@@ -2,19 +2,8 @@
 Using getenv
 http://www0.cs.ucl.ac.uk/staff/ucacbbl/getenv/
 
-
 Find abolute pathname with getwd()
 https://users.pja.edu.pl/~jms/qnx/help/watcom/clibref/src/getcwd.html
-
-
-Linux System Calls
-http://docs.cs.up.ac.za/programming/asm/derick_tut/syscalls.html
-
-Syscalls Man Pages
-http://man7.org/linux/man-pages/man2/syscalls.2.html
-
-System Call Quick Reference
-http://www.digilife.be/quickreferences/qrc/linux%20system%20call%20quick%20reference.pdf
 
 execvp implementation for finding executables in PATH
 http://lxr.free-electrons.com/source/arch/um/os-Linux/execvp.c
