@@ -1,0 +1,23 @@
+# README file for socket.tar.gz
+# Produced for CSC 501, Fall 2004.
+# vin@csc.ncsu.edu
+
+This directory contains three files:
+
+* Makefile
+* listen.c
+* speak.c
+
+The Makefile creates two executables: listen and speak.  The Makefile
+is set up for Solaris.  To compile in Linux, comment the indicated
+line in Makefile.
+
+The pair of programs are an example of a very simple socket program.
+Execute the listen program first.  It will establish a port and wait
+for another process to connect.  The speak program will connect to the
+port established by listen.  Each line typed into speak will be sent
+to listen, which echoes the text on its screen.
+
+Terminate speak with a ^D.  Listen will hang around waiting for
+another connection, which can come from the same machine or another.
+Terminate listen with ^C.
