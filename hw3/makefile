@@ -16,7 +16,7 @@ speak:	speak.o
 
 listen.o:	listen.c
 
-speak.o:	speak.c 
+speak.o:	speak.c
 
 clean:
 	\rm -f listen speak *.o
