@@ -21,10 +21,6 @@ speak.o:	speak.c
 clean:
 	\rm -f listen speak *.o
 
-squeaky:
-	make clean
-	\rm -f listen.o speak.o
-
 tar:
 	cd ..; tar czvf socket.tar.gz socket/Makefile socket/listen.c socket/speak.c socket/README; cd socket; mv ../socket.tar.gz .
 

@@ -27,8 +27,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   char buf[512];
   char host[64];
@@ -70,7 +71,7 @@ main (int argc, char *argv[])
   sin.sin_family = AF_INET;
   sin.sin_port = htons(port);
   memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length);
-  
+
   /* bind socket s to address sin */
   rc = bind(s, (struct sockaddr *)&sin, sizeof(sin));
   if ( rc < 0 ) {
@@ -95,7 +96,7 @@ main (int argc, char *argv[])
     ihp = gethostbyaddr((char *)&incoming.sin_addr, 
 			sizeof(struct in_addr), AF_INET);
     printf(">> Connected to %s\n", ihp->h_name);
- 
+
     /* read and print strings sent over the connection */
     while ( 1 ) {
       len = recv(p, buf, 32, 0);
