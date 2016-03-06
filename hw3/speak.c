@@ -26,10 +26,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <unistd.h>
 
 #define LEN	64
- 
-main (int argc, char *argv[])
+
+int main (int argc, char *argv[])
 {
   int s, rc, len, port;
   char host[LEN], str[LEN];
@@ -41,9 +42,9 @@ main (int argc, char *argv[])
     fprintf(stderr, "Usage: %s <host-name> <port-number>\n", argv[0]);
     exit(1);
   }
-  
+
   /* fill in hostent struct */
-  hp = gethostbyname(argv[1]); 
+  hp = gethostbyname(argv[1]);
   if ( hp == NULL ) {
     fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
     exit(1);
@@ -63,7 +64,7 @@ main (int argc, char *argv[])
   sin.sin_family = AF_INET;
   sin.sin_port = htons(port);
   memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length);
-  
+
   /* connect to socket at above addr and port */
   rc = connect(s, (struct sockaddr *)&sin, sizeof(sin));
   if ( rc < 0 ) {
@@ -91,5 +92,3 @@ main (int argc, char *argv[])
   close(s);
   exit(0);
 }
-
-/*........................ end of speak.c ...................................*/

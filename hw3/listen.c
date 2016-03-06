@@ -93,22 +93,22 @@ int main (int argc, char *argv[])
       perror("bind:");
       exit(rc);
     }
-    ihp = gethostbyaddr((char *)&incoming.sin_addr, 
-			sizeof(struct in_addr), AF_INET);
+    ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
     printf(">> Connected to %s\n", ihp->h_name);
 
     /* read and print strings sent over the connection */
     while ( 1 ) {
       len = recv(p, buf, 32, 0);
       if ( len < 0 ) {
-	perror("recv");
-	exit(1);
+        perror("recv");
+        exit(1);
       }
       buf[len] = '\0';
-      if ( !strcmp("close", buf) )
-	break;
-      else
-	printf("%s\n", buf);
+      if ( !strcmp("close", buf) ) {
+        break;
+      } else {
+        printf("%s\n", buf);
+      }
     }
     close(p);
     printf(">> Connection closed\n");
