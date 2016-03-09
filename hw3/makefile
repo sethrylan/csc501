@@ -8,7 +8,7 @@ SHELL			= /bin/bash
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
 
-all: master
+all: master player
 
 debug: CFLAGS += -DDEBUG
 debug: all
@@ -19,16 +19,17 @@ listen:	listen.o
 speak:	speak.o
 	$(CC) $(CFLAGS) -o $@ speak.o $(LIB)
 
-master:	master.o
-	$(CC) $(CFLAGS) -o $@ master.o $(LIB)
+master:	master.o utils.o
+	$(CC) -o $@ $^
 
-player:	player.o
-	$(CC) $(CFLAGS) -o $@ player.o $(LIB)
+player:	player.o utils.o
+	$(CC) -o $@ $^
 
 listen.o:	listen.c
 speak.o:	speak.c
 master.o:	master.c
 player.o:	player.c
+utils.o: utils.c utils.h
 
 clean:
 	\rm -f listen speak master player *.o
