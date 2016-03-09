@@ -32,7 +32,7 @@ player.o:	player.c
 utils.o: utils.c utils.h
 
 clean:
-	\rm -f listen speak master player *.o
+	$(RM) listen speak master player *.o
 
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
