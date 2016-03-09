@@ -29,6 +29,8 @@
 #include <netdb.h>
 #include <unistd.h>
 
+extern int h_errno;
+
 int main (int argc, char *argv[])
 {
   char buf[512];
@@ -48,8 +50,13 @@ int main (int argc, char *argv[])
   gethostname(host, sizeof host);
   hp = gethostbyname(host);
   if ( hp == NULL ) {
-    fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
-    exit(1);
+    if (h_errno == HOST_NOT_FOUND) {
+      fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
+      exit(1);
+    } else {
+      fprintf(stderr, "%s: gethostbyname had an error.\n", argv[0]);
+      exit(1);
+    }
   }
 
   /* open a socket for listening
