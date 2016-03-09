@@ -35,7 +35,8 @@ int main (int argc, char *argv[])
 {
   char buf[512];
   char host[64];
-  int s, p, fp, rc, len, port;
+  socklen_t len;
+  int s, p, rc, port;
   struct hostent *hp, *ihp;
   struct sockaddr_in sin, incoming;
 
@@ -106,10 +107,10 @@ int main (int argc, char *argv[])
     /* read and print strings sent over the connection */
     while ( 1 ) {
       len = recv(p, buf, 32, 0);
-      if ( len < 0 ) {
-        perror("recv");
-        exit(1);
-      }
+      // if ( len < 0 ) {
+      //   perror("recv");
+      //   exit(1);
+      // }
       buf[len] = '\0';
       if ( !strcmp("close", buf) ) {
         break;

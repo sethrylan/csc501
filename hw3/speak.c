@@ -32,7 +32,8 @@
 
 int main (int argc, char *argv[])
 {
-  int s, rc, len, port;
+  int s, rc, port;
+  unsigned long len;
   char host[LEN], str[LEN];
   struct hostent *hp;
   struct sockaddr_in sin;
