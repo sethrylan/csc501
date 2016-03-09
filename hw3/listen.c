@@ -55,7 +55,7 @@ int main (int argc, char *argv[])
       fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
       exit(1);
     } else {
-      fprintf(stderr, "%s: gethostbyname had an error.\n", argv[0]);
+      herror(argv[0]);
       exit(1);
     }
   }

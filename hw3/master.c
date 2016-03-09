@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include "utils.h"
 
 extern int h_errno;
 
@@ -14,16 +15,24 @@ int main (int argc, char *argv[]) {
   char buf[512];
   char host[64];
   socklen_t len;
-  int s, p, rc, port;
+  int s, p, rc, port, num_players, hops;
   struct hostent *hp, *ihp;
   struct sockaddr_in sin, incoming;
 
   /* read port number from command line */
   if (argc < 2) {
-    fprintf(stderr, "Usage: %s <number-of-players> <hops>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
     exit(1);
   }
   port = atoi(argv[1]);
+  num_players = atoi(argv[2]);
+  hops = atoi(argv[3]);
+
+  if (num_players < 1 || hops < 0) {
+    fprintf(stderr, "Usage: %s <number-of-players> <hops>\n", argv[0]);
+    fprintf(stderr, "‹number-of-players› must be > 0 and ‹hops› must be ≥ 0\n");
+    exit(1);
+  }
 
   /* fill in hostent struct for self */
   gethostname(host, sizeof host);
@@ -33,7 +42,7 @@ int main (int argc, char *argv[]) {
       fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
       exit(1);
     } else {
-      fprintf(stderr, "%s: gethostbyname had an error.\n", argv[0]);
+      herror(argv[0]);
       exit(1);
     }
   }
@@ -82,7 +91,7 @@ int main (int argc, char *argv[]) {
     printf(">> Connected to %s\n", ihp->h_name);
 
     /* read and print strings sent over the connection */
-    while ( 1 ) {
+    while (1) {
       len = recv(p, buf, 32, 0);
       // if ( len < 0 ) {
       //   perror("recv");

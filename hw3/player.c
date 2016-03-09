@@ -9,8 +9,7 @@
 #include <unistd.h>
 #include "utils.h"
 
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) {
   int s, rc, port;
   unsigned long len;
   char host[HOSTNAME_LENGTH], str[HOSTNAME_LENGTH];
@@ -18,14 +17,14 @@ int main (int argc, char *argv[])
   struct sockaddr_in sin;
 
   /* read host and port number from command line */
-  if ( argc != 3 ) {
-    fprintf(stderr, "Usage: %s <host-name> <port-number>\n", argv[0]);
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s <master-machine-name> <port-number>\n", argv[0]);
     exit(1);
   }
 
   /* fill in hostent struct */
   hp = gethostbyname(argv[1]);
-  if ( hp == NULL ) {
+  if (hp == NULL) {
     fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
     exit(1);
   }
@@ -35,7 +34,7 @@ int main (int argc, char *argv[])
 
   /* use address family INET and STREAMing sockets (TCP) */
   s = socket(AF_INET, SOCK_STREAM, 0);
-  if ( s < 0 ) {
+  if (s < 0) {
     perror("socket:");
     exit(s);
   }
@@ -47,17 +46,18 @@ int main (int argc, char *argv[])
 
   /* connect to socket at above addr and port */
   rc = connect(s, (struct sockaddr *)&sin, sizeof(sin));
-  if ( rc < 0 ) {
+  if (rc < 0) {
     perror("connect:");
     exit(rc);
   }
 
   /* read a string from the terminal and send on socket */
-  while ( fgets(str, HOSTNAME_LENGTH, stdin) != NULL ) {
-    if (str[strlen(str)-1] == '\n')
+  while (fgets(str, HOSTNAME_LENGTH, stdin) != NULL) {
+    if (str[strlen(str)-1] == '\n') {
       str[strlen(str)-1] = '\0';
+    }
     len = send(s, str, strlen(str), 0);
-    if ( len != strlen(str) ) {
+    if (len != strlen(str)) {
       perror("send");
       exit(1);
     }
