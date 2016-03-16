@@ -8,3 +8,4 @@
 
 void die (const char *msg);
 int matches (const char *string, const char *compare);
+unsigned int randr(unsigned int min, unsigned int max);

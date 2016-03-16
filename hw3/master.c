@@ -95,6 +95,8 @@ int main (int argc, char *argv[]) {
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
+  int players_connected = 0;
+
   /* accept connections */
   while (1) {
     len = sizeof(sin);
@@ -107,6 +109,14 @@ int main (int argc, char *argv[]) {
 
     // REQUIRED output
     printf("player %d is on %s\n", 1, ihp->h_name);
+    players_connected++;
+
+    if (players_connected >= num_players) {
+      int first_player = randr(0, num_players-1);
+
+      // REQUIRED OUTPUT
+      printf("All players present, sending potato to player %d\n", first_player);
+    }
 
     /* read and print strings sent over the connection */
     while (1) {

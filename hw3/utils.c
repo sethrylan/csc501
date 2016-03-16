@@ -7,7 +7,7 @@
 #include <stdio.h>
 // #include <unistd.h>
 #include <string.h>
-// #include <limits.h>
+#include <time.h>
 
 
 
@@ -28,4 +28,10 @@ int contains (char **list, char *string, size_t length) {
 
 int matches (const char *string, const char *compare) {
   return !strcmp(string, compare);
+}
+
+unsigned int randr(unsigned int min, unsigned int max) {
+  srand(time(NULL));
+  double scaled = (double)rand()/RAND_MAX;
+  return (max - min +1)*scaled + min;
 }
