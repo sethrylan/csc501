@@ -20,10 +20,10 @@ speak:	speak.o
 	$(CC) $(CFLAGS) -o $@ speak.o $(LIB)
 
 master:	master.o utils.o
-	$(CC) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 player:	player.o utils.o
-	$(CC) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 listen.o:	listen.c
 speak.o:	speak.c

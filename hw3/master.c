@@ -7,17 +7,28 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
 #include "utils.h"
 
 extern int h_errno;
+
+int s;        // socket file descriptor
+
+// SIGINT (^c) handler
+void intHandler() {
+  close(s);
+  exit(0);
+}
 
 int main (int argc, char *argv[]) {
   char buf[512];
   char host[64];
   socklen_t len;
-  int s, p, rc, port, num_players, hops;
+  int p, rc, port, num_players, hops;
   struct hostent *hp, *ihp;
   struct sockaddr_in sin, incoming;
+
+  signal(SIGINT, intHandler);
 
   /* read port number from command line */
   if (argc < 2) {
@@ -79,6 +90,11 @@ int main (int argc, char *argv[]) {
     exit(rc);
   }
 
+  // REQUIRED OUTPUT
+  printf("Potato Master on %s\n", host);
+  printf("Players = %d\n", num_players);
+  printf("Hops = %d\n", hops);
+
   /* accept connections */
   while (1) {
     len = sizeof(sin);
@@ -88,11 +104,14 @@ int main (int argc, char *argv[]) {
       exit(rc);
     }
     ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
-    printf(">> Connected to %s\n", ihp->h_name);
+
+    // REQUIRED output
+    printf("player %d is on %s\n", 1, ihp->h_name);
 
     /* read and print strings sent over the connection */
     while (1) {
       len = recv(p, buf, 32, 0);
+      // DEBUG_PRINT("len = %d\n", len);
       // if ( len < 0 ) {
       //   perror("recv");
       //   exit(1);
@@ -100,15 +119,14 @@ int main (int argc, char *argv[]) {
       buf[len] = '\0';
       if ( !strcmp("close", buf) ) {
         break;
-      } else {
+      } else if (len > 0) {
         printf("%s\n", buf);
       }
     }
     close(p);
     printf(">> Connection closed\n");
   }
-  close(s);
+
+  // never reaches here
   exit(0);
 }
-
-/*........................ end of listen.c ..................................*/

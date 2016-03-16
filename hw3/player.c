@@ -7,14 +7,35 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
 #include "utils.h"
 
+int s;     // socket file descriptor
+
+// Send "close" command to master
+void close_player() {
+  int len = send(s, "close", 5, 0);
+  if (len != 5) {
+    perror("send");
+    exit(1);
+  }
+  close(s);
+  exit(0);
+}
+
+// SIGINT (^c) handler
+void intHandler() {
+  close_player();
+}
+
 int main (int argc, char *argv[]) {
-  int s, rc, port;
+  int rc, port;
   unsigned long len;
   char host[HOSTNAME_LENGTH], str[HOSTNAME_LENGTH];
   struct hostent *hp;
   struct sockaddr_in sin;
+
+  signal(SIGINT, intHandler);
 
   /* read host and port number from command line */
   if (argc != 3) {
@@ -63,12 +84,6 @@ int main (int argc, char *argv[]) {
     }
   }
 
-  /* when finished sending, tell host you are closing and close */
-  len = send(s, "close", 5, 0);
-  if (len != 5) {
-    perror("send");
-    exit(1);
-  }
-  close(s);
-  exit(0);
+  close_player();
+
 }
