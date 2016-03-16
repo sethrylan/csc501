@@ -1,15 +1,8 @@
 #include "utils.h"
-
-// #include <sys/fcntl.h>
-// #include <sys/wait.h>
-// #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
-// #include <unistd.h>
 #include <string.h>
 #include <time.h>
-
-
 
 void die (const char *msg) {
   perror(msg);

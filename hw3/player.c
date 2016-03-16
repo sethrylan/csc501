@@ -72,6 +72,10 @@ int main (int argc, char *argv[]) {
     exit(rc);
   }
 
+  // REQUIRED OUTPUT
+  // TODO: get real number
+  printf("Connected as player %d\n", 1);
+
   /* read a string from the terminal and send on socket */
   while (fgets(str, HOSTNAME_LENGTH, stdin) != NULL) {
     if (str[strlen(str)-1] == '\n') {
