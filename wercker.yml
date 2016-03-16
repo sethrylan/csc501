@@ -4,7 +4,7 @@
 # http://devcenter.wercker.com/docs/containers/index.html
 # box: nachinius/c-dev
 # box: gcc
-box: centos@7.1.1503
+box: centos:7.1.1503
 # You can also use services such as databases. Read more on our dev center:
 # http://devcenter.wercker.com/docs/services/index.html
 # services:
