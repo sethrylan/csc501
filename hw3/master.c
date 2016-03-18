@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -13,6 +14,11 @@
 extern int h_errno;
 
 int s;        // socket file descriptor
+int rc;
+int port, num_players, hops;
+struct sockaddr_in address;
+int players_connected;
+
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -20,13 +26,54 @@ void intHandler() {
   exit(0);
 }
 
-int main (int argc, char *argv[]) {
-  char buf[512];
-  char host[64];
+void initialize_master(const int num_players, int port) {
+
+}
+
+void accept_checkins() {
+  char buffer[512];
   socklen_t len;
-  int p, rc, port, num_players, hops;
-  struct hostent *hp, *ihp;
-  struct sockaddr_in sin, incoming;
+  int p;
+  struct hostent *ihp;
+  struct sockaddr_in incoming;
+
+  len = sizeof(address);
+  p = accept(s, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  if ( p < 0 ) {
+    perror("bind:");
+    exit(rc);
+  }
+  ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
+
+  // REQUIRED output
+  printf("player %d is on %s\n", 1, ihp->h_name);
+  players_connected++;
+
+  /* read and print strings sent over the connection */
+  while (1) {
+    bzero(buffer, 512);
+    len = recv(p, buffer, 32, 0);       // TODO: read(p,buff,511);  // block until input is read from socket
+    // DEBUG_PRINT("len = %d\n", len);
+    // if ( len < 0 ) {
+    //   perror("recv");
+    //   exit(1);
+    // }
+    buffer[len] = '\0';
+    if ( !strcmp("close", buffer) ) {
+      break;
+    } else if (len > 0) {
+      printf("%s\n", buffer);
+    }
+  }
+  close(p);
+  printf(">> Connection closed\n");
+}
+
+int main (int argc, char *argv[]) {
+  char host[64];
+  struct hostent *hp;
+
+  players_connected = 0;
 
   signal(SIGINT, intHandler);
 
@@ -73,18 +120,23 @@ int main (int argc, char *argv[]) {
   }
 
   /* set up the address and port */
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons(port);
-  memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length);
+  bzero((char *) &address, sizeof(address));   // set all values in address buffer to zero
+  address.sin_family = AF_INET;                // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
+  address.sin_port = htons(port);              // convert port to network byte order
+  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
+  memcpy(&address.sin_addr, hp->h_addr_list[0], hp->h_length);
 
-  /* bind socket s to address sin */
-  rc = bind(s, (struct sockaddr *)&sin, sizeof(sin));
+  // adding INADDR_ANY prompts for network listen
+  // address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+
+  // bind socket s to address sin
+  rc = bind(s, (struct sockaddr *)&address, sizeof(address));
   if ( rc < 0 ) {
     perror("bind:");
     exit(rc);
   }
 
-  rc = listen(s, 5);
+  rc = listen(s, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
   if ( rc < 0 ) {
     perror("listen:");
     exit(rc);
@@ -95,48 +147,15 @@ int main (int argc, char *argv[]) {
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
-  int players_connected = 0;
-
   /* accept connections */
-  while (1) {
-    len = sizeof(sin);
-    p = accept(s, (struct sockaddr *)&incoming, &len);
-    if ( p < 0 ) {
-      perror("bind:");
-      exit(rc);
-    }
-    ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
-
-    // REQUIRED output
-    printf("player %d is on %s\n", 1, ihp->h_name);
-    players_connected++;
-
-    if (players_connected >= num_players) {
-      int first_player = randr(0, num_players-1);
-
-      // REQUIRED OUTPUT
-      printf("All players present, sending potato to player %d\n", first_player);
-    }
-
-    /* read and print strings sent over the connection */
-    while (1) {
-      len = recv(p, buf, 32, 0);
-      // DEBUG_PRINT("len = %d\n", len);
-      // if ( len < 0 ) {
-      //   perror("recv");
-      //   exit(1);
-      // }
-      buf[len] = '\0';
-      if ( !strcmp("close", buf) ) {
-        break;
-      } else if (len > 0) {
-        printf("%s\n", buf);
-      }
-    }
-    close(p);
-    printf(">> Connection closed\n");
+  while (players_connected < num_players) {
+    accept_checkins();
   }
 
-  // never reaches here
+  int first_player = randr(0, num_players-1);
+
+  // REQUIRED OUTPUT
+  printf("All players present, sending potato to player %d\n", first_player);
+
   exit(0);
 }
