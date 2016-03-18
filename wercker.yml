@@ -23,7 +23,7 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - script:
-        cwd: hw2/
+        cwd: hw3/
         name: make test
         code: |
           yum -y install make gcc

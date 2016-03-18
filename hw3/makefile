@@ -36,3 +36,10 @@ clean:
 
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
+
+test: testusage
+
+testusage: master player
+	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \
+	./player 2>&1 | $(DIFF) - tests/player_usage.output && echo "OK PASS";
+
