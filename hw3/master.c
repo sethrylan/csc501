@@ -52,7 +52,7 @@ void accept_checkins() {
   /* read and print strings sent over the connection */
   while (1) {
     bzero(buffer, 512);
-    len = recv(p, buffer, 32, 0);       // TODO: read(p,buff,511);  // block until input is read from socket
+    len = read(p, buffer, 512);   // block until input is read from socket
     // DEBUG_PRINT("len = %d\n", len);
     // if ( len < 0 ) {
     //   perror("recv");
