@@ -14,10 +14,13 @@
 extern int h_errno;
 extern const char *__progname;
 
+// network state
 int listen_socket;        // socket file descriptor
-int listen_port, num_players, hops;   // arguments from command line
+int listen_port;
 struct sockaddr_in listen_address;
-int players_connected;
+
+// game state
+int num_players, hops, players_connected;   // arguments from command line
 
 
 // SIGINT (^c) handler
@@ -62,13 +65,13 @@ struct hostent* setup_listener(int listen_port) {
 
   /* set up the address and port */
   bzero((char *) &listen_address, sizeof(listen_address));   // set all values in address buffer to zero
-  listen_address.sin_family = AF_INET;                // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
+  listen_address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
   listen_address.sin_port = htons(listen_port);              // convert port to network byte order
   DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
   memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);
 
   // adding INADDR_ANY prompts for network listen
-  // listen_address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  // listen_address.sin_addr.s_addr = INADDR_ANY;;           // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
 
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
@@ -79,7 +82,7 @@ struct hostent* setup_listener(int listen_port) {
   }
 
   // if listen() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = listen(listen_socket, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
+  retval = listen(listen_socket, 5);   // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
   if (retval < 0) {
     perror("listen:");
     exit(retval);
