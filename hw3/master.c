@@ -14,7 +14,7 @@
 extern int h_errno;
 
 int listen_socket;        // socket file descriptor
-int port, num_players, hops;   // arguments from command line
+int listen_port, num_players, hops;   // arguments from command line
 struct sockaddr_in listen_address;
 int players_connected;
 
@@ -77,7 +77,7 @@ int main (int argc, char *argv[]) {
     fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
     exit(1);
   }
-  port = atoi(argv[1]);
+  listen_port = atoi(argv[1]);
   num_players = atoi(argv[2]);
   hops = atoi(argv[3]);
 
@@ -117,7 +117,7 @@ int main (int argc, char *argv[]) {
   /* set up the address and port */
   bzero((char *) &listen_address, sizeof(listen_address));   // set all values in address buffer to zero
   listen_address.sin_family = AF_INET;                // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
-  listen_address.sin_port = htons(port);              // convert port to network byte order
+  listen_address.sin_port = htons(listen_port);              // convert port to network byte order
   DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
   memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);
 
