@@ -36,17 +36,22 @@ unsigned int randr(unsigned int min, unsigned int max) {
   return (max - min +1)*scaled + min;
 }
 
-char *gethostcanonicalname() {
+char *gethostcanonicalname(const char *hostname) {
   struct addrinfo hints, *servinfo;
   char host[HOSTNAME_LENGTH];
   int retval;
+
+  if (hostname == NULL) {
+    gethostname(host, sizeof host);
+  } else {
+    strcpy(host, hostname);
+  }
 
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_INET;          // use AF_INET6 to force IPv6
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_CANONNAME;
 
-  gethostname(host, sizeof host);
   if ((retval = getaddrinfo(host, 0, &hints, &servinfo)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));
     exit(retval);
@@ -70,7 +75,7 @@ char *gethostcanonicalname() {
  * Initializes listen_address variable
  * Returns file descriptor for listen socket, or -1 if not able to listen
  */
-int setup_listener(int listen_port) {
+int setup_listener(const int listen_port) {
   int retval;
   struct sockaddr_in address;
 

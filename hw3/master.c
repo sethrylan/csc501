@@ -92,7 +92,7 @@ int main (int argc, char *argv[]) {
   listen_socket = setup_listener(listen_port);
 
   // REQUIRED OUTPUT
-  printf("Potato Master on %s\n", gethostcanonicalname());   // This is the “official” name of the host.
+  printf("Potato Master on %s\n", gethostcanonicalname(NULL));   // This is the “official” name of the host.
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
