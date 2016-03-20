@@ -58,8 +58,9 @@ struct hostent *gethostent() {
  * Returns file descriptor for listen socket, or -1 if not able to listen
  *
  */
-int setup_listener(int listen_port) {
+int setup_listener(int listen_port, struct sockaddr_in *listen_address) {
   int retval;
+  struct sockaddr_in address = *(listen_address);
 
   /* use address family INET and STREAMing sockets (TCP) */
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,16 +70,16 @@ int setup_listener(int listen_port) {
   }
 
   /* set up the address and port */
-  bzero((char *) &listen_address, sizeof(listen_address));   // set all values in address buffer to zero
-  listen_address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html)
-  listen_address.sin_port = htons(listen_port);              // convert port to network byte order
-  listen_address.sin_addr.s_addr = htonl(INADDR_ANY);        // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
-  memset(&(listen_address.sin_zero), '\0', 8);
+  bzero((char *) &address, sizeof(address));   // set all values in address buffer to zero
+  address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html)
+  address.sin_port = htons(listen_port);              // convert port to network byte order
+  address.sin_addr.s_addr = htonl(INADDR_ANY);        // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  memset(&(address.sin_zero), '\0', 8);
   // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
 
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = bind(socket_fd, (struct sockaddr *)&listen_address, sizeof(listen_address));
+  retval = bind(socket_fd, (struct sockaddr *)&address, sizeof(address));
   if (retval < 0) {
     perror("bind:");
     exit(retval);
@@ -159,7 +160,7 @@ int main (int argc, char *argv[]) {
   }
 
   struct hostent *host_listener = gethostent();
-  listen_socket = setup_listener(listen_port);
+  listen_socket = setup_listener(listen_port, &listen_address);
 
   // REQUIRED OUTPUT
   printf("Potato Master on %s\n", host_listener->h_name);
