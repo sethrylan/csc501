@@ -8,6 +8,18 @@
 
 #define HOSTNAME_LENGTH 64
 
+typedef struct {
+  int player_id;
+  char address[INET_ADDRSTRLEN];
+  int listen_port;
+} player;
+
+typedef struct {
+  int hops;
+  int *identities;
+} potato;
+
+
 void die (const char *msg);
 int matches (const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);

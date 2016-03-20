@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <strings.h>
+#include <arpa/inet.h>
 
 extern int h_errno;
 extern const char *__progname;
@@ -42,7 +43,8 @@ struct hostent *gethostent() {
   /* fill in hostent struct for self */
   gethostname(host, sizeof host);
   hp = gethostbyname(host);
-  // DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
+
+  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", inet_ntop(AF_INET, &(hp->h_addr_list[0]), NULL, INET_ADDRSTRLEN));
   if (hp == NULL) {
     if (h_errno == HOST_NOT_FOUND) {
       fprintf(stderr, "%s: host not found (%s)\n", __progname, host);
@@ -78,7 +80,7 @@ int setup_listener(int listen_port) {
   bzero((char *) &address, sizeof(address));   // set all values in address buffer to zero
   address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html)
   address.sin_port = htons(listen_port);              // convert port to network byte order
-  address.sin_addr.s_addr = htonl(INADDR_ANY);        // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  address.sin_addr.s_addr = htonl(INADDR_ANY);        // All IP addresses of the host. For server code, this will always be the IP address of the machine on which the server is running.
   memset(&(address.sin_zero), '\0', 8);
   // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
 
