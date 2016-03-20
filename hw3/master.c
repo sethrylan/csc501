@@ -29,23 +29,14 @@ void intHandler() {
   exit(0);
 }
 
-/* Open a socket for listening
- *  1. create socket
- *  2. bind it to an address/port
- *  3. listen
- *
- * Initializes listen_socket, and listen_address variables
- * Returns port number for listen socket, or -1 if not able to listen
- *
- */
-struct hostent* setup_listener(int listen_port) {
-  int retval;
+struct hostent *gethostent() {
   struct hostent *hp;
   char host[64];
 
   /* fill in hostent struct for self */
   gethostname(host, sizeof host);
   hp = gethostbyname(host);
+  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
   if (hp == NULL) {
     if (h_errno == HOST_NOT_FOUND) {
       fprintf(stderr, "%s: host not found (%s)\n", __progname, host);
@@ -55,6 +46,20 @@ struct hostent* setup_listener(int listen_port) {
       exit(1);
     }
   }
+  return hp;
+}
+
+/* Open a socket for listening
+ *  1. create socket
+ *  2. bind it to an address/port
+ *  3. listen
+ *
+ * Initializes listen_socket, and listen_address variables
+ * Returns port number for listen socket, or -1 if not able to listen
+ *
+ */
+int setup_listener(int listen_port) {
+  int retval;
 
   /* use address family INET and STREAMing sockets (TCP) */
   listen_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -65,13 +70,11 @@ struct hostent* setup_listener(int listen_port) {
 
   /* set up the address and port */
   bzero((char *) &listen_address, sizeof(listen_address));   // set all values in address buffer to zero
-  listen_address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
+  listen_address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html)
   listen_address.sin_port = htons(listen_port);              // convert port to network byte order
-  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
-  memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);
-
-  // adding INADDR_ANY prompts for network listen
-  // listen_address.sin_addr.s_addr = INADDR_ANY;;           // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  listen_address.sin_addr.s_addr = htonl(INADDR_ANY);        // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  memset(&(listen_address.sin_zero), '\0', 8);
+  // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
 
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
@@ -88,7 +91,7 @@ struct hostent* setup_listener(int listen_port) {
     exit(retval);
   }
 
-  return hp;
+  return listen_socket;
 }
 
 /*
@@ -155,7 +158,8 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  struct hostent* host_listener = setup_listener(listen_port);
+  struct hostent *host_listener = gethostent();
+  listen_socket = setup_listener(listen_port);
 
   // REQUIRED OUTPUT
   printf("Potato Master on %s\n", host_listener->h_name);
