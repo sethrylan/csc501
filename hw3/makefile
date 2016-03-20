@@ -4,11 +4,17 @@ SRC				= master.c player.c
 rm				= rm -f
 DIFF			= diff -w
 SHELL			= /bin/bash
+UNAME     = $(shell uname -s)
 
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
 
 all: master player
+
+# sign executable on OSX to exempt from "accept incoming network connections" firewall prompt
+ifeq ($(UNAME), Darwin)
+all: signcode
+endif
 
 debug: CFLAGS += -DDEBUG
 debug: all
@@ -30,6 +36,9 @@ speak.o:	speak.c
 master.o:	master.c
 player.o:	player.c
 utils.o: utils.c utils.h
+
+signcode:
+	codesign --force -s "gcc-signature" ./master && codesign --force -s "gcc-signature" ./player
 
 clean:
 	$(RM) listen speak master player *.o
