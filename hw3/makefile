@@ -5,6 +5,7 @@ rm				= rm -f
 DIFF			= diff -w
 SHELL			= /bin/bash
 UNAME     = $(shell uname -s)
+CERT_NAME = gcc-signature
 
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
@@ -12,6 +13,7 @@ UNAME     = $(shell uname -s)
 all: master player
 
 # sign executable on OSX to exempt from "accept incoming network connections" firewall prompt
+# this compilation target requires a code-signing certifacte named $(CERT_NAME)
 ifeq ($(UNAME), Darwin)
 all: signcode
 endif
@@ -38,7 +40,8 @@ player.o:	player.c
 utils.o: utils.c utils.h
 
 signcode:
-	codesign --force -s "gcc-signature" ./master && codesign --force -s "gcc-signature" ./player
+	codesign --force -s $(CERT_NAME) ./master
+	codesign --force -s $(CERT_NAME) ./player
 
 clean:
 	$(RM) listen speak master player *.o
