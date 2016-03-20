@@ -12,11 +12,13 @@
 #include "utils.h"
 
 extern int h_errno;
+extern const char *__progname;
 
 int listen_socket;        // socket file descriptor
 int listen_port, num_players, hops;   // arguments from command line
 struct sockaddr_in listen_address;
 int players_connected;
+
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -24,88 +26,32 @@ void intHandler() {
   exit(0);
 }
 
-void accept_checkins() {
-  char buffer[512];
-  socklen_t len;
-  int p;
-  struct hostent *ihp;
-  struct sockaddr_in incoming;
-
-  len = sizeof(listen_address);
-  p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
-  if ( p < 0 ) {
-    perror("bind:");
-    exit(p);
-  }
-  ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
-
-  // REQUIRED output
-  printf("player %d is on %s\n", 1, ihp->h_name);
-  players_connected++;
-
-  /* read and print strings sent over the connection */
-  while (1) {
-    bzero(buffer, 512);
-    len = read(p, buffer, 512);   // block until input is read from socket
-    // DEBUG_PRINT("len = %d\n", len);
-    // if ( len < 0 ) {
-    //   perror("recv");
-    //   exit(1);
-    // }
-    buffer[len] = '\0';
-    if ( !strcmp("close", buffer) ) {
-      break;
-    } else if (len > 0) {
-      printf("%s\n", buffer);
-    }
-  }
-  close(p);
-  printf(">> Connection closed\n");
-}
-
-int main (int argc, char *argv[]) {
+/* Open a socket for listening
+ *  1. create socket
+ *  2. bind it to an address/port
+ *  3. listen
+ *
+ * Initializes listen_socket, and listen_address variables
+ * Returns port number for listen socket, or -1 if not able to listen
+ *
+ */
+struct hostent* setup_listener(int listen_port) {
   int retval;
-  char host[64];
   struct hostent *hp;
-
-  signal(SIGINT, intHandler);
-
-  players_connected = 0;
-
-  /* read port number from command line */
-  if (argc < 4) {
-    fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
-    exit(1);
-  }
-  listen_port = atoi(argv[1]);
-  num_players = atoi(argv[2]);
-  hops = atoi(argv[3]);
-
-  if (num_players < 1 || hops < 0) {
-    fprintf(stderr, "Usage: %s <number-of-players> <hops>\n", argv[0]);
-    fprintf(stderr, "‹number-of-players› must be > 0 and ‹hops› must be ≥ 0\n");
-    exit(1);
-  }
+  char host[64];
 
   /* fill in hostent struct for self */
   gethostname(host, sizeof host);
   hp = gethostbyname(host);
   if (hp == NULL) {
     if (h_errno == HOST_NOT_FOUND) {
-      fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
+      fprintf(stderr, "%s: host not found (%s)\n", __progname, host);
       exit(1);
     } else {
-      herror(argv[0]);
+      perror(__progname);
       exit(1);
     }
   }
-
-  /* open a socket for listening
-   *  1. create socket
-   *  2. bind it to an address/port
-   *  3. listen
-   *  4. accept a connection
-   */
 
   /* use address family INET and STREAMing sockets (TCP) */
   listen_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -139,8 +85,77 @@ int main (int argc, char *argv[]) {
     exit(retval);
   }
 
+  return hp;
+}
+
+/*
+ * Blocks until num_player connections are created and closed.
+ * Expects listen_address and listen_socket to be initialized.
+ * Initializes the player state for master.
+ */
+void accept_checkins() {
+  char buffer[512];
+  socklen_t len;
+  int p;
+  struct hostent *ihp;
+  struct sockaddr_in incoming;
+
+  len = sizeof(listen_address);
+  p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  if ( p < 0 ) {
+    perror("bind:");
+    exit(p);
+  }
+  ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
+
+  // REQUIRED output
+  printf("player %d is on %s\n", players_connected, ihp->h_name);
+  players_connected++;
+
+  /* read and print strings sent over the connection */
+  while (1) {
+    bzero(buffer, 512);
+    len = read(p, buffer, 512);   // block until input is read from socket
+    // DEBUG_PRINT("len = %d\n", len);
+    // if ( len < 0 ) {
+    //   perror("recv");
+    //   exit(1);
+    // }
+    buffer[len] = '\0';
+    if ( !strcmp("close", buffer) ) {
+      break;
+    } else if (len > 0) {
+      printf("%s\n", buffer);
+    }
+  }
+  close(p);
+  printf(">> Connection closed\n");
+}
+
+int main (int argc, char *argv[]) {
+  signal(SIGINT, intHandler);
+
+  players_connected = 0;
+
+  /* read port number from command line */
+  if (argc < 4) {
+    fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
+    exit(1);
+  }
+  listen_port = atoi(argv[1]);
+  num_players = atoi(argv[2]);
+  hops = atoi(argv[3]);
+
+  if (num_players < 1 || hops < 0) {
+    fprintf(stderr, "Usage: %s <number-of-players> <hops>\n", argv[0]);
+    fprintf(stderr, "‹number-of-players› must be > 0 and ‹hops› must be ≥ 0\n");
+    exit(1);
+  }
+
+  struct hostent* host_listener = setup_listener(listen_port);
+
   // REQUIRED OUTPUT
-  printf("Potato Master on %s\n", host);
+  printf("Potato Master on %s\n", host_listener->h_name);
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
