@@ -16,7 +16,7 @@ extern int h_errno;
 int listen_socket;        // socket file descriptor
 int rc;
 int port, num_players, hops;
-struct sockaddr_in address;
+struct sockaddr_in listen_address;
 int players_connected;
 
 // SIGINT (^c) handler
@@ -32,7 +32,7 @@ void accept_checkins() {
   struct hostent *ihp;
   struct sockaddr_in incoming;
 
-  len = sizeof(address);
+  len = sizeof(listen_address);
   p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( p < 0 ) {
     perror("bind:");
@@ -115,17 +115,17 @@ int main (int argc, char *argv[]) {
   }
 
   /* set up the address and port */
-  bzero((char *) &address, sizeof(address));   // set all values in address buffer to zero
-  address.sin_family = AF_INET;                // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
-  address.sin_port = htons(port);              // convert port to network byte order
+  bzero((char *) &listen_address, sizeof(listen_address));   // set all values in address buffer to zero
+  listen_address.sin_family = AF_INET;                // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html_
+  listen_address.sin_port = htons(port);              // convert port to network byte order
   DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
-  memcpy(&address.sin_addr, hp->h_addr_list[0], hp->h_length);
+  memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);
 
   // adding INADDR_ANY prompts for network listen
-  // address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
+  // listen_address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
 
   // bind socket s to address sin
-  rc = bind(listen_socket, (struct sockaddr *)&address, sizeof(address));
+  rc = bind(listen_socket, (struct sockaddr *)&listen_address, sizeof(listen_address));
   if ( rc < 0 ) {
     perror("bind:");
     exit(rc);
