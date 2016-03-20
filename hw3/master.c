@@ -14,8 +14,7 @@
 extern int h_errno;
 
 int listen_socket;        // socket file descriptor
-int rc;
-int port, num_players, hops;
+int port, num_players, hops;   // arguments from command line
 struct sockaddr_in listen_address;
 int players_connected;
 
@@ -36,7 +35,7 @@ void accept_checkins() {
   p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( p < 0 ) {
     perror("bind:");
-    exit(rc);
+    exit(p);
   }
   ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
 
@@ -65,6 +64,7 @@ void accept_checkins() {
 }
 
 int main (int argc, char *argv[]) {
+  int retval;
   char host[64];
   struct hostent *hp;
 
@@ -125,16 +125,18 @@ int main (int argc, char *argv[]) {
   // listen_address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
 
   // bind socket s to address sin
-  rc = bind(listen_socket, (struct sockaddr *)&listen_address, sizeof(listen_address));
-  if ( rc < 0 ) {
+  // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
+  retval = bind(listen_socket, (struct sockaddr *)&listen_address, sizeof(listen_address));
+  if (retval < 0) {
     perror("bind:");
-    exit(rc);
+    exit(retval);
   }
 
-  rc = listen(listen_socket, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
-  if ( rc < 0 ) {
+  // if listen() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
+  retval = listen(listen_socket, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
+  if (retval < 0) {
     perror("listen:");
-    exit(rc);
+    exit(retval);
   }
 
   // REQUIRED OUTPUT
