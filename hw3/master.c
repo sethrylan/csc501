@@ -12,11 +12,10 @@
 #include "utils.h"
 
 // network state
-int listen_socket;        // socket file descriptor
-struct sockaddr_in listen_address;
+int listen_socket;                  // socket file descriptor
 
 // game state
-int num_players, hops, players_connected;   // arguments from command line
+int num_players, hops, players_connected;
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -36,7 +35,7 @@ void accept_checkins() {
   struct hostent *ihp;
   struct sockaddr_in incoming;
 
-  len = sizeof(listen_address);
+  len = sizeof(incoming);
   p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( p < 0 ) {
     perror("bind:");
@@ -91,7 +90,7 @@ int main (int argc, char *argv[]) {
   }
 
   struct hostent *host_listener = gethostent();
-  listen_socket = setup_listener(listen_port, &listen_address);
+  listen_socket = setup_listener(listen_port);
 
   // REQUIRED OUTPUT
   printf("Potato Master on %s\n", host_listener->h_name);

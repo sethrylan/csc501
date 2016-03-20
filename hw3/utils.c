@@ -63,9 +63,9 @@ struct hostent *gethostent() {
  * Initializes listen_address variable
  * Returns file descriptor for listen socket, or -1 if not able to listen
  */
-int setup_listener(int listen_port, struct sockaddr_in *listen_address) {
+int setup_listener(int listen_port) {
   int retval;
-  struct sockaddr_in address = *(listen_address);
+  struct sockaddr_in address;
 
   /* use address family INET and STREAMing sockets (TCP) */
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);

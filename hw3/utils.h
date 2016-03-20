@@ -12,4 +12,4 @@ void die (const char *msg);
 int matches (const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);
 struct hostent *gethostent();
-int setup_listener(int listen_port, struct sockaddr_in *listen_address);
+int setup_listener(int listen_port);
