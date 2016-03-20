@@ -34,7 +34,8 @@ void send_player_info() {
 }
 
 int main (int argc, char *argv[]) {
-  int rc, master_port;
+  int retval;
+  int master_port;
   unsigned long len;
   char master_host[HOSTNAME_LENGTH];
   char str[1000];
@@ -71,11 +72,12 @@ int main (int argc, char *argv[]) {
   sin.sin_port = htons(master_port);
   memcpy(&sin.sin_addr, master_hp->h_addr_list[0], master_hp->h_length);
 
-  /* connect to socket at above addr and port */
-  rc = connect(s, (struct sockaddr *)&sin, sizeof(sin));
-  if (rc < 0) {
+  // connect to socket at above addr and port
+  // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
+  retval = connect(s, (struct sockaddr *)&sin, sizeof(sin));
+  if (retval < 0) {
     perror("connect:");
-    exit(rc);
+    exit(retval);
   }
 
   // REQUIRED OUTPUT
