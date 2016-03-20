@@ -12,7 +12,7 @@
 #include "utils.h"
 
 // network state
-int listen_socket;                  // socket file descriptor
+int listen_socket;  // socket file descriptor
 
 // game state
 int num_players, hops, players_connected;
