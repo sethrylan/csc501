@@ -54,18 +54,18 @@ struct hostent *gethostent() {
  *  2. bind it to an address/port
  *  3. listen
  *
- * Initializes listen_socket, and listen_address variables
- * Returns port number for listen socket, or -1 if not able to listen
+ * Initializes listen_address variable
+ * Returns file descriptor for listen socket, or -1 if not able to listen
  *
  */
 int setup_listener(int listen_port) {
   int retval;
 
   /* use address family INET and STREAMing sockets (TCP) */
-  listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-  if (listen_socket < 0) {
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_fd < 0) {
     perror("socket:");
-    exit(listen_socket);
+    exit(socket_fd);
   }
 
   /* set up the address and port */
@@ -78,20 +78,20 @@ int setup_listener(int listen_port) {
 
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = bind(listen_socket, (struct sockaddr *)&listen_address, sizeof(listen_address));
+  retval = bind(socket_fd, (struct sockaddr *)&listen_address, sizeof(listen_address));
   if (retval < 0) {
     perror("bind:");
     exit(retval);
   }
 
   // if listen() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = listen(listen_socket, 5);   // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
+  retval = listen(socket_fd, 5);   // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
   if (retval < 0) {
     perror("listen:");
     exit(retval);
   }
 
-  return listen_socket;
+  return socket_fd;
 }
 
 /*
