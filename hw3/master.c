@@ -13,12 +13,10 @@
 
 // network state
 int listen_socket;        // socket file descriptor
-int listen_port;
 struct sockaddr_in listen_address;
 
 // game state
 int num_players, hops, players_connected;   // arguments from command line
-
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -117,6 +115,8 @@ void accept_checkins() {
 }
 
 int main (int argc, char *argv[]) {
+  int listen_port;
+
   signal(SIGINT, intHandler);
 
   players_connected = 0;
