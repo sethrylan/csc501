@@ -1,0 +1,1 @@
+./ush < testcases/test.4 >& results/test.4.out.txt

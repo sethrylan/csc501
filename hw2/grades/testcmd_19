@@ -1,0 +1,1 @@
+./ush < testcases/test.19 >& /dev/null
