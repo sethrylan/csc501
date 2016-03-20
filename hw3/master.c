@@ -11,9 +11,6 @@
 #include <signal.h>
 #include "utils.h"
 
-extern int h_errno;
-extern const char *__progname;
-
 // network state
 int listen_socket;        // socket file descriptor
 int listen_port;
@@ -27,26 +24,6 @@ int num_players, hops, players_connected;   // arguments from command line
 void intHandler() {
   close(listen_socket);
   exit(0);
-}
-
-struct hostent *gethostent() {
-  struct hostent *hp;
-  char host[64];
-
-  /* fill in hostent struct for self */
-  gethostname(host, sizeof host);
-  hp = gethostbyname(host);
-  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", hp->h_addr_list[0]);
-  if (hp == NULL) {
-    if (h_errno == HOST_NOT_FOUND) {
-      fprintf(stderr, "%s: host not found (%s)\n", __progname, host);
-      exit(1);
-    } else {
-      perror(__progname);
-      exit(1);
-    }
-  }
-  return hp;
 }
 
 /* Open a socket for listening
