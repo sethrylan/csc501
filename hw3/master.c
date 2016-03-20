@@ -13,21 +13,16 @@
 
 extern int h_errno;
 
-int s;        // socket file descriptor
+int listen_socket;        // socket file descriptor
 int rc;
 int port, num_players, hops;
 struct sockaddr_in address;
 int players_connected;
 
-
 // SIGINT (^c) handler
 void intHandler() {
-  close(s);
+  close(listen_socket);
   exit(0);
-}
-
-void initialize_master(const int num_players, int port) {
-
 }
 
 void accept_checkins() {
@@ -38,7 +33,7 @@ void accept_checkins() {
   struct sockaddr_in incoming;
 
   len = sizeof(address);
-  p = accept(s, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( p < 0 ) {
     perror("bind:");
     exit(rc);
@@ -73,12 +68,12 @@ int main (int argc, char *argv[]) {
   char host[64];
   struct hostent *hp;
 
-  players_connected = 0;
-
   signal(SIGINT, intHandler);
 
+  players_connected = 0;
+
   /* read port number from command line */
-  if (argc < 2) {
+  if (argc < 4) {
     fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
     exit(1);
   }
@@ -113,10 +108,10 @@ int main (int argc, char *argv[]) {
    */
 
   /* use address family INET and STREAMing sockets (TCP) */
-  s = socket(AF_INET, SOCK_STREAM, 0);
-  if (s < 0) {
+  listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (listen_socket < 0) {
     perror("socket:");
-    exit(s);
+    exit(listen_socket);
   }
 
   /* set up the address and port */
@@ -130,13 +125,13 @@ int main (int argc, char *argv[]) {
   // address.sin_addr.s_addr = INADDR_ANY;;    // IP address of the host. For server code, this will always be the IP address of the machine on which the server is running.
 
   // bind socket s to address sin
-  rc = bind(s, (struct sockaddr *)&address, sizeof(address));
+  rc = bind(listen_socket, (struct sockaddr *)&address, sizeof(address));
   if ( rc < 0 ) {
     perror("bind:");
     exit(rc);
   }
 
-  rc = listen(s, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
+  rc = listen(listen_socket, 5);        // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
   if ( rc < 0 ) {
     perror("listen:");
     exit(rc);

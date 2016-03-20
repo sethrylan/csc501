@@ -28,11 +28,16 @@ void intHandler() {
   close_player();
 }
 
+void send_player_info() {
+
+}
+
 int main (int argc, char *argv[]) {
-  int rc, port;
+  int rc, master_port;
   unsigned long len;
-  char host[HOSTNAME_LENGTH], str[HOSTNAME_LENGTH];
-  struct hostent *hp;
+  char master_host[HOSTNAME_LENGTH];
+  char str[1000];
+  struct hostent *master_hp;
   struct sockaddr_in sin;
 
   signal(SIGINT, intHandler);
@@ -44,12 +49,12 @@ int main (int argc, char *argv[]) {
   }
 
   /* fill in hostent struct */
-  hp = gethostbyname(argv[1]);
-  if (hp == NULL) {
-    fprintf(stderr, "%s: host not found (%s)\n", argv[0], host);
+  master_hp = gethostbyname(argv[1]);
+  if (master_hp == NULL) {
+    fprintf(stderr, "%s: host not found (%s)\n", argv[0], master_host);
     exit(1);
   }
-  port = atoi(argv[2]);
+  master_port = atoi(argv[2]);
 
   /* create and connect to a socket */
 
@@ -62,8 +67,8 @@ int main (int argc, char *argv[]) {
 
   /* set up the address and port */
   sin.sin_family = AF_INET;
-  sin.sin_port = htons(port);
-  memcpy(&sin.sin_addr, hp->h_addr_list[0], hp->h_length);
+  sin.sin_port = htons(master_port);
+  memcpy(&sin.sin_addr, master_hp->h_addr_list[0], master_hp->h_length);
 
   /* connect to socket at above addr and port */
   rc = connect(s, (struct sockaddr *)&sin, sizeof(sin));
