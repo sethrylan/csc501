@@ -1,2 +1,6 @@
 randr implementation
 http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range
+
+
+getaddrinfo example
+http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#getaddrinfoman

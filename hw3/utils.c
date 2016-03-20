@@ -36,25 +36,30 @@ unsigned int randr(unsigned int min, unsigned int max) {
   return (max - min +1)*scaled + min;
 }
 
-struct hostent *gethostent() {
-  struct hostent *hp;
-  char host[64];
+char *gethostcanonicalname() {
+  struct addrinfo hints, *servinfo;
+  char host[HOSTNAME_LENGTH];
+  int retval;
 
-  /* fill in hostent struct for self */
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family = AF_INET;          // use AF_INET6 to force IPv6
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_CANONNAME;
+
   gethostname(host, sizeof host);
-  hp = gethostbyname(host);
-
-  DEBUG_PRINT("hp->h_addr_list[0] = %s\n", inet_ntop(AF_INET, &(hp->h_addr_list[0]), NULL, INET_ADDRSTRLEN));
-  if (hp == NULL) {
-    if (h_errno == HOST_NOT_FOUND) {
-      fprintf(stderr, "%s: host not found (%s)\n", __progname, host);
-      exit(1);
-    } else {
-      perror(__progname);
-      exit(1);
-    }
+  if ((retval = getaddrinfo(host, 0, &hints, &servinfo)) != 0) {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));
+    exit(retval);
   }
-  return hp;
+
+  // struct addrinfo *p;
+  // for(p = servinfo; p != NULL; p = p->ai_next) {
+  //   DEBUG_PRINT("p->ai_canonname = %s\n", p->ai_canonname);
+  // }
+
+  char* canonname = strdup(servinfo->ai_canonname);
+  freeaddrinfo(servinfo);
+  return canonname;
 }
 
 /* Open a socket for listening

@@ -23,5 +23,5 @@ typedef struct {
 void die (const char *msg);
 int matches (const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);
-struct hostent *gethostent();
+char *gethostcanonicalname();
 int setup_listener(int listen_port);
