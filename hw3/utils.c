@@ -27,10 +27,8 @@ void reverse(char s[]) {
   }
 }
 
-
 void itoa(int n, char s[]) {
   int i, sign;
-
   if ((sign = n) < 0)  /* record sign */
     n = -n;          /* make n positive */
   i = 0;
@@ -71,17 +69,19 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
 
   DEBUG_PRINT("gethostaddrinfo( %s )\n", hostname);
 
-  if (hostname == NULL) {
-    gethostname(host, sizeof host);
-  } else {
-    strcpy(host, hostname);
-  }
-
   itoa(port, port_string);
   memset(&hints, 0, sizeof hints);
+
+  if (hostname == NULL) {
+    hints.ai_flags = AI_PASSIVE;   // roughly equivalent to address.sin_addr.s_addr = htonl(INADDR_ANY)
+    // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
+  } else {
+    strcpy(host, hostname);
+    hints.ai_flags = AI_CANONNAME;
+  }
+
   hints.ai_family = AF_INET;          // use AF_INET6 to force IPv6
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_CANONNAME;
 
   if ((retval = getaddrinfo(host, port_string, &hints, &server_info)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));
@@ -112,17 +112,8 @@ char *gethostcanonicalname(const char *hostname, int port) {
  */
 int setup_listener(const int listen_port) {
   int retval;
-  struct addrinfo hints, *address;
-  char port_string[6];
-  itoa(listen_port, port_string);
 
-  /* use address family INET and STREAMing sockets (TCP) */
-  memset(&hints, 0, sizeof hints);
-  hints.ai_family = AF_INET;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE;       // roughly equivalent to address.sin_addr.s_addr = htonl(INADDR_ANY)
-  // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
-  getaddrinfo(NULL, port_string, &hints, &address);
+  struct addrinfo *address = gethostaddrinfo(NULL, listen_port);
 
   int socket_fd = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
   if (socket_fd < 0) {
