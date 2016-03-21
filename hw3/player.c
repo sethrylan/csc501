@@ -52,7 +52,6 @@ void send_player_info() {
 int main (int argc, char *argv[]) {
   int retval;
   struct addrinfo *master_info;
-  int master_port;
 
   signal(SIGINT, intHandler);
 
@@ -62,14 +61,11 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  master_port = atoi(argv[2]);
-  master_info = gethostaddrinfo(argv[1], master_port);
+  master_info = gethostaddrinfo(argv[1], atoi(argv[2]));
   if (master_info == NULL) {
     fprintf(stderr, "%s: host not found (%s)\n", argv[0], argv[1]);
     exit(1);
   }
-
-  /* create and connect to a socket */
 
   /* use address family INET and STREAMing sockets (TCP) */
   s = socket(AF_INET, SOCK_STREAM, 0);
@@ -77,11 +73,6 @@ int main (int argc, char *argv[]) {
     perror("socket:");
     exit(s);
   }
-
-  /* set up the address and port */
-  // sin.sin_family = AF_INET;
-  // sin.sin_port = htons(master_port);
-  // memcpy(&sin.sin_addr, master_info->ai_addr, master_info->ai_addrlen);
 
   // connect to socket at above addr and port
   // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
