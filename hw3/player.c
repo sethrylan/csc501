@@ -8,6 +8,10 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <signal.h>
+
+// for set_socket
+// #include <netinet/tcp.h>
+
 #include "utils.h"
 
 int s;     // socket file descriptor
@@ -48,18 +52,16 @@ void read_and_send(int socket_fd) {
 
 void send_player_info(int socket_fd) {
   char str[100];
-  snprintf(str, sizeof(str), "CONNECT %d", listen_port);
-  // asprintf(*str, "CONNECT %d", listen_port);
-
-  unsigned long len = send(socket_fd, str, strlen(str), 0);
+  unsigned long len;
+  sprintf(str, "CONNECT %d\n", listen_port);
+  str[strlen(str)] = '\0';
+  len = send(socket_fd, str, strlen(str), 0);
   DEBUG_PRINT("len = %lu\n", len);
   DEBUG_PRINT("strlen(str) = %lu\n", strlen(str));
   if (len != strlen(str)) {
     perror("send");
     exit(1);
   }
-
-  close(s);
 }
 
 int main (int argc, char *argv[]) {
@@ -98,12 +100,16 @@ int main (int argc, char *argv[]) {
   listen_port = 0;
   listen_socket = setup_listener(&listen_port);
 
+  // int one = 1;
+  // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+
+
   // REQUIRED OUTPUT
   // TODO: get real number
   printf("Connected as player %d\n", 1);
 
-  send_player_info(s);
-  // read_and_send(s);
+  // send_player_info(s);
+  read_and_send(s);
 
   close_player();
   return 0;    // never reachs here
