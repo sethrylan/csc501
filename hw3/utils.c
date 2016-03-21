@@ -112,35 +112,36 @@ char *gethostcanonicalname(const char *hostname, int port) {
  */
 int setup_listener(const int listen_port) {
   int retval;
-  struct sockaddr_in address;
+  struct addrinfo hints, *address;
+  char port_string[6];
+  itoa(listen_port, port_string);
 
   /* use address family INET and STREAMing sockets (TCP) */
-  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE;       // roughly equivalent to address.sin_addr.s_addr = htonl(INADDR_ANY)
+  // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
+  getaddrinfo(NULL, port_string, &hints, &address);
+
+  int socket_fd = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
   if (socket_fd < 0) {
-    perror("socket:");
+    perror("socket");
     exit(socket_fd);
   }
 
-  /* set up the address and port */
-  bzero((char *) &address, sizeof(address));   // set all values in address buffer to zero
-  address.sin_family = AF_INET;                       // "the correct thing to do is to use AF_INET in your struct sockaddr_in" (http://beej.us/net2/html/syscalls.html)
-  address.sin_port = htons(listen_port);              // convert port to network byte order
-  address.sin_addr.s_addr = htonl(INADDR_ANY);        // All IP addresses of the host. For server code, this will always be the IP address of the machine on which the server is running.
-  memset(&(address.sin_zero), '\0', 8);
-  // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
-
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = bind(socket_fd, (struct sockaddr *)&address, sizeof(address));
+  retval = bind(socket_fd, address->ai_addr, address->ai_addrlen);
   if (retval < 0) {
-    perror("bind:");
+    perror("bind");
     exit(retval);
   }
 
   // if listen() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
   retval = listen(socket_fd, 5);   // second argument is size of the backlog queue (number of connections that can be waiting while the process is handling a particular connection)
   if (retval < 0) {
-    perror("listen:");
+    perror("listen");
     exit(retval);
   }
 
