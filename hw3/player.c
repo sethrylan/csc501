@@ -35,12 +35,10 @@ void send_player_info() {
 
 int main (int argc, char *argv[]) {
   int retval;
-  int master_port;
   unsigned long len;
-  char master_host[HOSTNAME_LENGTH];
   char str[1000];
-  struct hostent *master_hp;
-  struct sockaddr_in sin;
+  struct addrinfo *master_info;
+  int master_port;
 
   signal(SIGINT, intHandler);
 
@@ -50,13 +48,12 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  /* fill in hostent struct */
-  master_hp = gethostbyname(argv[1]);
-  if (master_hp == NULL) {
-    fprintf(stderr, "%s: host not found (%s)\n", argv[0], master_host);
+  master_port = atoi(argv[2]);
+  master_info = gethostaddrinfo(argv[1], master_port);
+  if (master_info == NULL) {
+    fprintf(stderr, "%s: host not found (%s)\n", argv[0], argv[1]);
     exit(1);
   }
-  master_port = atoi(argv[2]);
 
   /* create and connect to a socket */
 
@@ -68,15 +65,15 @@ int main (int argc, char *argv[]) {
   }
 
   /* set up the address and port */
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons(master_port);
-  memcpy(&sin.sin_addr, master_hp->h_addr_list[0], master_hp->h_length);
+  // sin.sin_family = AF_INET;
+  // sin.sin_port = htons(master_port);
+  // memcpy(&sin.sin_addr, master_info->ai_addr, master_info->ai_addrlen);
 
   // connect to socket at above addr and port
   // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = connect(s, (struct sockaddr *)&sin, sizeof(sin));
+  retval = connect(s, master_info->ai_addr, master_info->ai_addrlen);
   if (retval < 0) {
-    perror("connect:");
+    perror("connect");
     exit(retval);
   }
 

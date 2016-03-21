@@ -22,6 +22,6 @@ typedef struct {
 void die (const char *msg);
 int matches (const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);
-struct addrinfo *gethostaddrinfo(const char *hostname);
-char *gethostcanonicalname(const char *hostname);
+struct addrinfo *gethostaddrinfo(const char *hostname, int port);
+char *gethostcanonicalname(const char *hostname, int port);
 int setup_listener(const int listen_port);

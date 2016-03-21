@@ -4,3 +4,6 @@ http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-
 
 getaddrinfo example
 http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#getaddrinfoman
+
+K&R implementations of itoa() and reverse()
+https://en.wikibooks.org/wiki/C_Programming/C_Reference/stdlib.h/itoa
