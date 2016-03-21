@@ -63,7 +63,6 @@ unsigned int randr(unsigned int min, unsigned int max) {
 
 struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   struct addrinfo hints, *server_info;
-  char host[HOSTNAME_LENGTH];
   int retval;
   char port_string[6];
 
@@ -76,14 +75,13 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
     hints.ai_flags = AI_PASSIVE;   // roughly equivalent to address.sin_addr.s_addr = htonl(INADDR_ANY)
     // memcpy(&listen_address.sin_addr, hp->h_addr_list[0], hp->h_length);  // alternative to INADDR_ANY, which doesn't trigger firewall protection on OSX
   } else {
-    strcpy(host, hostname);
     hints.ai_flags = AI_CANONNAME;
   }
 
   hints.ai_family = AF_INET;          // use AF_INET6 to force IPv6
   hints.ai_socktype = SOCK_STREAM;
 
-  if ((retval = getaddrinfo(host, port_string, &hints, &server_info)) != 0) {
+  if ((retval = getaddrinfo(hostname, port_string, &hints, &server_info)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));
     exit(retval);
   }
