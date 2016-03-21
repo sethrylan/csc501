@@ -36,8 +36,8 @@ unsigned int randr(unsigned int min, unsigned int max) {
   return (max - min +1)*scaled + min;
 }
 
-char *gethostcanonicalname(const char *hostname) {
-  struct addrinfo hints, *servinfo;
+struct addrinfo *gethostaddrinfo(const char *hostname) {
+  struct addrinfo hints, *server_info;
   char host[HOSTNAME_LENGTH];
   int retval;
 
@@ -52,18 +52,22 @@ char *gethostcanonicalname(const char *hostname) {
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_CANONNAME;
 
-  if ((retval = getaddrinfo(host, 0, &hints, &servinfo)) != 0) {
+  if ((retval = getaddrinfo(host, 0, &hints, &server_info)) != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(retval));
     exit(retval);
   }
 
   // struct addrinfo *p;
-  // for(p = servinfo; p != NULL; p = p->ai_next) {
+  // for(p = server_info; p != NULL; p = p->ai_next) {
   //   DEBUG_PRINT("p->ai_canonname = %s\n", p->ai_canonname);
   // }
+  return server_info;
+}
 
-  char* canonname = strdup(servinfo->ai_canonname);
-  freeaddrinfo(servinfo);
+char *gethostcanonicalname(const char *hostname) {
+  struct addrinfo *server_info = gethostaddrinfo(hostname);
+  char* canonname = strdup(server_info->ai_canonname);
+  freeaddrinfo(server_info);
   return canonname;
 }
 

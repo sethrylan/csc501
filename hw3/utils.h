@@ -19,9 +19,9 @@ typedef struct {
   int *identities;
 } potato;
 
-
 void die (const char *msg);
 int matches (const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);
+struct addrinfo *gethostaddrinfo(const char *hostname);
 char *gethostcanonicalname(const char *hostname);
 int setup_listener(const int listen_port);
