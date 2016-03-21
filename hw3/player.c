@@ -28,6 +28,22 @@ void intHandler() {
   close_player();
 }
 
+// read a string from the terminal and send on socket
+void read_and_send(int socket_fd) {
+  char str[1000];   // roughly the size of 1 packet
+  unsigned long len;
+  while (fgets(str, HOSTNAME_LENGTH, stdin) != NULL) {
+    if (str[strlen(str)-1] == '\n') {
+      str[strlen(str)-1] = '\0';
+    }
+    len = send(socket_fd, str, strlen(str), 0);
+    if (len != strlen(str)) {
+      perror("send");
+      exit(1);
+    }
+  }
+}
+
 void send_player_info() {
 
 
@@ -35,8 +51,6 @@ void send_player_info() {
 
 int main (int argc, char *argv[]) {
   int retval;
-  unsigned long len;
-  char str[1000];
   struct addrinfo *master_info;
   int master_port;
 
@@ -81,17 +95,7 @@ int main (int argc, char *argv[]) {
   // TODO: get real number
   printf("Connected as player %d\n", 1);
 
-  /* read a string from the terminal and send on socket */
-  while (fgets(str, HOSTNAME_LENGTH, stdin) != NULL) {
-    if (str[strlen(str)-1] == '\n') {
-      str[strlen(str)-1] = '\0';
-    }
-    len = send(s, str, strlen(str), 0);
-    if (len != strlen(str)) {
-      perror("send");
-      exit(1);
-    }
-  }
+  read_and_send(s);
 
   close_player();
   return 0;    // never reachs here
