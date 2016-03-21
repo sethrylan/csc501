@@ -91,7 +91,7 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  listen_socket = setup_listener(listen_port);
+  listen_socket = setup_listener(&listen_port);
 
   // REQUIRED OUTPUT
   printf("Potato Master on %s\n", gethostcanonicalname("localhost", 9999));   // This is the “official” name of the host.

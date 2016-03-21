@@ -11,6 +11,8 @@
 #include "utils.h"
 
 int s;     // socket file descriptor
+int listen_socket;
+int listen_port;
 
 // Send "close" command to master
 void close_player() {
@@ -32,7 +34,7 @@ void intHandler() {
 void read_and_send(int socket_fd) {
   char str[1000];   // roughly the size of 1 packet
   unsigned long len;
-  while (fgets(str, HOSTNAME_LENGTH, stdin) != NULL) {
+  while (fgets(str, 1000, stdin) != NULL) {
     if (str[strlen(str)-1] == '\n') {
       str[strlen(str)-1] = '\0';
     }
@@ -44,9 +46,20 @@ void read_and_send(int socket_fd) {
   }
 }
 
-void send_player_info() {
+void send_player_info(int socket_fd) {
+  char str[100];
+  snprintf(str, sizeof(str), "CONNECT %d", listen_port);
+  // asprintf(*str, "CONNECT %d", listen_port);
 
+  unsigned long len = send(socket_fd, str, strlen(str), 0);
+  DEBUG_PRINT("len = %lu\n", len);
+  DEBUG_PRINT("strlen(str) = %lu\n", strlen(str));
+  if (len != strlen(str)) {
+    perror("send");
+    exit(1);
+  }
 
+  close(s);
 }
 
 int main (int argc, char *argv[]) {
@@ -82,11 +95,15 @@ int main (int argc, char *argv[]) {
     exit(retval);
   }
 
+  listen_port = 0;
+  listen_socket = setup_listener(&listen_port);
+
   // REQUIRED OUTPUT
   // TODO: get real number
   printf("Connected as player %d\n", 1);
 
-  read_and_send(s);
+  send_player_info(s);
+  // read_and_send(s);
 
   close_player();
   return 0;    // never reachs here

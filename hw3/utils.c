@@ -111,13 +111,13 @@ char *gethostcanonicalname(const char *hostname, int port) {
  *  2. bind it to an address/port
  *  3. listen
  *
- * Initializes listen_address variable
+ * Initializes listen_address variable and sets listen_port if assigned.
  * Returns file descriptor for listen socket, or -1 if not able to listen
  */
-int setup_listener(const int listen_port) {
+int setup_listener(int *listen_port) {
   int retval;
 
-  struct addrinfo *address = gethostaddrinfo(NULL, listen_port);
+  struct addrinfo *address = gethostaddrinfo(NULL, *listen_port);
 
   int socket_fd = socket(address->ai_family, address->ai_socktype, address->ai_protocol);
   if (socket_fd < 0) {
@@ -139,6 +139,18 @@ int setup_listener(const int listen_port) {
     perror("listen");
     exit(retval);
   }
+
+  struct sockaddr_in sin;
+  socklen_t len = sizeof(sin);
+  if (getsockname(socket_fd, (struct sockaddr *)&sin, &len) == -1){
+    perror("getsockname");
+  }
+  else {
+    DEBUG_PRINT("port number %d\n", ntohs(sin.sin_port));
+    *listen_port = ntohs(sin.sin_port);
+  }
+
+  // DEBUG_PRINT("address->ai_addr->sin_port = %d\n", ((struct sockaddr_in*)address->ai_addr)->sin_port);
 
   return socket_fd;
 }
