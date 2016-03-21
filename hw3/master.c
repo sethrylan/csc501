@@ -31,26 +31,30 @@ void intHandler() {
 void accept_checkins() {
   char buffer[512];
   socklen_t len;
-  int p;
-  struct hostent *ihp;
+  int accept_fd;
   struct sockaddr_in incoming;
 
   len = sizeof(incoming);
-  p = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
-  if ( p < 0 ) {
-    perror("bind:");
-    exit(p);
+  accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  if ( accept_fd < 0 ) {
+    perror("bind");
+    exit(accept_fd);
   }
-  ihp = gethostbyaddr((char *)&incoming.sin_addr, sizeof(struct in_addr), AF_INET);
+
+  char host[1024];
+  char service[20];
+
+  getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, 0);
 
   // REQUIRED output
-  printf("player %d is on %s\n", players_connected, ihp->h_name);
+  printf("player %d is on %s\n", players_connected, host);
   players_connected++;
 
   /* read and print strings sent over the connection */
+  // http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
   while (1) {
     bzero(buffer, 512);
-    len = read(p, buffer, 512);   // block until input is read from socket
+    len = read(accept_fd, buffer, 512);   // block until input is read from socket
     // DEBUG_PRINT("len = %d\n", len);
     // if ( len < 0 ) {
     //   perror("recv");
@@ -63,7 +67,7 @@ void accept_checkins() {
       printf("%s\n", buffer);
     }
   }
-  close(p);
+  close(accept_fd);
   printf(">> Connection closed\n");
 }
 
