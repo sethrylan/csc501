@@ -41,9 +41,7 @@ void accept_checkins() {
     exit(accept_fd);
   }
 
-  char host[1024];
-  char service[20];
-
+  char host[HOSTNAME_LENGTH], service[20];
   getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, 0);
 
   // REQUIRED output

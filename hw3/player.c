@@ -94,5 +94,5 @@ int main (int argc, char *argv[]) {
   }
 
   close_player();
-
+  return 0;    // never reachs here
 }
