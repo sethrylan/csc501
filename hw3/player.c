@@ -98,7 +98,7 @@ int main (int argc, char *argv[]) {
 
   send_player_info(master_info);
   recv_player_info(listen_socket);
-  // read_and_send(s);
+  // Uncomment to enable an interactive write to the socket // read_and_send(s);
 
   // TODO: wait for potato or close message
 
