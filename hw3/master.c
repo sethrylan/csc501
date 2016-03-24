@@ -28,7 +28,7 @@ void intHandler() {
  * Expects listen_address and listen_socket to be initialized.
  * Initializes the player state for master.
  */
-void accept_checkins() {
+void accept_checkin() {
   char buffer[512];
   socklen_t len;
   int num_bytes;
@@ -53,20 +53,32 @@ void accept_checkins() {
   // http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
   while (1) {
     bzero(buffer, 512);
-    if ((num_bytes = recv(accept_fd, buffer, 512, 0)) == -1) {   // block until input is read from socket
+    if ((num_bytes = recv(accept_fd, buffer, 512, 0)) < 0) {   // block until input is read from socket
       perror("recv");
       exit(1);
     }
-    // DEBUG_PRINT("num_bytes = %d\n", num_bytes);
-    buffer[num_bytes] = '\0';
-    if ( !strcmp("close", buffer) ) {
-      break;
-    } else if (num_bytes > 0) {
-      printf("%s\n", buffer);
+    DEBUG_PRINT("num_bytes = %d\n", num_bytes);
+
+    if (num_bytes == 0) {
+      close(accept_fd);
+      printf(">> Connection closed\n");
+      return;
     }
+
+    buffer[num_bytes] = '\0';
+    char *token = strtok(buffer, "\n");
+    while (token) {
+      if (!strcmp("close", token)) {
+        close(accept_fd);
+        printf(">> Connection closed\n");
+        return;
+      } else {
+        printf("%s\n", token);
+      }
+      token = strtok(NULL, "\n");
+    }
+
   }
-  close(accept_fd);
-  printf(">> Connection closed\n");
 }
 
 int main (int argc, char *argv[]) {
@@ -100,7 +112,7 @@ int main (int argc, char *argv[]) {
 
   /* accept connections */
   while (players_connected < num_players) {
-    accept_checkins();
+    accept_checkin();
   }
 
   int first_player = randr(0, num_players-1);

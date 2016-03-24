@@ -57,7 +57,6 @@ void send_player_info(int socket_fd) {
   str[strlen(str)] = '\0';
   len = send(socket_fd, str, strlen(str), 0);
   DEBUG_PRINT("len = %lu\n", len);
-  DEBUG_PRINT("strlen(str) = %lu\n", strlen(str));
   if (len != strlen(str)) {
     perror("send");
     exit(1);
@@ -108,8 +107,8 @@ int main (int argc, char *argv[]) {
   // TODO: get real number
   printf("Connected as player %d\n", 1);
 
-  // send_player_info(s);
-  read_and_send(s);
+  send_player_info(s);
+  // read_and_send(s);
 
   close_player(s);
   return 0;    // never reachs here
