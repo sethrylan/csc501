@@ -220,6 +220,7 @@ void read_message(int socket_fd, char *message, size_t buffer_size) {
   }
 }
 
+// 0. Validate host_address
 // 1. Create socket
 // 2. Connect socket to host
 // 3. Send message
