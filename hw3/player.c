@@ -8,10 +8,6 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <signal.h>
-
-// for set_socket
-// #include <netinet/tcp.h>
-
 #include "utils.h"
 
 int listen_socket;
@@ -19,11 +15,6 @@ int listen_port;
 
 // Send "close" command to master and close socket
 void close_player(int socket_fd) {
-  // int len = send(socket_fd, "close", 5, 0);
-  // if (len != 5) {
-  //   perror("send");
-  //   exit(1);
-  // }
   close(socket_fd);
   exit(0);
 }
@@ -59,12 +50,9 @@ void recv_player_info(int socket_fd) {
   // REQUIRED OUTPUT
   // TODO: get real number
   printf("Connected as player %d\n", 1);
-
 }
 
 int main (int argc, char *argv[]) {
-  int s;     // socket file descriptor
-  int retval;
   struct addrinfo *master_info;
 
   signal(SIGINT, intHandler);
@@ -87,6 +75,6 @@ int main (int argc, char *argv[]) {
   recv_player_info(listen_socket);
   // read_and_send(s);
 
-  close_player(s);
+  close_player(listen_socket);
   return 0;    // never reachs here
 }
