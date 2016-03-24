@@ -48,33 +48,36 @@ void send_player_info(struct addrinfo *address) {
   send_to(address, str);
 }
 
-void recv_player_info(int listen_socket_fd) {
+void recv_messages(int listen_socket_fd) {
   char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;
   socklen_t len = sizeof(incoming);
 
-  int accept_fd = accept(listen_socket_fd, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
-  if ( accept_fd < 0 ) {
-    perror("bind");
-    exit(accept_fd);
-  }
+  while (1) {
 
-  read_message(accept_fd, buffer, MAX_RECV_SIZE);
-
-  char *token = strtok(buffer, "\n");
-  while (token) {
-    DEBUG_PRINT("recv_player_info(): %s\n", token);
-    if (begins_with(token, ID_PREFIX)) {
-      char *player_number_str = malloc(10);
-      strncpy(player_number_str, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
-      DEBUG_PRINT("recv_player_info(): player_number = %s\n", player_number_str);
-      player_number = atoi(player_number_str);
+    int accept_fd = accept(listen_socket_fd, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+    if ( accept_fd < 0 ) {
+      perror("bind");
+      exit(accept_fd);
     }
-    token = strtok(NULL, "\n");
-  }
 
-  // REQUIRED OUTPUT
-  printf("Connected as player %d\n", player_number);
+    read_message(accept_fd, buffer, MAX_RECV_SIZE);
+
+    char *token = strtok(buffer, "\n");
+    while (token) {
+      DEBUG_PRINT("recv_player_info(): %s\n", token);
+      if (begins_with(token, ID_PREFIX)) {
+        char *player_number_str = malloc(10);
+        strncpy(player_number_str, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
+        DEBUG_PRINT("recv_player_info(): player_number = %s\n", player_number_str);
+        player_number = atoi(player_number_str);
+
+        // REQUIRED OUTPUT
+        printf("Connected as player %d\n", player_number);
+      }
+      token = strtok(NULL, "\n");
+    }
+  }
 }
 
 int main (int argc, char *argv[]) {
@@ -96,13 +99,10 @@ int main (int argc, char *argv[]) {
   // int one = 1;
   // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
-  send_player_info(master_info);
-  recv_player_info(listen_socket);
   // Uncomment to enable an interactive write to the socket // read_and_send(s);
 
-  // TODO: wait for potato or close message
-  // recv_messages(listen_socket);
-
+  send_player_info(master_info);
+  recv_messages(listen_socket);   // wait for messages (potato/route/close)
 
   close_player(listen_socket);
   return 0;    // never reachs here
