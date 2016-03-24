@@ -49,7 +49,7 @@ void send_player_info(struct addrinfo *address) {
 }
 
 void recv_player_info(int listen_socket_fd) {
-  char buffer[512];
+  char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;
   socklen_t len = sizeof(incoming);
 
@@ -59,7 +59,7 @@ void recv_player_info(int listen_socket_fd) {
     exit(accept_fd);
   }
 
-  read_message(accept_fd, buffer, 512);
+  read_message(accept_fd, buffer, MAX_RECV_SIZE);
 
   char *token = strtok(buffer, "\n");
   while (token) {
@@ -101,6 +101,8 @@ int main (int argc, char *argv[]) {
   // Uncomment to enable an interactive write to the socket // read_and_send(s);
 
   // TODO: wait for potato or close message
+  // recv_messages(listen_socket);
+
 
   close_player(listen_socket);
   return 0;    // never reachs here

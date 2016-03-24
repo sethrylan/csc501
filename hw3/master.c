@@ -30,7 +30,7 @@ void intHandler() {
  * Initializes the player state for master.
  */
 void accept_checkin() {
-  char buffer[512];
+  char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;
 
   socklen_t len = sizeof(incoming);
@@ -46,7 +46,7 @@ void accept_checkin() {
   // REQUIRED output
   printf("player %d is on %s\n", players_connected, host);
 
-  read_message(accept_fd, buffer, 512);
+  read_message(accept_fd, buffer, MAX_RECV_SIZE);
 
   char *token = strtok(buffer, "\n");
   while (token) {
@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);
 
-  // send_to(player[first_player], ROUTE_PREFIX);
+  // send_to(players[first_player], ROUTE_PREFIX);
 
   free(players);
   exit(0);
