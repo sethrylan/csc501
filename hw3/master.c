@@ -31,6 +31,7 @@ void intHandler() {
 void accept_checkins() {
   char buffer[512];
   socklen_t len;
+  int num_bytes;
   int accept_fd;
   struct sockaddr_in incoming;
 
@@ -52,16 +53,15 @@ void accept_checkins() {
   // http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
   while (1) {
     bzero(buffer, 512);
-    len = read(accept_fd, buffer, 512);   // block until input is read from socket
-    // DEBUG_PRINT("len = %d\n", len);
-    // if ( len < 0 ) {
-    //   perror("recv");
-    //   exit(1);
-    // }
-    buffer[len] = '\0';
+    if ((num_bytes = recv(accept_fd, buffer, 512, 0)) == -1) {   // block until input is read from socket
+      perror("recv");
+      exit(1);
+    }
+    // DEBUG_PRINT("num_bytes = %d\n", num_bytes);
+    buffer[num_bytes] = '\0';
     if ( !strcmp("close", buffer) ) {
       break;
-    } else if (len > 0) {
+    } else if (num_bytes > 0) {
       printf("%s\n", buffer);
     }
   }
