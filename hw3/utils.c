@@ -119,12 +119,6 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
 }
 
 char *gethostcanonicalname(const char *hostname, in_port_t port) {
-  // char host[HOSTNAME_LENGTH];
-  // if (hostname == NULL) {
-  //   gethostname(host, sizeof host);
-  // } else {
-  //   strcpy(host, hostname);
-  // }
   struct addrinfo *server_info = gethostaddrinfo(hostname, port);
   char* canonname = strdup(server_info->ai_canonname);
   freeaddrinfo(server_info);
