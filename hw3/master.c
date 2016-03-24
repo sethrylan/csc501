@@ -68,9 +68,11 @@ void accept_checkin() {
 }
 
 void send_info_to_player(int player_number) {
-  DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
   struct addrinfo *player_address = players[player_number].address_info;
-  send_to(player_address, "YOUARE:1\nL:66666\nR:55555\n");
+  char str[100];
+  DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
+  sprintf(str, "%s:%d\nL:66666\nR:55555\n", ID_PREFIX, player_number);
+  send_to(player_address, str);
 }
 
 int main (int argc, char *argv[]) {

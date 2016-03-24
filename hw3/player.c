@@ -12,6 +12,7 @@
 
 int listen_socket;
 int listen_port;
+int player_number;
 
 // Send "close" command to master and close socket
 void close_player(int socket_fd) {
@@ -63,18 +64,17 @@ void recv_player_info(int socket_fd) {
   while (token) {
     DEBUG_PRINT("%s\n", token);
     if (begins_with(token, ID_PREFIX)) {
-      char *player_number = malloc(10);
-      strncpy(player_number, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
-      DEBUG_PRINT("player_number = %s\n", player_number);
+      char *player_number_str = malloc(10);
+      strncpy(player_number_str, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
+      DEBUG_PRINT("player_number = %s\n", player_number_str);
+      player_number = atoi(player_number_str);
     }
     token = strtok(NULL, "\n");
   }
   DEBUG_PRINT(">> recv_player_info finished\n");
 
-
   // REQUIRED OUTPUT
-  // TODO: get real number
-  printf("Connected as player %d\n", 1);
+  printf("Connected as player %d\n", player_number);
 }
 
 int main (int argc, char *argv[]) {

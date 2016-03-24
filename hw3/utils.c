@@ -226,6 +226,9 @@ void read_message(int socket_fd, char *message, size_t buffer_size) {
 // 2. Connect socket to host
 // 3. Send message
 // 4. Close socket
+//
+// Recommended to compose message using sprintf, which will fill remaining buffer with \0
+//
 void send_to(struct addrinfo *host_address, char *message) {
   if (host_address == NULL) {
     fprintf(stderr, "send_to(): host_address cannot be null\n");
