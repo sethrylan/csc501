@@ -51,9 +51,9 @@ void accept_checkin() {
   char *token = strtok(buffer, "\n");
   while (token) {
     DEBUG_PRINT("%s\n", token);
-    if (begins_with(token, "CONNECT:")) {
+    if (begins_with(token, CONNECT_PREFIX)) {
       char *port_string = malloc(10);
-      strncpy(port_string, token + strlen("CONNECT:"), strlen(token) - strlen("CONNECT:"));
+      strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
       DEBUG_PRINT("Adding player #%d as %s:%s\n", players_connected, host, port_string);
       struct addrinfo *player_listner = gethostaddrinfo(host, atoi(port_string));
       players[players_connected].address_info = player_listner;

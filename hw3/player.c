@@ -42,7 +42,7 @@ void read_and_send(int socket_fd) {
 
 void send_player_info(struct addrinfo *address) {
   char str[100];
-  sprintf(str, "CONNECT:%d\n", listen_port);
+  sprintf(str, "%s%d\n", CONNECT_PREFIX, listen_port);
   send_to(address, str);
 }
 
@@ -62,9 +62,9 @@ void recv_player_info(int socket_fd) {
   char *token = strtok(buffer, "\n");
   while (token) {
     DEBUG_PRINT("%s\n", token);
-    if (begins_with(token, "YOUARE:")) {
+    if (begins_with(token, ID_PREFIX)) {
       char *player_number = malloc(10);
-      strncpy(player_number, token + strlen("YOUARE:"), strlen(token) - strlen("YOUARE:"));
+      strncpy(player_number, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
       DEBUG_PRINT("player_number = %s\n", player_number);
     }
     token = strtok(NULL, "\n");
