@@ -118,7 +118,7 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   return server_info;
 }
 
-char *gethostcanonicalname(const char *hostname, int port) {
+char *gethostcanonicalname(const char *hostname, in_port_t port) {
   // char host[HOSTNAME_LENGTH];
   // if (hostname == NULL) {
   //   gethostname(host, sizeof host);
@@ -139,7 +139,7 @@ char *gethostcanonicalname(const char *hostname, int port) {
  * Initializes listen_address variable and sets listen_port if assigned.
  * Returns file descriptor for listen socket, or -1 if not able to listen
  */
-int setup_listener(int *listen_port) {
+int setup_listener(in_port_t *listen_port) {
   int retval;
 
   struct addrinfo *address = gethostaddrinfo(NULL, *listen_port);

@@ -88,7 +88,7 @@ void send_info_to_player(int player_number) {
 }
 
 int main (int argc, char *argv[]) {
-  int listen_port;
+  in_port_t listen_port;
 
   signal(SIGINT, intHandler);
 

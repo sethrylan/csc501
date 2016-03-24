@@ -11,8 +11,9 @@
 #include "utils.h"
 
 int listen_socket;
-int listen_port;
+in_port_t listen_port;
 int player_number;
+struct addrinfo *left_addrinfo, *right_addrinfo;
 
 // Send "close" command to master and close socket
 void close_player(int socket_fd) {
