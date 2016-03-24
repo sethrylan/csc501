@@ -48,7 +48,6 @@ void accept_checkin() {
   printf("player %d is on %s\n", players_connected, host);
   players_connected++;
 
-
   read_message(accept_fd, buffer, 512);
 
   char *token = strtok(buffer, "\n");
@@ -94,8 +93,8 @@ int main (int argc, char *argv[]) {
     accept_checkin();
   }
 
-  //TODO: int seed = 42;
-  // srand(seed);
+  int seed = 42;
+  srand(seed);
   int first_player = randr(0, num_players-1);
 
   // REQUIRED OUTPUT
