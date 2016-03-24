@@ -27,6 +27,8 @@ void reverse(char s[]) {
   }
 }
 
+// Convert integer to string.
+// K&R implementation
 void itoa(int n, char s[]) {
   int i, sign;
   if ((sign = n) < 0)  /* record sign */
