@@ -139,7 +139,8 @@ int main (int argc, char *argv[]) {
     accept_checkin();
   }
 
-  for (int i = 0; i < num_players; i++) {
+  int i;
+  for (i = 0; i < num_players; i++) {
     send_info_to_player(i);
   }
 
