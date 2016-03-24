@@ -47,11 +47,10 @@ void send_player_info(struct addrinfo *address) {
 }
 
 void recv_player_info(int socket_fd) {
-
   char buffer[512];
   struct sockaddr_in incoming;
-
   socklen_t len = sizeof(incoming);
+
   int accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( accept_fd < 0 ) {
     perror("bind");
