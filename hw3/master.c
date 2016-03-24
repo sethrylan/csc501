@@ -132,9 +132,7 @@ int main (int argc, char *argv[]) {
     send_info_to_player(i);
   }
 
-  int seed = 42;
-  srand(seed);
-  int first_player = randr(0, num_players-1);
+  int first_player = randr(0, num_players-1, 42);
 
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);

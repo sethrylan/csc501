@@ -59,11 +59,19 @@ int begins_with(const char *string, const char *compare) {
   return !strncmp(string, compare, strlen(compare));
 }
 
-unsigned int randr(unsigned int min, unsigned int max) {
-  srand(time(NULL));
+unsigned int randr(unsigned int min, unsigned int max, int seed) {
+  if (seed == -1) {
+    srand(time(NULL));
+  } else {
+    srand(seed);
+  }
   double scaled = (double)rand()/RAND_MAX;
   return (max - min +1)*scaled + min;
 }
+
+// unsigned int randr(unsigned int min, unsigned int max) {
+//   return randr(min, max, time(NULL));
+// }
 
 struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   struct addrinfo hints, *server_info;
@@ -211,3 +219,32 @@ void read_message(int socket_fd, char *message, size_t buffer_size) {
     }
   }
 }
+
+// 1. Create socket
+// 2. Connect socket to host
+// 3. Send message
+// 4. Close socket
+void send_to(struct addrinfo *host_address, char *message) {
+  if (host_address == NULL) {
+    fprintf(stderr, "send_to(): host_address cannot be null\n");
+    exit(1);
+  }
+
+  /* use address family INET and STREAMing sockets (TCP) */
+  int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (socket_fd < 0) {
+    perror("socket:");
+    exit(socket_fd);
+  }
+
+  // connect to socket at addr and port
+  // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
+  int retval = connect(socket_fd, host_address->ai_addr, host_address->ai_addrlen);
+  if (retval < 0) {
+    perror("connect");
+    exit(retval);
+  }
+
+  send_message(socket_fd, message);
+}
+

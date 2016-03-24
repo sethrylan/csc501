@@ -24,9 +24,10 @@ typedef struct {
 void die (const char *msg);
 int matches (const char *string, const char *compare);
 int begins_with(const char *string, const char *compare);
-unsigned int randr(unsigned int min, unsigned int max);
+unsigned int randr(unsigned int min, unsigned int max, int seed);
 struct addrinfo *gethostaddrinfo(const char *hostname, int port);
 char *gethostcanonicalname(const char *hostname, int port);
 int setup_listener(int *listen_port);
 void send_message(int socket_fd, char* message);
 void read_message(int socket_fd, char *message, size_t buffer_size);
+void send_to(struct addrinfo *host_address, char *message);
