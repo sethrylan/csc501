@@ -47,12 +47,12 @@ void send_player_info(struct addrinfo *address) {
   send_to(address, str);
 }
 
-void recv_player_info(int socket_fd) {
+void recv_player_info(int listen_socket_fd) {
   char buffer[512];
   struct sockaddr_in incoming;
   socklen_t len = sizeof(incoming);
 
-  int accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  int accept_fd = accept(listen_socket_fd, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( accept_fd < 0 ) {
     perror("bind");
     exit(accept_fd);
@@ -99,6 +99,8 @@ int main (int argc, char *argv[]) {
   send_player_info(master_info);
   recv_player_info(listen_socket);
   // read_and_send(s);
+
+  // TODO: wait for potato or close message
 
   close_player(listen_socket);
   return 0;    // never reachs here
