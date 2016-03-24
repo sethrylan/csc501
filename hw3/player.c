@@ -14,7 +14,6 @@
 
 #include "utils.h"
 
-int s;     // socket file descriptor
 int listen_socket;
 int listen_port;
 
@@ -31,7 +30,7 @@ void close_player(int socket_fd) {
 
 // SIGINT (^c) handler
 void intHandler() {
-  close_player(s);
+  close_player(listen_socket);
 }
 
 // read a string from the terminal and send on socket
@@ -52,22 +51,19 @@ void read_and_send(int socket_fd) {
 
 void send_player_info(int socket_fd) {
   char str[100];
-  unsigned long len;
   sprintf(str, "CONNECT:%d\n", listen_port);
-  str[strlen(str)] = '\0';
-  len = send(socket_fd, str, strlen(str), 0);
-  DEBUG_PRINT("len = %lu\n", len);
-  if (len != strlen(str)) {
-    perror("send");
-    exit(1);
-  }
+  send_message(socket_fd, str);
 }
 
 void recv_player_info(int socket_fd) {
+  // REQUIRED OUTPUT
+  // TODO: get real number
+  printf("Connected as player %d\n", 1);
 
 }
 
 int main (int argc, char *argv[]) {
+  int s;     // socket file descriptor
   int retval;
   struct addrinfo *master_info;
 
@@ -105,10 +101,6 @@ int main (int argc, char *argv[]) {
 
   // int one = 1;
   // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-
-  // REQUIRED OUTPUT
-  // TODO: get real number
-  printf("Connected as player %d\n", 1);
 
   send_player_info(s);
   recv_player_info(listen_socket);

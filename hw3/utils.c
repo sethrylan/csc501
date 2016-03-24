@@ -162,6 +162,17 @@ int setup_listener(int *listen_port) {
   return socket_fd;
 }
 
+
+void send_message(int socket_fd, char* message) {
+  unsigned long len;
+  len = send(socket_fd, message, strlen(message), 0);
+  DEBUG_PRINT("len = %lu\n", len);
+  if (len != strlen(message)) {
+    perror("send");
+    exit(1);
+  }
+}
+
 // Blocks until message and connection close is received, the puts message text into buffer.
 // The socket_fd must be a connected socket ready for connections
 // See http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv

@@ -31,12 +31,10 @@ void intHandler() {
  */
 void accept_checkin() {
   char buffer[512];
-  socklen_t len;
-  int accept_fd;
   struct sockaddr_in incoming;
 
-  len = sizeof(incoming);
-  accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  socklen_t len = sizeof(incoming);
+  int accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
   if ( accept_fd < 0 ) {
     perror("bind");
     exit(accept_fd);
@@ -69,22 +67,12 @@ void accept_checkin() {
   players_connected++;
 }
 
-void send_message(int socket_fd, char* message) {
-  char str[100];
-  unsigned long len;
-  len = send(socket_fd, message, strlen(message), 0);
-  DEBUG_PRINT("len = %lu\n", len);
-  if (len != strlen(str)) {
-    perror("send");
-    exit(1);
-  }
-}
-
 void send_info_to_player(int player_number) {
+  DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
   struct addrinfo *address = players[player_number].address_info;
   int s = socket(AF_INET, SOCK_STREAM, 0);
   if (s < 0) {
-    perror("socket:");
+    perror("socket");
     exit(s);
   }
 
