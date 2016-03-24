@@ -125,6 +125,11 @@ int setup_listener(int *listen_port) {
     exit(socket_fd);
   }
 
+  const int enable_reuse = 1;
+  if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &enable_reuse, sizeof(int)) < 0) {
+    perror("setsockopt(SO_REUSEADDR) failed");
+  }
+
   // bind socket s to address sin
   // if bind() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
   retval = bind(socket_fd, address->ai_addr, address->ai_addrlen);
