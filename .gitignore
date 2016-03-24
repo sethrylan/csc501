@@ -34,5 +34,7 @@
 # Vagrant files
 .vagrant/
 
-# miscellaneous
+# compiled files
 ush
+master
+player
