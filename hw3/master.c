@@ -54,7 +54,7 @@ void accept_checkin() {
     if (begins_with(token, "CONNECT:")) {
       char *port_string = malloc(10);
       strncpy(port_string, token + strlen("CONNECT:"), strlen(token) - strlen("CONNECT:"));
-      DEBUG_PRINT("Adding player(%s:%s)\n", host, port_string);
+      DEBUG_PRINT("Adding player #%d as %s:%s\n", players_connected, host, port_string);
       struct addrinfo *player_listner = gethostaddrinfo(host, atoi(port_string));
       players[players_connected].address_info = player_listner;
       players[players_connected].player_id = players_connected;

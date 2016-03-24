@@ -47,6 +47,32 @@ void send_player_info(struct addrinfo *address) {
 }
 
 void recv_player_info(int socket_fd) {
+
+  char buffer[512];
+  struct sockaddr_in incoming;
+
+  socklen_t len = sizeof(incoming);
+  int accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+  if ( accept_fd < 0 ) {
+    perror("bind");
+    exit(accept_fd);
+  }
+
+  read_message(accept_fd, buffer, 512);
+
+  char *token = strtok(buffer, "\n");
+  while (token) {
+    DEBUG_PRINT("%s\n", token);
+    if (begins_with(token, "YOUARE:")) {
+      char *player_number = malloc(10);
+      strncpy(player_number, token + strlen("YOUARE:"), strlen(token) - strlen("YOUARE:"));
+      DEBUG_PRINT("player_number = %s\n", player_number);
+    }
+    token = strtok(NULL, "\n");
+  }
+  DEBUG_PRINT(">> recv_player_info finished\n");
+
+
   // REQUIRED OUTPUT
   // TODO: get real number
   printf("Connected as player %d\n", 1);
