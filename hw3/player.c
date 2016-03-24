@@ -53,7 +53,7 @@ void read_and_send(int socket_fd) {
 void send_player_info(int socket_fd) {
   char str[100];
   unsigned long len;
-  sprintf(str, "CONNECT %d\n", listen_port);
+  sprintf(str, "CONNECT:%d\n", listen_port);
   str[strlen(str)] = '\0';
   len = send(socket_fd, str, strlen(str), 0);
   DEBUG_PRINT("len = %lu\n", len);
@@ -105,7 +105,6 @@ int main (int argc, char *argv[]) {
 
   // int one = 1;
   // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
-
 
   // REQUIRED OUTPUT
   // TODO: get real number

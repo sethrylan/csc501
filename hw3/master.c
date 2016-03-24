@@ -16,6 +16,7 @@ int listen_socket;  // socket file descriptor
 
 // game state
 int num_players, hops, players_connected;
+player* players;
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -46,17 +47,60 @@ void accept_checkin() {
 
   // REQUIRED output
   printf("player %d is on %s\n", players_connected, host);
-  players_connected++;
 
   read_message(accept_fd, buffer, 512);
 
   char *token = strtok(buffer, "\n");
   while (token) {
-    printf("%s\n", token);
+    DEBUG_PRINT("%s\n", token);
+    if (begins_with(token, "CONNECT:")) {
+      char *port_string = malloc(10);
+      strncpy(port_string, token + strlen("CONNECT:"), strlen(token) - strlen("CONNECT:"));
+      DEBUG_PRINT("Adding player(%s:%s)\n", host, port_string);
+      struct addrinfo *player_listner = gethostaddrinfo(host, atoi(port_string));
+      players[players_connected].address_info = player_listner;
+      players[players_connected].player_id = players_connected;
+      // strcpy(players[players_connected].address, host);
+      // players[players_connected].listen_port = token[8];
+    }
     token = strtok(NULL, "\n");
   }
-  printf(">> Connection closed\n");
+  DEBUG_PRINT(">> Connection closed\n");
+  players_connected++;
+}
 
+void send_message(int socket_fd, char* message) {
+  char str[100];
+  unsigned long len;
+  len = send(socket_fd, message, strlen(message), 0);
+  DEBUG_PRINT("len = %lu\n", len);
+  if (len != strlen(str)) {
+    perror("send");
+    exit(1);
+  }
+}
+
+void send_info_to_player(int player_number) {
+  struct addrinfo *address = players[player_number].address_info;
+  int s = socket(AF_INET, SOCK_STREAM, 0);
+  if (s < 0) {
+    perror("socket:");
+    exit(s);
+  }
+
+  // connect to socket at addr and port
+  // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
+  int retval = connect(s, address->ai_addr, address->ai_addrlen);
+  if (retval < 0) {
+    perror("connect");
+    exit(retval);
+  }
+
+  send_message(s, "YOUARE:1\n");
+  send_message(s, "L:66666\n");
+  send_message(s, "R:55555\n");
+
+  close(s);
 }
 
 int main (int argc, char *argv[]) {
@@ -81,6 +125,8 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
+  players = malloc(sizeof(player) * num_players);
+
   listen_socket = setup_listener(&listen_port);
 
   // REQUIRED OUTPUT
@@ -93,6 +139,10 @@ int main (int argc, char *argv[]) {
     accept_checkin();
   }
 
+  for (int i = 0; i < num_players; i++) {
+    send_info_to_player(i);
+  }
+
   int seed = 42;
   srand(seed);
   int first_player = randr(0, num_players-1);
@@ -100,5 +150,6 @@ int main (int argc, char *argv[]) {
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);
 
+  free(players);
   exit(0);
 }

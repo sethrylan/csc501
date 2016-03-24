@@ -55,6 +55,10 @@ int matches (const char *string, const char *compare) {
   return !strcmp(string, compare);
 }
 
+int begins_with(const char *string, const char *compare) {
+  return !strncmp(string, compare, strlen(compare));
+}
+
 unsigned int randr(unsigned int min, unsigned int max) {
   srand(time(NULL));
   double scaled = (double)rand()/RAND_MAX;
@@ -65,8 +69,6 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   struct addrinfo hints, *server_info;
   int retval;
   char port_string[6];
-
-  DEBUG_PRINT("gethostaddrinfo( %s )\n", hostname);
 
   itoa(port, port_string);
   memset(&hints, 0, sizeof hints);
@@ -160,7 +162,8 @@ int setup_listener(int *listen_port) {
   return socket_fd;
 }
 
-// Blocks until message and connection close is received, the puts message text into buffer
+// Blocks until message and connection close is received, the puts message text into buffer.
+// The socket_fd must be a connected socket ready for connections
 // See http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
 // Returns a buffer set to a null-terminated string with commands separated by \n
 void read_message(int socket_fd, char *message, size_t buffer_size) {

@@ -11,8 +11,9 @@
 
 typedef struct {
   int player_id;
-  char address[INET_ADDRSTRLEN];
-  int listen_port;
+  struct addrinfo *address_info;
+  // char address[INET_ADDRSTRLEN];
+  // int listen_port;
 } player;
 
 typedef struct {
@@ -22,6 +23,7 @@ typedef struct {
 
 void die (const char *msg);
 int matches (const char *string, const char *compare);
+int begins_with(const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max);
 struct addrinfo *gethostaddrinfo(const char *hostname, int port);
 char *gethostcanonicalname(const char *hostname, int port);
