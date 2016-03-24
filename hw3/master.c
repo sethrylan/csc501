@@ -69,9 +69,13 @@ void accept_checkin() {
 
 void send_info_to_player(int player_number) {
   struct addrinfo *player_address = players[player_number].address_info;
-  char str[100];
+  struct addrinfo *left_address   = players[(player_number-1)%num_players].address_info;
+  struct addrinfo *right_address  = players[(player_number+1)%num_players].address_info;
+  char str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
-  sprintf(str, "%s:%d\nL:66666\nR:55555\n", ID_PREFIX, player_number);
+  sprintf(left_address_str, "%s:%d", "localhost", 7777);
+  sprintf(right_address_str, "%s:%d", "localhost", 7777);
+  sprintf(str, "%s:%d\n%s%s\n%s%s\n", ID_PREFIX, player_number, LEFT_ADDRESS_PREFIX, left_address_str, RIGHT_ADDRESS_PREFIX, right_address_str);
   send_to(player_address, str);
 }
 

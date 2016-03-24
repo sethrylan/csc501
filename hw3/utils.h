@@ -9,14 +9,10 @@
 #define HOSTNAME_LENGTH 64
 #define MAX_RECV_SIZE 512
 
-#define CONNECT_PREFIX     "CONNECT:"
-#define ID_PREFIX          "YOUARE:"
-#define LEFT_ADDR_PREFIX   "LADDR:"
-#define LEFT_HOST_PREFIX   "LHOST:"
-#define LEFT_PORT_PREFIX   "LPORT:"
-#define RIGHT_ADDR_PREFIX  "RADDR:"
-#define RIGHT_HOST_PREFIX  "LHOST:"
-#define RIGHT_PORT_PREFIX  "LPORT:"
+#define CONNECT_PREFIX         "CONNECT:"
+#define ID_PREFIX              "YOUARE:"
+#define LEFT_ADDRESS_PREFIX    "LADDR:"
+#define RIGHT_ADDRESS_PREFIX  "RADDR:"
 
 typedef struct {
   int player_id;
