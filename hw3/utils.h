@@ -9,16 +9,15 @@
 #define HOSTNAME_LENGTH 64
 #define MAX_RECV_SIZE 512
 
-#define CONNECT_PREFIX         "CONNECT:"
-#define ID_PREFIX              "YOUARE:"
-#define LEFT_ADDRESS_PREFIX    "LADDR:"
-#define RIGHT_ADDRESS_PREFIX  "RADDR:"
+#define CONNECT_PREFIX         "CONNECT:"   // format: "<prefix>:<listen_port>"
+#define ID_PREFIX              "YOUARE:"    // format: "<prefix>:<player_number>"
+#define LEFT_ADDRESS_PREFIX    "LADDR:"     // format: "<prefix>:<host>:<port>"
+#define RIGHT_ADDRESS_PREFIX   "RADDR:"     // format: "<prefix>:<host>:<port>"
+#define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<player_number>,<player_number>,..."
 
 typedef struct {
   int player_id;
   struct addrinfo *address_info;
-  // char address[INET_ADDRSTRLEN];
-  // int listen_port;
 } player;
 
 typedef struct {
