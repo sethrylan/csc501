@@ -58,8 +58,6 @@ void accept_checkin() {
       struct addrinfo *player_listner = gethostaddrinfo(host, atoi(port_string));
       players[players_connected].address_info = player_listner;
       players[players_connected].player_id = players_connected;
-      // strcpy(players[players_connected].address, host);
-      // players[players_connected].listen_port = token[8];
     }
     token = strtok(NULL, "\n");
   }
@@ -68,14 +66,24 @@ void accept_checkin() {
 }
 
 void send_info_to_player(int player_number) {
+  char host[HOSTNAME_LENGTH], service[20], str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
   struct addrinfo *player_address = players[player_number].address_info;
   struct addrinfo *left_address   = players[(player_number-1)%num_players].address_info;
   struct addrinfo *right_address  = players[(player_number+1)%num_players].address_info;
-  char str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
+
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
-  sprintf(left_address_str, "%s:%d", "localhost", 7777);
-  sprintf(right_address_str, "%s:%d", "localhost", 7777);
+
+  // compose left_address_str for left neighbor
+  getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
+  sprintf(left_address_str, "%s:%s", host, service);
+
+  // compose right_address_str for right neighbor
+  getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
+  sprintf(right_address_str, "%s:%s", host, service);
+
+  // compose complete message
   sprintf(str, "%s:%d\n%s%s\n%s%s\n", ID_PREFIX, player_number, LEFT_ADDRESS_PREFIX, left_address_str, RIGHT_ADDRESS_PREFIX, right_address_str);
+
   send_to(player_address, str);
 }
 

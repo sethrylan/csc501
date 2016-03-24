@@ -7,3 +7,6 @@ http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#getaddrinfoman
 
 K&R implementations of itoa() and reverse()
 https://en.wikibooks.org/wiki/C_Programming/C_Reference/stdlib.h/itoa
+
+Beej's implementation of get_in_addr()
+http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#simpleserver

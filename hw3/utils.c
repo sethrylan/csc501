@@ -71,9 +71,22 @@ unsigned int randr(unsigned int min, unsigned int max, int seed) {
   return (max - min +1)*scaled + min;
 }
 
-// unsigned int randr(unsigned int min, unsigned int max) {
-//   return randr(min, max, time(NULL));
-// }
+// Beej's implementation: see http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#simpleserver
+// get sockaddr, IPv4 or IPv6
+void * get_addr(struct sockaddr *sa) {
+  if (sa->sa_family == AF_INET) {
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  }
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+// get port, IPv4 or IPv6
+in_port_t get_port(struct sockaddr *sa) {
+  if (sa->sa_family == AF_INET) {
+    return (((struct sockaddr_in*)sa)->sin_port);
+  }
+  return (((struct sockaddr_in6*)sa)->sin6_port);
+}
 
 struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   struct addrinfo hints, *server_info;
