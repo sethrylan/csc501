@@ -246,5 +246,6 @@ void send_to(struct addrinfo *host_address, char *message) {
   }
 
   send_message(socket_fd, message);
+  close(socket_fd);
 }
 
