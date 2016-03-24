@@ -19,11 +19,11 @@ int listen_port;
 
 // Send "close" command to master and close socket
 void close_player(int socket_fd) {
-  int len = send(socket_fd, "close", 5, 0);
-  if (len != 5) {
-    perror("send");
-    exit(1);
-  }
+  // int len = send(socket_fd, "close", 5, 0);
+  // if (len != 5) {
+  //   perror("send");
+  //   exit(1);
+  // }
   close(socket_fd);
   exit(0);
 }
@@ -49,10 +49,10 @@ void read_and_send(int socket_fd) {
   }
 }
 
-void send_player_info(int socket_fd) {
+void send_player_info(struct addrinfo *address) {
   char str[100];
   sprintf(str, "CONNECT:%d\n", listen_port);
-  send_message(socket_fd, str);
+  send_to(address, str);
 }
 
 void recv_player_info(int socket_fd) {
@@ -76,25 +76,6 @@ int main (int argc, char *argv[]) {
   }
 
   master_info = gethostaddrinfo(argv[1], atoi(argv[2]));
-  if (master_info == NULL) {
-    fprintf(stderr, "%s: host not found (%s)\n", argv[0], argv[1]);
-    exit(1);
-  }
-
-  /* use address family INET and STREAMing sockets (TCP) */
-  s = socket(AF_INET, SOCK_STREAM, 0);
-  if (s < 0) {
-    perror("socket:");
-    exit(s);
-  }
-
-  // connect to socket at above addr and port
-  // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  retval = connect(s, master_info->ai_addr, master_info->ai_addrlen);
-  if (retval < 0) {
-    perror("connect");
-    exit(retval);
-  }
 
   listen_port = 0;
   listen_socket = setup_listener(&listen_port);
@@ -102,7 +83,7 @@ int main (int argc, char *argv[]) {
   // int one = 1;
   // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
-  send_player_info(s);
+  send_player_info(master_info);
   recv_player_info(listen_socket);
   // read_and_send(s);
 

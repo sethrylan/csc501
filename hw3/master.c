@@ -63,7 +63,7 @@ void accept_checkin() {
     }
     token = strtok(NULL, "\n");
   }
-  DEBUG_PRINT(">> Connection closed\n");
+  DEBUG_PRINT(">> Checkin finished\n");
   players_connected++;
 }
 

@@ -201,7 +201,6 @@ void read_message(int socket_fd, char *message, size_t buffer_size) {
 
     if (num_bytes == 0) {
       close(socket_fd);
-      printf(">> Connection closed\n");
       return;
     }
 
