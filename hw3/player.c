@@ -18,20 +18,20 @@ int s;     // socket file descriptor
 int listen_socket;
 int listen_port;
 
-// Send "close" command to master
-void close_player() {
-  int len = send(s, "close", 5, 0);
+// Send "close" command to master and close socket
+void close_player(int socket_fd) {
+  int len = send(socket_fd, "close", 5, 0);
   if (len != 5) {
     perror("send");
     exit(1);
   }
-  close(s);
+  close(socket_fd);
   exit(0);
 }
 
 // SIGINT (^c) handler
 void intHandler() {
-  close_player();
+  close_player(s);
 }
 
 // read a string from the terminal and send on socket
@@ -111,6 +111,6 @@ int main (int argc, char *argv[]) {
   // send_player_info(s);
   read_and_send(s);
 
-  close_player();
+  close_player(s);
   return 0;    // never reachs here
 }
