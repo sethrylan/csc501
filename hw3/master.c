@@ -69,26 +69,8 @@ void accept_checkin() {
 
 void send_info_to_player(int player_number) {
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
-  struct addrinfo *address = players[player_number].address_info;
-  int s = socket(AF_INET, SOCK_STREAM, 0);
-  if (s < 0) {
-    perror("socket");
-    exit(s);
-  }
-
-  // connect to socket at addr and port
-  // if connect() succeeds, then value of 0 is returned, otherwise -1 is returned and errno is set.
-  int retval = connect(s, address->ai_addr, address->ai_addrlen);
-  if (retval < 0) {
-    perror("connect");
-    exit(retval);
-  }
-
-  send_message(s, "YOUARE:1\n");
-  send_message(s, "L:66666\n");
-  send_message(s, "R:55555\n");
-
-  close(s);
+  struct addrinfo *player_address = players[player_number].address_info;
+  send_to(player_address, "YOUARE:1\nL:66666\nR:55555\n");
 }
 
 int main (int argc, char *argv[]) {
