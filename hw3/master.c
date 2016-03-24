@@ -16,7 +16,7 @@ int listen_socket;  // socket file descriptor
 
 // game state
 int num_players, hops, players_connected;
-player* players;
+struct addrinfo** players;
 
 // SIGINT (^c) handler
 void intHandler() {
@@ -55,9 +55,8 @@ void accept_checkin() {
       char *port_string = malloc(10);
       strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
       DEBUG_PRINT("Adding player #%d as %s:%s\n", players_connected, host, port_string);
-      struct addrinfo *player_listner = gethostaddrinfo(host, atoi(port_string));
-      players[players_connected].address_info = player_listner;
-      players[players_connected].player_id = players_connected;
+      struct addrinfo *player_listener = gethostaddrinfo(host, atoi(port_string));
+      players[players_connected] = player_listener;
     }
     token = strtok(NULL, "\n");
   }
@@ -67,9 +66,9 @@ void accept_checkin() {
 
 void send_info_to_player(int player_number) {
   char host[HOSTNAME_LENGTH], service[20], str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
-  struct addrinfo *player_address = players[player_number].address_info;
-  struct addrinfo *left_address   = players[(player_number-1)%num_players].address_info;
-  struct addrinfo *right_address  = players[(player_number+1)%num_players].address_info;
+  struct addrinfo *player_address = players[player_number];
+  struct addrinfo *left_address   = players[(player_number-1)%num_players];
+  struct addrinfo *right_address  = players[(player_number+1)%num_players];
 
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
 
@@ -82,7 +81,7 @@ void send_info_to_player(int player_number) {
   sprintf(right_address_str, "%s:%s", host, service);
 
   // compose complete message
-  sprintf(str, "%s:%d\n%s%s\n%s%s\n", ID_PREFIX, player_number, LEFT_ADDRESS_PREFIX, left_address_str, RIGHT_ADDRESS_PREFIX, right_address_str);
+  sprintf(str, "%s%d\n%s%s\n%s%s\n", ID_PREFIX, player_number, LEFT_ADDRESS_PREFIX, left_address_str, RIGHT_ADDRESS_PREFIX, right_address_str);
 
   send_to(player_address, str);
 }
@@ -109,7 +108,7 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  players = malloc(sizeof(player) * num_players);
+  players = malloc(sizeof(struct addrinfo*) * num_players);
 
   listen_socket = setup_listener(&listen_port);
 
@@ -132,6 +131,7 @@ int main (int argc, char *argv[]) {
 
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);
+
 
   free(players);
   exit(0);

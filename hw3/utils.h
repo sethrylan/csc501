@@ -16,11 +16,6 @@
 #define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<player_number>,<player_number>,..."
 
 typedef struct {
-  int player_id;
-  struct addrinfo *address_info;
-} player;
-
-typedef struct {
   int hops;
   int *identities;
 } potato;

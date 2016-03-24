@@ -111,10 +111,10 @@ struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
     exit(retval);
   }
 
-  struct addrinfo *p;
-  for(p = server_info; p != NULL; p = p->ai_next) {
-    DEBUG_PRINT("p->ai_canonname = %s\n", p->ai_canonname);
-  }
+  // struct addrinfo *p;
+  // for(p = server_info; p != NULL; p = p->ai_next) {
+  //   DEBUG_PRINT("p->ai_canonname = %s\n", p->ai_canonname);
+  // }
   return server_info;
 }
 
