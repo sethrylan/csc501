@@ -170,7 +170,7 @@ int setup_listener(in_port_t *listen_port) {
     perror("getsockname");
   }
   else {
-    DEBUG_PRINT("port number %d\n", ntohs(sin.sin_port));
+    DEBUG_PRINT("setup_listener(): port number %d\n", ntohs(sin.sin_port));
     *listen_port = ntohs(sin.sin_port);
   }
 
@@ -183,7 +183,7 @@ int setup_listener(in_port_t *listen_port) {
 void send_message(int socket_fd, char* message) {
   unsigned long len;
   len = send(socket_fd, message, strlen(message), 0);
-  DEBUG_PRINT("len = %lu\n", len);
+  DEBUG_PRINT("send_message(): len = %lu\n", len);
   if (len != strlen(message)) {
     perror("send");
     exit(1);
@@ -206,7 +206,7 @@ void read_message(int socket_fd, char *message, size_t buffer_size) {
       perror("recv");
       exit(1);
     }
-    DEBUG_PRINT("num_bytes = %d\n", num_bytes);
+    DEBUG_PRINT("read_message(): num_bytes = %d\n", num_bytes);
 
     if (num_bytes == 0) {
       close(socket_fd);

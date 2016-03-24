@@ -50,17 +50,17 @@ void accept_checkin() {
 
   char *token = strtok(buffer, "\n");
   while (token) {
-    DEBUG_PRINT("%s\n", token);
+    DEBUG_PRINT("accept_checkin(): %s\n", token);
     if (begins_with(token, CONNECT_PREFIX)) {
       char *port_string = malloc(10);
       strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
-      DEBUG_PRINT("Adding player #%d as %s:%s\n", players_connected, host, port_string);
+      DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port_string);
       struct addrinfo *player_listener = gethostaddrinfo(host, atoi(port_string));
       players[players_connected] = player_listener;
     }
     token = strtok(NULL, "\n");
   }
-  DEBUG_PRINT(">> Checkin finished\n");
+  DEBUG_PRINT("accept_checkin(): checkins finished\n");
   players_connected++;
 }
 
@@ -132,6 +132,7 @@ int main (int argc, char *argv[]) {
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);
 
+  // send_to(player[first_player], ROUTE_PREFIX);
 
   free(players);
   exit(0);
