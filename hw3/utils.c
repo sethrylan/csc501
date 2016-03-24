@@ -160,3 +160,40 @@ int setup_listener(int *listen_port) {
   return socket_fd;
 }
 
+// Blocks until message and connection close is received, the puts message text into buffer
+// See http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
+// Returns a buffer set to a null-terminated string with commands separated by \n
+void read_message(int socket_fd, char *message, size_t buffer_size) {
+  int m = 0;
+  int num_bytes;
+  char buffer[MAX_RECV_SIZE];
+  bzero(message, buffer_size);
+
+  while (1) {
+    bzero(buffer, MAX_RECV_SIZE);
+    if ((num_bytes = recv(socket_fd, buffer, MAX_RECV_SIZE-1, 0)) < 0) {   // block until input is read from socket
+      perror("recv");
+      exit(1);
+    }
+    DEBUG_PRINT("num_bytes = %d\n", num_bytes);
+
+    if (num_bytes == 0) {
+      close(socket_fd);
+      printf(">> Connection closed\n");
+      return;
+    }
+
+    buffer[num_bytes] = '\0';
+    char *token = strtok(buffer, "\n");
+    while (token) {
+      if (!strcmp("close", token)) {
+        close(socket_fd);
+        return;
+      } else {
+        sprintf(message + m, "%s\n", token);
+        m += strlen(token) + 1;
+      }
+      token = strtok(NULL, "\n");
+    }
+  }
+}

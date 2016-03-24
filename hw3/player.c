@@ -63,6 +63,10 @@ void send_player_info(int socket_fd) {
   }
 }
 
+void recv_player_number(int socket_fd) {
+
+}
+
 int main (int argc, char *argv[]) {
   int retval;
   struct addrinfo *master_info;
@@ -108,6 +112,7 @@ int main (int argc, char *argv[]) {
   printf("Connected as player %d\n", 1);
 
   send_player_info(s);
+  recv_player_number(s);
   // read_and_send(s);
 
   close_player(s);

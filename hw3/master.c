@@ -31,7 +31,6 @@ void intHandler() {
 void accept_checkin() {
   char buffer[512];
   socklen_t len;
-  int num_bytes;
   int accept_fd;
   struct sockaddr_in incoming;
 
@@ -49,36 +48,16 @@ void accept_checkin() {
   printf("player %d is on %s\n", players_connected, host);
   players_connected++;
 
-  /* read and print strings sent over the connection */
-  // http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#sendrecv
-  while (1) {
-    bzero(buffer, 512);
-    if ((num_bytes = recv(accept_fd, buffer, 512, 0)) < 0) {   // block until input is read from socket
-      perror("recv");
-      exit(1);
-    }
-    DEBUG_PRINT("num_bytes = %d\n", num_bytes);
 
-    if (num_bytes == 0) {
-      close(accept_fd);
-      printf(">> Connection closed\n");
-      return;
-    }
+  read_message(accept_fd, buffer, 512);
 
-    buffer[num_bytes] = '\0';
-    char *token = strtok(buffer, "\n");
-    while (token) {
-      if (!strcmp("close", token)) {
-        close(accept_fd);
-        printf(">> Connection closed\n");
-        return;
-      } else {
-        printf("%s\n", token);
-      }
-      token = strtok(NULL, "\n");
-    }
-
+  char *token = strtok(buffer, "\n");
+  while (token) {
+    printf("%s\n", token);
+    token = strtok(NULL, "\n");
   }
+  printf(">> Connection closed\n");
+
 }
 
 int main (int argc, char *argv[]) {
@@ -115,6 +94,8 @@ int main (int argc, char *argv[]) {
     accept_checkin();
   }
 
+  //TODO: int seed = 42;
+  // srand(seed);
   int first_player = randr(0, num_players-1);
 
   // REQUIRED OUTPUT

@@ -7,6 +7,7 @@
 #endif
 
 #define HOSTNAME_LENGTH 64
+#define MAX_RECV_SIZE 512
 
 typedef struct {
   int player_id;
@@ -25,3 +26,4 @@ unsigned int randr(unsigned int min, unsigned int max);
 struct addrinfo *gethostaddrinfo(const char *hostname, int port);
 char *gethostcanonicalname(const char *hostname, int port);
 int setup_listener(int *listen_port);
+void read_message(int socket_fd, char *message, size_t buffer_size);
