@@ -83,15 +83,17 @@ void recv_messages(int listen_socket_fd) {
       if (begins_with(token, LEFT_ADDRESS_PREFIX) || begins_with(token, RIGHT_ADDRESS_PREFIX)) {
         char host[HOSTNAME_LENGTH];
         char prefix[strlen(LEFT_ADDRESS_PREFIX)];
-        int port;
+        int port, neighbor_number;
 
-        sscanf(token, "%[^:]:%[^:]:%d", prefix, host, &port);  // see https://en.wikipedia.org/wiki/Scanf_format_string
+        sscanf(token, "%[^:]:%d:%[^:]:%d", prefix, &neighbor_number, host, &port);  // see https://en.wikipedia.org/wiki/Scanf_format_string
 
         // DEBUG_PRINT("recv_messages(): %s is %s:%d\n", prefix, host, port)
         if (begins_with(LEFT_ADDRESS_PREFIX, prefix)) {
           left_addrinfo = gethostaddrinfo(host, port);
+          left_player_number = neighbor_number;
         } else if (begins_with(RIGHT_ADDRESS_PREFIX, prefix)) {
           right_addrinfo = gethostaddrinfo(host, port);
+          right_player_number = neighbor_number;
         }
       }
 
@@ -135,10 +137,10 @@ void recv_messages(int listen_socket_fd) {
         } else {
           int left = randr(0, 1, 42);
           if (left) {
-            printf("Sending potato LEFT\n");
+            printf("Sending potato to %d\n", left_player_number);
             send_to(left_addrinfo, message);
           } else {
-            printf("Sending potato RIGHT\n");
+            printf("Sending potato to %d\n", right_player_number);
             send_to(right_addrinfo, message);
           }
         }

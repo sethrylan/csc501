@@ -95,20 +95,22 @@ void recv_messages(int listen_socket_fd) {
 
 
 void send_info_to_player(int player_number) {
-  char host[HOSTNAME_LENGTH], service[20], str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
+  char host[HOSTNAME_LENGTH], service[20], str[250], left_address_str[100], right_address_str[100];
   struct addrinfo *player_address = players[player_number];
-  struct addrinfo *left_address   = players[(player_number-1)%num_players];
-  struct addrinfo *right_address  = players[(player_number+1)%num_players];
+  int left_player_number  = (player_number - 1) % num_players;
+  int right_player_number = (player_number + 1) % num_players;
+  struct addrinfo *left_address   = players[left_player_number];
+  struct addrinfo *right_address  = players[right_player_number];
 
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
 
   // compose left_address_str for left neighbor
   getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
-  sprintf(left_address_str, "%s:%s", host, service);
+  sprintf(left_address_str, "%d:%s:%s", left_player_number, host, service);
 
   // compose right_address_str for right neighbor
   getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
-  sprintf(right_address_str, "%s:%s", host, service);
+  sprintf(right_address_str, "%d:%s:%s", right_player_number, host, service);
 
   // compose complete message
   sprintf(str, "%s%d\n%s%s\n%s%s\n", ID_PREFIX, player_number, LEFT_ADDRESS_PREFIX, left_address_str, RIGHT_ADDRESS_PREFIX, right_address_str);
