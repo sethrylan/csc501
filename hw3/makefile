@@ -1,9 +1,9 @@
-CC				= gcc
-CFLAGS		= -Wall -Wextra -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
-SRC				= master.c player.c
-rm				= rm -f
-DIFF			= diff -w
-SHELL			= /bin/bash
+CC        = gcc
+CFLAGS    = -Wall -Wextra -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
+SRC       = master.c player.c
+rm        = rm -f
+DIFF      = diff -w
+SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
 
