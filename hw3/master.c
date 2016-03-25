@@ -34,11 +34,11 @@ void intHandler() {
   close_master();
 }
 
-/*
- * Blocks until num_player connections are created and closed.
- * Expects listen_address and listen_socket to be initialized.
- * Initializes the player state for master.
- */
+//
+// Blocks until num_player connections are created and closed.
+// Expects listen_address and listen_socket to be initialized.
+// Initializes the player state for master.
+//
 void accept_checkin() {
   char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;
@@ -136,7 +136,7 @@ int main (int argc, char *argv[]) {
 
   players_connected = 0;
 
-  /* read port number from command line */
+  // read port number from command line
   if (argc < 4) {
     fprintf(stderr, "Usage: %s <port-number> <number-of-players> <hops>\n", argv[0]);
     exit(1);
@@ -160,7 +160,7 @@ int main (int argc, char *argv[]) {
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
-  /* accept connections */
+  // accept connections
   while (players_connected < num_players) {
     accept_checkin();
   }

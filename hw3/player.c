@@ -149,7 +149,7 @@ void recv_messages(int listen_socket_fd) {
 int main (int argc, char *argv[]) {
   signal(SIGINT, intHandler);
 
-  /* read host and port number from command line */
+  // read host and port number from command line
   if (argc != 3) {
     fprintf(stderr, "Usage: %s <master-machine-name> <port-number>\n", argv[0]);
     exit(1);
@@ -157,11 +157,8 @@ int main (int argc, char *argv[]) {
 
   master_info = gethostaddrinfo(argv[1], atoi(argv[2]));
 
-  listen_port = 0;
+  listen_port = 0;   // pass 0 to be assigned port in ephemeral range
   listen_socket = setup_listener(&listen_port);
-
-  // int one = 1;
-  // setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
   // Uncomment to enable an interactive write to the socket // read_and_send(s);
 

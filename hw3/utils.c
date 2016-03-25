@@ -29,7 +29,7 @@ size_t join_integers(const unsigned int *num, size_t num_len, char *buf, size_t 
   return written;
 }
 
-/* reverse:  reverse string s in place */
+// reverse:  reverse string s in place
 void reverse(char s[]) {
   int i, j;
   char c;
@@ -44,12 +44,12 @@ void reverse(char s[]) {
 // K&R implementation
 void itoa(int n, char s[]) {
   int i, sign;
-  if ((sign = n) < 0)  /* record sign */
-    n = -n;          /* make n positive */
+  if ((sign = n) < 0)  // record sign
+    n = -n;            // make n positive
   i = 0;
-  do {       /* generate digits in reverse order */
-    s[i++] = n % 10 + '0';   /* get next digit */
-  } while ((n /= 10) > 0);     /* delete it */
+  do {                 //generate digits in reverse order
+    s[i++] = n % 10 + '0';   // get next digit
+  } while ((n /= 10) > 0);   // delete it
   if (sign < 0)
     s[i++] = '-';
   s[i] = '\0';
@@ -130,14 +130,14 @@ char *gethostcanonicalname(const char *hostname, in_port_t port) {
   return canonname;
 }
 
-/* Open a socket for listening
- *  1. create socket
- *  2. bind it to an address/port
- *  3. listen
- *
- * Initializes listen_address variable and sets listen_port if assigned.
- * Returns file descriptor for listen socket, or -1 if not able to listen
- */
+// Open a socket for listening
+//  1. create socket
+//  2. bind it to an address/port
+//  3. listen
+//
+// Initializes listen_address variable and sets listen_port if assigned.
+// Returns file descriptor for listen socket, or -1 if not able to listen
+//
 int setup_listener(in_port_t *listen_port) {
   int retval;
 
@@ -245,7 +245,7 @@ void send_to(struct addrinfo *host_address, char *message) {
     exit(1);
   }
 
-  /* use address family INET and STREAMing sockets (TCP) */
+  // use address family INET and STREAMing sockets (TCP)
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd < 0) {
     perror("socket:");
