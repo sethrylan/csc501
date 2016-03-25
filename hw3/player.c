@@ -87,7 +87,6 @@ void recv_messages(int listen_socket_fd) {
 
         sscanf(token, "%[^:]:%d:%[^:]:%d", prefix, &neighbor_number, host, &port);  // see https://en.wikipedia.org/wiki/Scanf_format_string
 
-        // DEBUG_PRINT("recv_messages(): %s is %s:%d\n", prefix, host, port)
         if (begins_with(LEFT_ADDRESS_PREFIX, prefix)) {
           left_addrinfo = gethostaddrinfo(host, port);
           left_player_number = neighbor_number;
@@ -113,14 +112,10 @@ void recv_messages(int listen_socket_fd) {
             size_t field_len = strcspn(s, ",");
             if (field_len > 0) {
               DEBUG_PRINT("route[%d] = %.*s\n", i, (int)field_len, s);
-              // printf("%.*s\n", (int)field_len, s);
               s += field_len;
               i++;
-            } else {
-              DEBUG_PRINT("end routes\n");
             }
         } while (*s++);
-
 
         char message[MAX_RECV_SIZE];
         // append this player to the routes list
@@ -130,7 +125,7 @@ void recv_messages(int listen_socket_fd) {
           sprintf(message, "%s,%d", token, player_number);
         }
 
-        if (i == hops) {
+        if (i == hops - 1) {
           // REQUIRED OUTPUT
           printf("I'm it\n");
           send_to(master_info, message);
@@ -147,7 +142,7 @@ void recv_messages(int listen_socket_fd) {
       }
       token = strtok(NULL, "\n");
     }
-    // TODO: free(token);
+    free(token);
   }
 }
 

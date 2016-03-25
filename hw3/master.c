@@ -83,13 +83,14 @@ void recv_messages(int listen_socket_fd) {
       DEBUG_PRINT("recv_player_info(): %s\n", token);
       if (begins_with(token, ROUTE_PREFIX)) {
 
+        // REQUIRED output
         printf("Trace of potato:\n");
-        // TODO: print trace
+        printf("%s\n", token + strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 1);
         return;
       }
       token = strtok(NULL, "\n");
     }
-    // TODO: free(token);
+    free(token);
   }
 }
 
