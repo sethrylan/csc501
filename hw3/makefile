@@ -44,7 +44,7 @@ signcode:
 	codesign --force -s $(CERT_NAME) ./player
 
 clean:
-	$(RM) listen speak master player *.o
+	$(RM) listen speak master player *.o *.testoutput
 
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
