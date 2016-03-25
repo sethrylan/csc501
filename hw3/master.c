@@ -18,10 +18,20 @@ int listen_socket;  // socket file descriptor
 int num_players, hops, players_connected;
 struct addrinfo** players;
 
+
+void close_master() {
+  int i;
+  for (i = 0; i < num_players; i++) {
+    send_to(players[i], CLOSE);
+  }
+  close(listen_socket);
+  free(players);
+  exit(0);
+}
+
 // SIGINT (^c) handler
 void intHandler() {
-  close(listen_socket);
-  exit(0);
+  close_master();
 }
 
 /*
@@ -146,7 +156,7 @@ int main (int argc, char *argv[]) {
   listen_socket = setup_listener(&listen_port);
 
   // REQUIRED OUTPUT
-  printf("Potato Master on %s\n", gethostcanonicalname("localhost", 9999));   // This is the “official” name of the host.
+  printf("Potato Master on %s\n", gethostcanonicalname("localhost", listen_port));   // This is the “official” name of the host.
   printf("Players = %d\n", num_players);
   printf("Hops = %d\n", hops);
 
@@ -170,11 +180,5 @@ int main (int argc, char *argv[]) {
   send_to(players[first_player], str);
 
   recv_messages(listen_socket);
-
-  for (i = 0; i < num_players; i++) {
-    send_to(players[i], CLOSE);
-  }
-  close(listen_socket);
-  free(players);
-  exit(0);
+  close_master();
 }

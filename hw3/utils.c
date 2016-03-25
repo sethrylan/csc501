@@ -93,14 +93,6 @@ void * get_addr(struct sockaddr *sa) {
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-// get port, IPv4 or IPv6
-in_port_t get_port(struct sockaddr *sa) {
-  if (sa->sa_family == AF_INET) {
-    return (((struct sockaddr_in*)sa)->sin_port);
-  }
-  return (((struct sockaddr_in6*)sa)->sin6_port);
-}
-
 struct addrinfo *gethostaddrinfo(const char *hostname, int port) {
   struct addrinfo hints, *server_info;
   int retval;
@@ -192,14 +184,12 @@ int setup_listener(in_port_t *listen_port) {
   return socket_fd;
 }
 
-
 void send_message(int socket_fd, char* message) {
   unsigned long len;
   len = send(socket_fd, message, strlen(message), 0);
   DEBUG_PRINT("send_message(): len = %lu\n", len);
   if (len != strlen(message)) {
     perror("send");
-    exit(1);
   }
 }
 
