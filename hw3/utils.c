@@ -17,46 +17,17 @@ void die (const char *msg) {
 }
 
 // see http://stackoverflow.com/questions/1745811/using-c-convert-a-dynamically-allocated-int-array-to-a-comma-separated-string-a
-// size_t join_integers(const unsigned int *num, size_t num_len, char *buf, size_t buf_len) {
-//   size_t i;
-//   unsigned int written = 0;
-//   for(i = 0; i < num_len; i++) {
-//     written += snprintf(buf + written, buf_len - written, (i != 0 ? ", %u" : "%u"), *(num + i));
-//     if(written == buf_len) {
-//       break;
-//     }
-//   }
-//   return written;
-// }
-
-// size_t atoil(char* string, int *ints) {
-//   char* token;
-//   while (token = strsep(&string, ",")) {
-    
-//   }
-
-// }
-
-// char* serialize_route(route *r) {
-//   int len = r->hops * 5;
-//   char *result = malloc(strlen(ROUTE_PREFIX) + len + r->hops/10 + 1);
-//   char *route_str = malloc(len);
-//   join_integers(r->route, r->hops, route_str, len);
-//   sprintf(result, "%s%d:%s", ROUTE_PREFIX, r->hops, route_str);
-//   return result;
-// }
-
-// route * deserialize_route(char *string) {
-//   route *r = malloc(sizeof(route));
-//   char *token;
-//   token = strsep(&string, ":");
-//   token = strsep(&string, ":");
-//   r->hops = atoi(token);
-//   token = strsep(&string, ":");
-//   free(token);
-//   return r;
-// }
-
+size_t join_integers(const unsigned int *num, size_t num_len, char *buf, size_t buf_len) {
+  size_t i;
+  unsigned int written = 0;
+  for(i = 0; i < num_len; i++) {
+    written += snprintf(buf + written, buf_len - written, (i != 0 ? ", %u" : "%u"), *(num + i));
+    if(written == buf_len) {
+      break;
+    }
+  }
+  return written;
+}
 
 /* reverse:  reverse string s in place */
 void reverse(char s[]) {
