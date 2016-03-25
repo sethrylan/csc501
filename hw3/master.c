@@ -155,7 +155,7 @@ int main (int argc, char *argv[]) {
     printf("All players present, sending potato to player %d\n", first_player);
 
     char str[strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 10];
-    sprintf(str, "%s%0*d:\n", ROUTE_PREFIX, MAX_HOPS_STRLEN, hops);  // todo: MAX_HOPS_STRLEN
+    sprintf(str, "%s%0*d:\n", ROUTE_PREFIX, MAX_HOPS_STRLEN, hops);
     send_to(players[first_player], str);
 
     recv_messages(listen_socket);
