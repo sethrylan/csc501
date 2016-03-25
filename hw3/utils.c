@@ -16,6 +16,11 @@ void die (const char *msg) {
   exit(EXIT_FAILURE);
 }
 
+int mod(int a, int b) {
+  int m = a % b;
+  return m < 0 ? m + b : m;
+}
+
 // see http://stackoverflow.com/questions/1745811/using-c-convert-a-dynamically-allocated-int-array-to-a-comma-separated-string-a
 size_t join_integers(const unsigned int *num, size_t num_len, char *buf, size_t buf_len) {
   size_t i;

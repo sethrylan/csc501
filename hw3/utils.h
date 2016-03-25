@@ -21,7 +21,7 @@
 #define CLOSE                  "CLOSE"      // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
 
 void die (const char *msg);
-// char* serialize_route(route *x);
+int mod(int a, int b);
 int matches (const char *string, const char *compare);
 int begins_with(const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max, int seed);

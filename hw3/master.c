@@ -83,8 +83,8 @@ void recv_messages(int listen_socket_fd) {
 void send_info_to_player(int player_number) {
   char host[HOSTNAME_LENGTH], service[20], str[250], left_address_str[100], right_address_str[100];
   struct addrinfo *player_address = players[player_number];
-  int left_player_number  = (player_number - 1) % num_players;
-  int right_player_number = (player_number + 1) % num_players;
+  int left_player_number  = mod(player_number - 1, num_players);
+  int right_player_number = mod(player_number + 1, num_players);
   struct addrinfo *left_address   = players[left_player_number];
   struct addrinfo *right_address  = players[right_player_number];
 
