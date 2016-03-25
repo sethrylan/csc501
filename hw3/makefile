@@ -61,6 +61,12 @@ testusage: master player
 	$(DIFF) player0.testoutput tests/1p0h/player0.output && \
 	echo "OK PASS";
 
+1p100h: master player
+	./master 9999 1 100 > master.testoutput & ./player localhost 9999 > player0.testoutput && \
+	$(DIFF) master.testoutput tests/1p100h/master.output && \
+	$(DIFF) player0.testoutput tests/1p100h/player0.output && \
+	echo "OK PASS";
+
 2p1h: master player
 	./master 9999 2 1 > master.testoutput & ./player localhost 9999 > player0.testoutput & ./player localhost 9999 > player1.testoutput && \
 	$(DIFF) master.testoutput tests/2p1h/master.output && \
