@@ -18,10 +18,9 @@ int listen_socket;  // socket file descriptor
 int num_players, hops, players_connected;
 struct addrinfo** players;
 
-
 void close_master() {
   int i;
-  for (i = 0; i < num_players; i++) {
+  for (i = 0; i < players_connected; i++) {
     send_to(players[i], CLOSE);
   }
   close(listen_socket);
@@ -172,13 +171,20 @@ int main (int argc, char *argv[]) {
 
   int first_player = randr(0, num_players-1, 42);
 
-  // REQUIRED OUTPUT
-  printf("All players present, sending potato to player %d\n", first_player);
+  // "Zero (0) is a valid number of hops. In this case, your program must
+  // create the ring of processes. After the ring is created, the ringmaster
+  // shuts down the game.""
+  if (hops > 0) {
+    // REQUIRED OUTPUT
+    printf("All players present, sending potato to player %d\n", first_player);
 
-  char str[strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 10];
-  sprintf(str, "%s%0*d:\n", ROUTE_PREFIX, MAX_HOPS_STRLEN, hops);  // todo: MAX_HOPS_STRLEN
-  send_to(players[first_player], str);
+    char str[strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 10];
+    sprintf(str, "%s%0*d:\n", ROUTE_PREFIX, MAX_HOPS_STRLEN, hops);  // todo: MAX_HOPS_STRLEN
+    send_to(players[first_player], str);
 
-  recv_messages(listen_socket);
+    recv_messages(listen_socket);
+
+  }
+
   close_master();
 }
