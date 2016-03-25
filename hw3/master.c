@@ -64,7 +64,6 @@ void accept_checkin() {
   players_connected++;
 }
 
-// TODO: combine with accept_checkin
 void recv_messages(int listen_socket_fd) {
   char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;

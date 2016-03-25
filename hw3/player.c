@@ -122,7 +122,11 @@ void recv_messages(int listen_socket_fd) {
 
         char message[MAX_RECV_SIZE];
         // append this player to the routes list
-        sprintf(message, "%s,%d", token, player_number);
+        if (i == 0) {
+          sprintf(message, "%s%d", token, player_number);
+        } else {
+          sprintf(message, "%s,%d", token, player_number);
+        }
 
         if (i == hops) {
           // REQUIRED OUTPUT
