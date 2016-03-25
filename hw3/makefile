@@ -49,7 +49,7 @@ clean:
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
 
-test: all testusage 1p0h 2p1h
+test: all testusage 1p0h 1p100h 2p1h
 
 testusage: master player
 	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \

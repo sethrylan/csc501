@@ -1,19 +1,7 @@
-setup_listener(): port number 9999
 Potato Master on localhost
 Players = 1
 Hops = 100
-read_message(): num_bytes = 14
-read_message(): num_bytes = 0
-recv_player_info(): CONNECT:51560
 player 0 is on localhost
-accept_checkin(): Adding player #0 as localhost:51560
-send_info_to_player(0)
-send_message(): len = 57
 All players present, sending potato to player 0
-send_message(): len = 13
-read_message(): num_bytes = 211
-read_message(): num_bytes = 0
-recv_player_info(): ROUTE:00100:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Trace of potato:
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-send_message(): len = 5
