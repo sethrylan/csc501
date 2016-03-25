@@ -49,9 +49,14 @@ clean:
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
 
-test: testusage
+test: all testusage test-player1-hops0
 
 testusage: master player
 	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \
 	./player 2>&1 | $(DIFF) - tests/player_usage.output && echo "OK PASS";
 
+test-player1-hops0: master player
+	./master 9999 1 0 > master.testoutput & ./player localhost 9999 > player.testoutput && \
+	$(DIFF) master.testoutput tests/master_1_0.output && \
+	$(DIFF) player.testoutput tests/player0_1_0.output && \
+	echo "OK PASS";
