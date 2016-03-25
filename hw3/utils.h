@@ -9,18 +9,26 @@
 #define HOSTNAME_LENGTH 64
 #define MAX_RECV_SIZE 512
 
+#define MAX_HOPS 10000
+#define MAX_HOPS_STRLEN 5
+
+#define MAX_PLAYERS 1000
+
 #define CONNECT_PREFIX         "CONNECT:"   // format: "<prefix>:<listen_port>"
 #define ID_PREFIX              "YOUARE:"    // format: "<prefix>:<player_number>"
 #define LEFT_ADDRESS_PREFIX    "LADDR:"     // format: "<prefix>:<host>:<port>"
 #define RIGHT_ADDRESS_PREFIX   "RADDR:"     // format: "<prefix>:<host>:<port>"
-#define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<player_number>,<player_number>,..."
+#define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
+#define CLOSE                  "CLOSE"     // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
 
-typedef struct {
-  int hops;
-  int *identities;
-} potato;
+
+// typedef struct {
+//   unsigned int hops;
+//   unsigned int *route;
+// } route;
 
 void die (const char *msg);
+// char* serialize_route(route *x);
 int matches (const char *string, const char *compare);
 int begins_with(const char *string, const char *compare);
 unsigned int randr(unsigned int min, unsigned int max, int seed);

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -12,8 +12,8 @@
 
 int listen_socket;
 in_port_t listen_port;
-int player_number;
-struct addrinfo *left_addrinfo, *right_addrinfo;
+int player_number, left_player_number, right_player_number;
+struct addrinfo *left_addrinfo, *right_addrinfo, *master_info;
 
 // Send "close" command to master and close socket
 void close_player(int socket_fd) {
@@ -54,7 +54,6 @@ void recv_messages(int listen_socket_fd) {
   socklen_t len = sizeof(incoming);
 
   while (1) {
-
     int accept_fd = accept(listen_socket_fd, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
     if ( accept_fd < 0 ) {
       perror("bind");
@@ -66,6 +65,11 @@ void recv_messages(int listen_socket_fd) {
     char *token = strtok(buffer, "\n");
     while (token) {
       DEBUG_PRINT("recv_player_info(): %s\n", token);
+
+      if (begins_with(token, CLOSE)) {
+        close_player(listen_socket);
+      }
+
       if (begins_with(token, ID_PREFIX)) {
         char *player_number_str = malloc(10);
         strncpy(player_number_str, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
@@ -75,14 +79,73 @@ void recv_messages(int listen_socket_fd) {
         // REQUIRED OUTPUT
         printf("Connected as player %d\n", player_number);
       }
+
+      if (begins_with(token, LEFT_ADDRESS_PREFIX) || begins_with(token, RIGHT_ADDRESS_PREFIX)) {
+        char host[HOSTNAME_LENGTH];
+        char prefix[strlen(LEFT_ADDRESS_PREFIX)];
+        int port;
+
+        sscanf(token, "%[^:]:%[^:]:%d", prefix, host, &port);  // see https://en.wikipedia.org/wiki/Scanf_format_string
+
+        // DEBUG_PRINT("recv_messages(): %s is %s:%d\n", prefix, host, port)
+        if (begins_with(LEFT_ADDRESS_PREFIX, prefix)) {
+          left_addrinfo = gethostaddrinfo(host, port);
+        } else if (begins_with(RIGHT_ADDRESS_PREFIX, prefix)) {
+          right_addrinfo = gethostaddrinfo(host, port);
+        }
+      }
+
+      if (begins_with(token, ROUTE_PREFIX)) {
+        char hops_str[MAX_HOPS_STRLEN];
+        int hops;
+        int *route;
+
+        strncpy(hops_str, token + strlen(ROUTE_PREFIX), MAX_HOPS_STRLEN);
+        DEBUG_PRINT("recv_messages(): hops_str = %s\n", hops_str);
+        hops = atoi(hops_str);
+        route = malloc(sizeof(int) * hops);
+
+        int i = 0;
+        const char *s = token + strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 1;
+        do {
+            size_t field_len = strcspn(s, ",");
+            if (field_len > 0) {
+              DEBUG_PRINT("route[%d] = %.*s\n", i, (int)field_len, s);
+              // printf("%.*s\n", (int)field_len, s);
+              s += field_len;
+              i++;
+            } else {
+              DEBUG_PRINT("end routes\n");
+            }
+        } while (*s++);
+
+
+        char message[MAX_RECV_SIZE];
+        // append this player to the routes list
+        sprintf(message, "%s,%d", token, player_number);
+
+        if (i == hops) {
+          // REQUIRED OUTPUT
+          printf("I'm it\n");
+          send_to(master_info, message);
+        } else {
+          int left = randr(0, 1, 42);
+          if (left) {
+            printf("Sending potato LEFT\n");
+            send_to(left_addrinfo, message);
+          } else {
+            printf("Sending potato RIGHT\n");
+            send_to(right_addrinfo, message);
+          }
+        }
+      }
       token = strtok(NULL, "\n");
     }
+    // TODO: free(token);
   }
 }
 
 int main (int argc, char *argv[]) {
-  struct addrinfo *master_info;
-
   signal(SIGINT, intHandler);
 
   /* read host and port number from command line */
@@ -103,7 +166,6 @@ int main (int argc, char *argv[]) {
 
   send_player_info(master_info);
   recv_messages(listen_socket);   // wait for messages (potato/route/close)
-
   close_player(listen_socket);
   return 0;    // never reachs here
 }

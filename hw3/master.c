@@ -64,6 +64,37 @@ void accept_checkin() {
   players_connected++;
 }
 
+// TODO: combine with accept_checkin
+void recv_messages(int listen_socket_fd) {
+  char buffer[MAX_RECV_SIZE];
+  struct sockaddr_in incoming;
+  socklen_t len = sizeof(incoming);
+
+  while (1) {
+    int accept_fd = accept(listen_socket_fd, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
+    if ( accept_fd < 0 ) {
+      perror("bind");
+      exit(accept_fd);
+    }
+
+    read_message(accept_fd, buffer, MAX_RECV_SIZE);
+
+    char *token = strtok(buffer, "\n");
+    while (token) {
+      DEBUG_PRINT("recv_player_info(): %s\n", token);
+      if (begins_with(token, ROUTE_PREFIX)) {
+
+        printf("Trace of potato:\n");
+        // TODO: print trace
+        return;
+      }
+      token = strtok(NULL, "\n");
+    }
+    // TODO: free(token);
+  }
+}
+
+
 void send_info_to_player(int player_number) {
   char host[HOSTNAME_LENGTH], service[20], str[200], left_address_str[INET_ADDRSTRLEN], right_address_str[INET_ADDRSTRLEN];
   struct addrinfo *player_address = players[player_number];
@@ -102,9 +133,9 @@ int main (int argc, char *argv[]) {
   num_players = atoi(argv[2]);
   hops = atoi(argv[3]);
 
-  if (num_players < 1 || hops < 0) {
+  if (num_players < 1 || num_players > MAX_PLAYERS || hops < 0 || hops > MAX_HOPS) {
     fprintf(stderr, "Usage: %s <number-of-players> <hops>\n", argv[0]);
-    fprintf(stderr, "‹number-of-players› must be > 0 and ‹hops› must be ≥ 0\n");
+    fprintf(stderr, "‹number-of-players› must be > 0 and ≤ %d and ‹hops› must be ≥ 0 and ≤ %d\n", MAX_PLAYERS, MAX_HOPS);
     exit(1);
   }
 
@@ -132,8 +163,16 @@ int main (int argc, char *argv[]) {
   // REQUIRED OUTPUT
   printf("All players present, sending potato to player %d\n", first_player);
 
-  // send_to(players[first_player], ROUTE_PREFIX);
+  char str[strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 10];
+  sprintf(str, "%s%0*d:\n", ROUTE_PREFIX, MAX_HOPS_STRLEN, hops);  // todo: MAX_HOPS_STRLEN
+  send_to(players[first_player], str);
 
+  recv_messages(listen_socket);
+
+  for (i = 0; i < num_players; i++) {
+    send_to(players[i], CLOSE);
+  }
+  close(listen_socket);
   free(players);
   exit(0);
 }
