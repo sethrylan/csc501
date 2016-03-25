@@ -11,7 +11,6 @@
 
 #define MAX_HOPS 10000
 #define MAX_HOPS_STRLEN 5
-
 #define MAX_PLAYERS 1000
 
 #define CONNECT_PREFIX         "CONNECT:"   // format: "<prefix>:<listen_port>"
@@ -20,12 +19,6 @@
 #define RIGHT_ADDRESS_PREFIX   "RADDR:"     // format: "<prefix>:<player_number>:<host>:<port>"
 #define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
 #define CLOSE                  "CLOSE"      // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
-
-
-// typedef struct {
-//   unsigned int hops;
-//   unsigned int *route;
-// } route;
 
 void die (const char *msg);
 // char* serialize_route(route *x);

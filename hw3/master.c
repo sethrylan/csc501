@@ -33,46 +33,6 @@ void intHandler() {
   close_master();
 }
 
-//
-// Blocks until num_player connections are created and closed.
-// Expects listen_address and listen_socket to be initialized.
-// Initializes the player state for master.
-//
-void accept_checkin() {
-  char buffer[MAX_RECV_SIZE];
-  struct sockaddr_in incoming;
-
-  socklen_t len = sizeof(incoming);
-  int accept_fd = accept(listen_socket, (struct sockaddr *)&incoming, &len);        // block until a client connects to the server, then return new file descriptor
-  if ( accept_fd < 0 ) {
-    perror("bind");
-    exit(accept_fd);
-  }
-
-  char host[HOSTNAME_LENGTH], service[20];
-  getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, 0);
-
-  // REQUIRED output
-  printf("player %d is on %s\n", players_connected, host);
-
-  read_message(accept_fd, buffer, MAX_RECV_SIZE);
-
-  char *token = strtok(buffer, "\n");
-  while (token) {
-    DEBUG_PRINT("accept_checkin(): %s\n", token);
-    if (begins_with(token, CONNECT_PREFIX)) {
-      char *port_string = malloc(10);
-      strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
-      DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port_string);
-      struct addrinfo *player_listener = gethostaddrinfo(host, atoi(port_string));
-      players[players_connected] = player_listener;
-    }
-    token = strtok(NULL, "\n");
-  }
-  DEBUG_PRINT("accept_checkin(): checkins finished\n");
-  players_connected++;
-}
-
 void recv_messages(int listen_socket_fd) {
   char buffer[MAX_RECV_SIZE];
   struct sockaddr_in incoming;
@@ -96,6 +56,22 @@ void recv_messages(int listen_socket_fd) {
         printf("Trace of potato:\n");
         printf("%s\n", token + strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 1);
         return;
+      }
+
+      if (begins_with(token, CONNECT_PREFIX)) {
+          char host[HOSTNAME_LENGTH], service[20];
+          getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, 0);
+
+        // REQUIRED output
+        printf("player %d is on %s\n", players_connected, host);
+
+        char *port_string = malloc(10);
+        strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
+        DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port_string);
+        struct addrinfo *player_listener = gethostaddrinfo(host, atoi(port_string));
+        players[players_connected] = player_listener;
+        players_connected++;
+        return;        /// exit listen loop
       }
       token = strtok(NULL, "\n");
     }
@@ -161,7 +137,7 @@ int main (int argc, char *argv[]) {
 
   // accept connections
   while (players_connected < num_players) {
-    accept_checkin();
+    recv_messages(listen_socket);
   }
 
   int i;
