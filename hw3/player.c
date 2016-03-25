@@ -99,12 +99,10 @@ void recv_messages(int listen_socket_fd) {
       if (begins_with(token, ROUTE_PREFIX)) {
         char hops_str[MAX_HOPS_STRLEN];
         int hops;
-        int *route;
 
         strncpy(hops_str, token + strlen(ROUTE_PREFIX), MAX_HOPS_STRLEN);
         DEBUG_PRINT("recv_messages(): hops_str = %s\n", hops_str);
         hops = atoi(hops_str);
-        route = malloc(sizeof(int) * hops);
 
         int i = 0;
         const char *s = token + strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 1;
