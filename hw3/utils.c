@@ -190,11 +190,25 @@ int setup_listener(in_port_t *listen_port) {
   return socket_fd;
 }
 
+int sendall(int s, char *buf, int *len) {
+  int total = 0;        // how many bytes we've sent
+  int bytesleft = *len; // how many we have left to send
+  int n;
+  while(total < *len) {
+    n = send(s, buf+total, bytesleft, 0);
+    if (n == -1) { break; }
+    total += n;
+    bytesleft -= n;
+  }
+  *len = total;        // return number actually sent here
+  return n==-1?-1:0;   // return -1 on failure, 0 on success
+}
+
 void send_message(int socket_fd, char* message) {
-  unsigned long len;
-  len = send(socket_fd, message, strlen(message), 0);
-  DEBUG_PRINT("send_message(): len = %lu\n", len);
-  if (len != strlen(message)) {
+  int result;
+  int len = strlen(message);
+  result = sendall(socket_fd, message, &len);
+  if (result < 0) {
     perror("send");
   }
 }
