@@ -7,6 +7,7 @@ SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
 SLEEP     = sleep .1
+PORT      = 12345
 
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
@@ -57,19 +58,19 @@ testusage: master player
 	./player 2>&1 | $(DIFF) - tests/player_usage.output && echo "OK PASS";
 
 1p0h: master player
-	./master 9999 1 0 > master.testoutput & ./player localhost 9999 > player0.testoutput && \
+	./master $(PORT) 1 0 > master.testoutput & ./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p0h/master.output && \
 	$(DIFF) player0.testoutput tests/1p0h/player0.output && \
 	echo "OK PASS";
 
 1p100h: master player
-	./master 9999 1 100 > master.testoutput & ./player localhost 9999 > player0.testoutput && \
+	./master $(PORT) 1 100 > master.testoutput & ./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p100h/master.output && \
 	$(DIFF) player0.testoutput tests/1p100h/player0.output && \
 	echo "OK PASS";
 
 1p1000h: master player
-	./master 9999 1 1000 > master.testoutput & ./player localhost 9999 > player0.testoutput && \
+	./master $(PORT) 1 1000 > master.testoutput & ./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p1000h/master.output && \
 	$(DIFF) player0.testoutput tests/1p1000h/player0.output && \
 	echo "OK PASS";
@@ -77,20 +78,20 @@ testusage: master player
 # sleep between connections to ensure that player 0 is registered first
 
 2p1h: master player
-	./master 9999 2 1 > master.testoutput & \
-	./player localhost 9999 > player0.testoutput & \
+	./master $(PORT) 2 1 > master.testoutput & \
+	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
-	./player localhost 9999 > player1.testoutput && \
+	./player localhost $(PORT) > player1.testoutput && \
 	$(DIFF) master.testoutput tests/2p1h/master.output && \
 	$(DIFF) player0.testoutput tests/2p1h/player0.output && \
 	$(DIFF) player1.testoutput tests/2p1h/player1.output && \
 	echo "OK PASS";
 
 2p1000h: master player
-	./master 9999 2 1000 > master.testoutput & \
-	./player localhost 9999 > player0.testoutput & \
+	./master $(PORT) 2 1000 > master.testoutput & \
+	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
-	./player localhost 9999 > player1.testoutput && \
+	./player localhost $(PORT) > player1.testoutput && \
 	$(DIFF) master.testoutput tests/2p1000h/master.output && \
 	$(DIFF) player0.testoutput tests/2p1000h/player0.output && \
 	$(DIFF) player1.testoutput tests/2p1000h/player1.output && \
@@ -98,12 +99,12 @@ testusage: master player
 	echo "OK PASS";
 
 3p100h: master player
-	./master 9999 3 100 > master.testoutput & \
-	./player localhost 9999 > player0.testoutput & \
+	./master $(PORT) 3 100 > master.testoutput & \
+	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
-	./player localhost 9999 > player1.testoutput & \
+	./player localhost $(PORT) > player1.testoutput & \
 	$(SLEEP); \
-	./player localhost 9999 > player2.testoutput && \
+	./player localhost $(PORT) > player2.testoutput && \
 	$(DIFF) master.testoutput tests/3p100h/master.output && \
 	$(DIFF) player0.testoutput tests/3p100h/player0.output && \
 	$(DIFF) player1.testoutput tests/3p100h/player1.output && \
