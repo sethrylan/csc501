@@ -51,7 +51,7 @@ clean:
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
 
-test: all testusage 1p0h 1p100h 1p1000h 2p1h 2p1000h 3p100h
+test: all testusage 1p0h 1p100h 1p1000h 2p1h 2p1000h 3p100h 10p8000h
 
 testusage: master player
 	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \
@@ -120,21 +120,39 @@ testusage: master player
 	$(DIFF) player2.testoutput tests/3p100h/player2.output && \
 	echo "OK PASS";
 
-4p10000h: master player
-	./master $(PORT) 4 10000 > master.testoutput & \
+10p8000h: master player
+	./master $(PORT) 10 8000 > master.testoutput & \
 	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
 	./player localhost $(PORT) > player1.testoutput & \
 	$(SLEEP); \
-	./player localhost $(PORT) > player2.testoutput && \
+	./player localhost $(PORT) > player2.testoutput & \
 	$(SLEEP); \
-	./player localhost $(PORT) > player3.testoutput && \
-	$(DIFF) master.testoutput tests/3p100h/master.output && \
-	$(DIFF) player0.testoutput tests/3p100h/player0.output && \
-	$(DIFF) player1.testoutput tests/3p100h/player1.output && \
-	$(DIFF) player2.testoutput tests/3p100h/player2.output && \
-	$(DIFF) player2.testoutput tests/3p100h/player3.output && \
+	./player localhost $(PORT) > player3.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player4.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player5.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player6.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player7.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player8.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player9.testoutput && \
+	$(DIFF) master.testoutput tests/10p8000h/master.output && \
+	$(DIFF) player0.testoutput tests/10p8000h/player0.output && \
+	$(DIFF) player1.testoutput tests/10p8000h/player1.output && \
+	$(DIFF) player2.testoutput tests/10p8000h/player2.output && \
+	$(DIFF) player3.testoutput tests/10p8000h/player3.output && \
+	$(DIFF) player4.testoutput tests/10p8000h/player4.output && \
+	$(DIFF) player5.testoutput tests/10p8000h/player5.output && \
+	$(DIFF) player6.testoutput tests/10p8000h/player6.output && \
+	$(DIFF) player7.testoutput tests/10p8000h/player7.output && \
+	$(DIFF) player8.testoutput tests/10p8000h/player8.output && \
+	$(DIFF) player9.testoutput tests/10p8000h/player9.output && \
 	echo "OK PASS";
 
 
