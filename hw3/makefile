@@ -7,7 +7,7 @@ SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
 SLEEP     = sleep .1
-PORT      = 12345
+PORT      = 54321
 
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
