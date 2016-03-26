@@ -71,10 +71,8 @@ void recv_messages(int listen_socket_fd) {
       }
 
       if (begins_with(token, ID_PREFIX)) {
-        char *player_number_str = malloc(10);
-        strncpy(player_number_str, token + strlen(ID_PREFIX), strlen(token) - strlen(ID_PREFIX));
-        DEBUG_PRINT("recv_player_info(): player_number = %s\n", player_number_str);
-        player_number = atoi(player_number_str);
+        sscanf(token, "%*[^:]:%d", &player_number);
+        DEBUG_PRINT("recv_player_info(): player_number = %d\n", player_number);
 
         // REQUIRED OUTPUT
         printf("Connected as player %d\n", player_number);
