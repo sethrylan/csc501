@@ -7,7 +7,7 @@
 #endif
 
 #define HOSTNAME_LENGTH 64
-#define MAX_RECV_SIZE 512
+#define MAX_RECV_SIZE 2048
 
 #define MAX_HOPS 10000
 #define MAX_HOPS_STRLEN 5

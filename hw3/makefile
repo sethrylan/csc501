@@ -68,6 +68,12 @@ testusage: master player
 	$(DIFF) player0.testoutput tests/1p100h/player0.output && \
 	echo "OK PASS";
 
+1p1000h: master player
+	./master 9999 1 1000 > master.testoutput & ./player localhost 9999 > player0.testoutput && \
+	$(DIFF) master.testoutput tests/1p1000h/master.output && \
+	$(DIFF) player0.testoutput tests/1p1000h/player0.output && \
+	echo "OK PASS";
+
 # sleep between connections to ensure that player 0 is registered first
 2p1h: master player
 	./master 9999 2 1 > master.testoutput & \
