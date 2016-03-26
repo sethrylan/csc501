@@ -59,6 +59,7 @@ testusage: master player
 
 1p0h: master player
 	./master $(PORT) 1 0 > master.testoutput & \
+	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p0h/master.output && \
 	$(DIFF) player0.testoutput tests/1p0h/player0.output && \
@@ -66,6 +67,7 @@ testusage: master player
 
 1p100h: master player
 	./master $(PORT) 1 100 > master.testoutput & \
+	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p100h/master.output && \
 	$(DIFF) player0.testoutput tests/1p100h/player0.output && \
@@ -73,6 +75,7 @@ testusage: master player
 
 1p1000h: master player
 	./master $(PORT) 1 1000 > master.testoutput & \
+	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput && \
 	$(DIFF) master.testoutput tests/1p1000h/master.output && \
 	$(DIFF) player0.testoutput tests/1p1000h/player0.output && \
@@ -82,6 +85,7 @@ testusage: master player
 
 2p1h: master player
 	./master $(PORT) 2 1 > master.testoutput & \
+	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
 	./player localhost $(PORT) > player1.testoutput && \
