@@ -30,3 +30,5 @@ int setup_listener(in_port_t *listen_port);
 void send_message(int socket_fd, char* message);
 void read_message(int socket_fd, char *message, size_t buffer_size);
 void send_to(struct addrinfo *host_address, char *message);
+void print_if_info();
+void print_addrinfo(struct addrinfo *address);
