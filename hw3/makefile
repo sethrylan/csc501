@@ -50,7 +50,7 @@ clean:
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
 
-test: all testusage 1p0h 1p100h 2p1h
+test: all testusage 1p0h 1p100h 2p1h 3p100h
 
 testusage: master player
 	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \
@@ -72,7 +72,7 @@ testusage: master player
 2p1h: master player
 	./master 9999 2 1 > master.testoutput & \
 	./player localhost 9999 > player0.testoutput & \
-	$(SLEEP) && \
+	$(SLEEP); \
 	./player localhost 9999 > player1.testoutput && \
 	$(DIFF) master.testoutput tests/2p1h/master.output && \
 	$(DIFF) player0.testoutput tests/2p1h/player0.output && \
@@ -80,7 +80,12 @@ testusage: master player
 	echo "OK PASS";
 
 3p100h: master player
-	./master 9999 3 100 > master.testoutput & ./player localhost 9999 > player0.testoutput & $(SLEEP) && ./player localhost 9999 > player1.testoutput & $(SLEEP) && ./player localhost 9999 > player2.testoutput && \
+	./master 9999 3 100 > master.testoutput & \
+	./player localhost 9999 > player0.testoutput & \
+	$(SLEEP); \
+	./player localhost 9999 > player1.testoutput & \
+	$(SLEEP); \
+	./player localhost 9999 > player2.testoutput && \
 	$(DIFF) master.testoutput tests/3p100h/master.output && \
 	$(DIFF) player0.testoutput tests/3p100h/player0.output && \
 	$(DIFF) player1.testoutput tests/3p100h/player1.output && \
