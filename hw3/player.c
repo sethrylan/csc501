@@ -103,7 +103,6 @@ void recv_messages(int listen_socket_fd) {
         do {
             size_t field_len = strcspn(s, ",");
             if (field_len > 0) {
-              // DEBUG_PRINT("route[%d] = %.*s\n", i, (int)field_len, s);
               s += field_len;
               i++;
             }
