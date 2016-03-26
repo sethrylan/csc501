@@ -253,7 +253,7 @@ void send_to(struct addrinfo *host_address, char *message) {
   // use address family INET and STREAMing sockets (TCP)
   int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
   if (socket_fd < 0) {
-    perror("socket:");
+    perror("socket");
     exit(socket_fd);
   }
 
