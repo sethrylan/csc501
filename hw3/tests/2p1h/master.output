@@ -1,8 +1,8 @@
 Potato Master on localhost
 Players = 2
 Hops = 1
-player 0 is on localhost
-player 1 is on localhost
+player 0 is on 127.0.0.1
+player 1 is on 127.0.0.1
 All players present, sending potato to player 0
 Trace of potato:
 0

@@ -60,7 +60,7 @@ void recv_messages(int listen_socket_fd) {
 
       if (begins_with(token, CONNECT_PREFIX)) {
           char host[HOSTNAME_LENGTH], service[20];
-          getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, 0);
+          getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
 
         // REQUIRED output
         printf("player %d is on %s\n", players_connected, host);
