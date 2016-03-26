@@ -108,6 +108,7 @@ testusage: master player
 
 3p100h: master player
 	./master $(PORT) 3 100 > master.testoutput & \
+	$(SLEEP); \
 	./player localhost $(PORT) > player0.testoutput & \
 	$(SLEEP); \
 	./player localhost $(PORT) > player1.testoutput & \
