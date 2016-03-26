@@ -50,7 +50,7 @@ clean:
 tar:
 	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
 
-test: all testusage 1p0h 1p100h 2p1h 3p100h
+test: all testusage 1p0h 1p100h 2p1h
 
 testusage: master player
 	./master 2>&1 | $(DIFF) - tests/master_usage.output && echo "OK PASS" && \
@@ -70,7 +70,10 @@ testusage: master player
 
 # sleep between connections to ensure that player 0 is registered first
 2p1h: master player
-	./master 9999 2 1 > master.testoutput & ./player localhost 9999 > player0.testoutput & $(SLEEP) && ./player localhost 9999 > player1.testoutput && \
+	./master 9999 2 1 > master.testoutput & \
+	./player localhost 9999 > player0.testoutput & \
+	$(SLEEP) && \
+	./player localhost 9999 > player1.testoutput && \
 	$(DIFF) master.testoutput tests/2p1h/master.output && \
 	$(DIFF) player0.testoutput tests/2p1h/player0.output && \
 	$(DIFF) player1.testoutput tests/2p1h/player1.output && \
