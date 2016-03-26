@@ -91,11 +91,11 @@ void send_info_to_player(int player_number) {
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
 
   // compose left_address_str for left neighbor
-  getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
+  getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST | NI_NUMERICSERV);
   sprintf(left_address_str, "%d:%s:%s", left_player_number, host, service);
 
   // compose right_address_str for right neighbor
-  getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
+  getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST | NI_NUMERICSERV);
   sprintf(right_address_str, "%d:%s:%s", right_player_number, host, service);
 
   // compose complete message
