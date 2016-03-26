@@ -320,4 +320,3 @@ void print_addrinfo(struct addrinfo *address) {
   }
   return;
 }
-
