@@ -7,11 +7,11 @@
 #endif
 
 #define HOSTNAME_LENGTH 64
-#define MAX_RECV_SIZE 2048
+#define MAX_RECV_SIZE   65536
 
-#define MAX_HOPS 10000
+#define MAX_HOPS        10000
 #define MAX_HOPS_STRLEN 5
-#define MAX_PLAYERS 1000
+#define MAX_PLAYERS     1000
 
 #define CONNECT_PREFIX         "CONNECT:"   // format: "<prefix>:<listen_port>"
 #define ID_PREFIX              "YOUARE:"    // format: "<prefix>:<player_number>"
