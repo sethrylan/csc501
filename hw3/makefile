@@ -120,3 +120,21 @@ testusage: master player
 	$(DIFF) player2.testoutput tests/3p100h/player2.output && \
 	echo "OK PASS";
 
+4p10000h: master player
+	./master $(PORT) 4 10000 > master.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player0.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player1.testoutput & \
+	$(SLEEP); \
+	./player localhost $(PORT) > player2.testoutput && \
+	$(SLEEP); \
+	./player localhost $(PORT) > player3.testoutput && \
+	$(DIFF) master.testoutput tests/3p100h/master.output && \
+	$(DIFF) player0.testoutput tests/3p100h/player0.output && \
+	$(DIFF) player1.testoutput tests/3p100h/player1.output && \
+	$(DIFF) player2.testoutput tests/3p100h/player2.output && \
+	$(DIFF) player2.testoutput tests/3p100h/player3.output && \
+	echo "OK PASS";
+
+

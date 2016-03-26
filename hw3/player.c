@@ -95,12 +95,8 @@ void recv_messages(int listen_socket_fd) {
       }
 
       if (begins_with(token, ROUTE_PREFIX)) {
-        char hops_str[MAX_HOPS_STRLEN];
         int hops;
-
-        strncpy(hops_str, token + strlen(ROUTE_PREFIX), MAX_HOPS_STRLEN);
-        DEBUG_PRINT("recv_messages(): hops_str = %s\n", hops_str);
-        hops = atoi(hops_str);
+        sscanf(token, "%*[^:]:%d:%*[^:]", &hops);
 
         int i = 0;
         const char *s = token + strlen(ROUTE_PREFIX) + MAX_HOPS_STRLEN + 1;
@@ -112,6 +108,8 @@ void recv_messages(int listen_socket_fd) {
               i++;
             }
         } while (*s++);
+
+        DEBUG_PRINT("recv_messages(): hops = %d / %d\n", i, hops);
 
         char message[MAX_RECV_SIZE];
         // append this player to the routes list
