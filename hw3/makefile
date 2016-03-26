@@ -1,6 +1,6 @@
 CC        = gcc
 CFLAGS    = -Wall -Wextra -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
-SRC       = master.c player.c
+SRCS      = master.c player.c utils.c utils.h makefile REFERENCES README
 rm        = rm -f
 DIFF      = diff -w
 SHELL     = /bin/bash
@@ -46,10 +46,10 @@ signcode:
 	codesign --force -s $(CERT_NAME) ./player
 
 clean:
-	$(RM) listen speak master player *.o *.testoutput
+	$(RM) listen speak master player *.o *.testoutput potato.tar.gz
 
 tar:
-	tar czvf socket.tar.gz $(SRC) makefile README REFERENCES
+	tar czvf potato.tar.gz $(SRCS) makefile README REFERENCES
 
 test: all testusage 1p0h 1p100h 1p1000h 2p1h 2p1000h 3p100h 10p8000h
 
