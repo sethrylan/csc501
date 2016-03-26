@@ -18,7 +18,7 @@
 #define LEFT_ADDRESS_PREFIX    "LADDR:"     // format: "<prefix>:<player_number>:<host>:<port>"
 #define RIGHT_ADDRESS_PREFIX   "RADDR:"     // format: "<prefix>:<player_number>:<host>:<port>"
 #define ROUTE_PREFIX           "ROUTE:"     // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
-#define CLOSE                  "CLOSE"      // format: "<prefix>:<hops>:<player_number>,<player_number>,..."
+#define CLOSE                  "CLOSE"      // format: "CLOSE"
 
 void die (const char *msg);
 int mod(int a, int b);
