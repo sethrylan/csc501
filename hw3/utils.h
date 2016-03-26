@@ -6,7 +6,6 @@
 #define DEBUG_PRINT(...) do{ } while ( 0 )
 #endif
 
-#define HOSTNAME_LENGTH 64
 #define MAX_RECV_SIZE   65536
 
 #define MAX_HOPS        10000

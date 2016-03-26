@@ -59,7 +59,7 @@ void recv_messages(int listen_socket_fd) {
       }
 
       if (begins_with(token, CONNECT_PREFIX)) {
-          char host[HOSTNAME_LENGTH], service[20];
+          char host[INET6_ADDRSTRLEN], service[20];
           getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
 
         // REQUIRED output
@@ -81,7 +81,7 @@ void recv_messages(int listen_socket_fd) {
 
 
 void send_info_to_player(int player_number) {
-  char host[HOSTNAME_LENGTH], service[20], str[250], left_address_str[100], right_address_str[100];
+  char host[INET6_ADDRSTRLEN], service[20], str[250], left_address_str[100], right_address_str[100];
   struct addrinfo *player_address = players[player_number];
   int left_player_number  = mod(player_number - 1, num_players);
   int right_player_number = mod(player_number + 1, num_players);
@@ -91,11 +91,11 @@ void send_info_to_player(int player_number) {
   DEBUG_PRINT("send_info_to_player(%d)\n", player_number);
 
   // compose left_address_str for left neighbor
-  getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
+  getnameinfo(left_address->ai_addr, left_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
   sprintf(left_address_str, "%d:%s:%s", left_player_number, host, service);
 
   // compose right_address_str for right neighbor
-  getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, 0);
+  getnameinfo(right_address->ai_addr, right_address->ai_addrlen, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
   sprintf(right_address_str, "%d:%s:%s", right_player_number, host, service);
 
   // compose complete message

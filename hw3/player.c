@@ -79,7 +79,7 @@ void recv_messages(int listen_socket_fd) {
       }
 
       if (begins_with(token, LEFT_ADDRESS_PREFIX) || begins_with(token, RIGHT_ADDRESS_PREFIX)) {
-        char host[HOSTNAME_LENGTH];
+        char host[INET6_ADDRSTRLEN];
         char prefix[strlen(LEFT_ADDRESS_PREFIX)];
         int port, neighbor_number;
 
