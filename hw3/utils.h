@@ -1,9 +1,9 @@
 #include <netinet/in.h>
 
 #ifdef DEBUG
-#define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__ );
+#define DEBUG_PRINT(...) fprintf(stdout, __VA_ARGS__);
 #else
-#define DEBUG_PRINT(...) do{ } while ( 0 )
+#define DEBUG_PRINT(...) do { } while ( 0 )
 #endif
 
 #define MAX_RECV_SIZE   65536
