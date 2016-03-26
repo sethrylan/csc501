@@ -6,7 +6,7 @@ DIFF      = diff -w
 SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
-SLEEP     = sleep 1
+SLEEP     = sleep .1
 
 # comment line below for Linux machines
 #LIB= -lsocket -lnsl
