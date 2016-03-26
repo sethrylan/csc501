@@ -59,16 +59,16 @@ void recv_messages(int listen_socket_fd) {
       }
 
       if (begins_with(token, CONNECT_PREFIX)) {
-          char host[INET6_ADDRSTRLEN], service[20];
-          getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
+        char host[INET6_ADDRSTRLEN], service[20];
+        getnameinfo((struct sockaddr *)&incoming, sizeof incoming, host, sizeof host, service, sizeof service, NI_NUMERICHOST);
 
         // REQUIRED output
         printf("player %d is on %s\n", players_connected, host);
 
-        char *port_string = malloc(10);
-        strncpy(port_string, token + strlen(CONNECT_PREFIX), strlen(token) - strlen(CONNECT_PREFIX));
-        DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port_string);
-        struct addrinfo *player_listener = gethostaddrinfo(host, atoi(port_string));
+        int port;
+        sscanf(token, "%*[^:]:%d", &port);
+        DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port);
+        struct addrinfo *player_listener = gethostaddrinfo(host, port);
         players[players_connected] = player_listener;
         players_connected++;
         return;        /// exit listen loop
