@@ -79,14 +79,14 @@ int begins_with(const char *string, const char *compare) {
   return !strncmp(string, compare, strlen(compare));
 }
 
+// see http://c-faq.com/lib/randrange.html
 unsigned int randr(unsigned int min, unsigned int max, int seed) {
   if (seed == -1) {
     srand(time(NULL));
   } else {
     srand(seed);
   }
-  double scaled = (double)rand()/RAND_MAX;
-  return (max - min +1)*scaled + min;
+  return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
 // Beej's implementation: see http://www.beej.us/guide/bgnet/output/html/singlepage/bgnet.html#simpleserver
