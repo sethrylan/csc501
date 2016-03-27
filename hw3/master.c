@@ -67,7 +67,7 @@ void recv_messages(int listen_socket_fd) {
 
         int port;
         sscanf(token, "%*[^:]:%d", &port);
-        DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%s\n", players_connected, host, port);
+        DEBUG_PRINT("accept_checkin(): Adding player #%d as %s:%d\n", players_connected, host, port);
         struct addrinfo *player_listener = gethostaddrinfo(host, port);
         players[players_connected] = player_listener;
         players_connected++;
