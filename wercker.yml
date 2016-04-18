@@ -23,9 +23,10 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - script:
-        cwd: hw3/
-        name: make test
+        cwd: hw4/
+        name: build and test
         code: |
-          yum -y install make gcc
+          yum -y install make gcc fuse-devel
+          # yum -i fuse-devel-2.9.3-4.1.2.x86_64.rpm
           make clean test
 

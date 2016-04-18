@@ -1,0 +1,25 @@
+
+# Info
+
+Design, implement, and evaluate an in-memory filesystem.
+
+For OS X, download and install https://osxfuse.github.io/
+
+# Building
+
+```make clean all```
+or
+```make clean debug```
+
+# Usage
+
+    ```ramdisk <mount_point> <size>```
+
+where size is in MB.
+
+# Tests
+
+```make clean test```
+
+
+
