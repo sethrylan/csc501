@@ -47,7 +47,7 @@ rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
 }
 
 int rd_opendir (const char * path, struct fuse_file_info *fi) {
-  DEBUG_PRINT("r_opendir called, path:%s\n", path);
+  DEBUG_PRINT("rd_opendir called, path:%s\n", path);
   rd_file *file;
 
   if (!path) {
@@ -73,7 +73,7 @@ int rd_opendir (const char * path, struct fuse_file_info *fi) {
 }
 
 static int rd_open(const char *path, struct fuse_file_info *fi){
-  DEBUG_PRINT("f_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
+  DEBUG_PRINT("rd_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
                               path, fi->flags&O_RDONLY, fi->flags&O_WRONLY, fi->flags&O_RDWR, fi->flags&O_APPEND, fi->flags&O_TRUNC);
 
   rd_file *file;
@@ -91,13 +91,31 @@ static int rd_open(const char *path, struct fuse_file_info *fi){
   return 0;
 }
 
+int rd_flush (const char * path, struct fuse_file_info * fi) {
+  DEBUG_PRINT("rd_flush called, path:%s\n", path);
+  rd_file *file;
+  if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
+    return -ENOENT;
+  }
+  file = get_rd_file(path, REGULAR, root);
+  if (!file) {
+    return -ENOENT;
+  }
+  return 0;
+}
+
+static int rd_read (const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+  // TODO:
+  return 0;
+}
+
 static struct fuse_operations operations = {
-  .open      = rd_open
+  .open      = rd_open,
+  .flush     = rd_flush,  // close()
+  .read      = rd_read
   // .create    = rd_create,
-  // .read      = rd_read,
   // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // .unlink    = rd_unlink,
-  // .flush     = rd_flush,    //==> close() in POSIX
   // .opendir   = rd_opendir,
   // .readdir   = rd_readdir,
   // .mkdir     = rd_mkdir,
