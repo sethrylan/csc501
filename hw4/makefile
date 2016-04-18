@@ -24,11 +24,11 @@ endif
 debug: CFLAGS += -DDEBUG
 debug: all
 
-ramdisk: ramdisk.o
+ramdisk: ramdisk.o utils.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-ramdisk.o:	ramdisk.c ramdisk.h
-# utils.o: utils.c utils.h
+ramdisk.o: ramdisk.c ramdisk.h
+utils.o:   utils.c utils.h
 
 signcode:
 	codesign --force -s $(CERT_NAME) ./ramdisk
