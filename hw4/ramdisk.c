@@ -47,7 +47,7 @@ int main (int argc, char *argv[]) {
 
   // read parameters from command line
   if (argc < 3) {
-    printf(stderr, "Usage: %s <directory-path> <size-MB>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <directory-path> <size-MB>\n", argv[0]);
     exit(1);
   }
 

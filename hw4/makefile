@@ -42,6 +42,6 @@ tar:
 test: all testusage
 
 testusage: ramdisk
-	./ramdisk | $(DIFF) - tests/usage.output && echo "OK PASS";
+	./ramdisk 2>&1 | $(DIFF) - tests/usage.output && echo "OK PASS";
 
 # ./postmark benchmark.conf
