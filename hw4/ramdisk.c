@@ -17,56 +17,78 @@ long current_bytes;
 rd_file *root;
 
 // http://www.cs.nmsu.edu/~pfeiffer/fuse-tutorial/html/callbacks.html
+// http://gauss.ececs.uc.edu/Courses/c4029/code/fuse/notes.html
+// https://lastlog.de/misc/fuse-doc/doc/html/
 
-int get_fd (char *path, rd_file_type file_type) {
-  return -1;
+rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
+  DEBUG_PRINT("get_rd_file(): %s\n", token);
+  // if the path is matches the filename and type, then we have the right file
+  if (matches(path, root->name) && root->type == file_type) {
+    return root;
+  }
+  char* path_c = strdup(path);
+  char *token = strtok(path_c, "/");
+  free(path_c);
+  if (token) {                                                      // for each part of the path
+    node *current = root->files;                                    // look through the list of files/directories
+    while (current) {
+      rd_file *file = (rd_file*)current->file;
+      // printf("%s\n", file->name);
+      if (matches(token, file->name)) {                             // if one of the files matches the path piece
+        int lookahead = strlen(token);
+        free(token);
+        return get_rd_file(path+lookahead, file_type, file);      // then try it next;
+      }
+      current = current->next;                                      // otherwise, keep looking through the list.
+    }
+  }
+  free(token);
+  return NULL;
 }
 
 int rd_opendir (const char * path, struct fuse_file_info *fi) {
-  rd_file * file;
-  int ret_val = 0;
-  DEBUG_PRINT("r_opendir called, path:%s, fi:%ld\n", path, fi);
+  DEBUG_PRINT("r_opendir called, path:%s\n", path);
+  rd_file *file;
 
-  if (!path){
+  if (!path) {
     return -ENOENT;
   }
 
   if (matches(path, "/")){
-    return ret_val;
+    return 0;
   }
 
   if (ends_with(path, "/")) {
-    DEBUG_PRINT(ramdisk_engine->lgr, "r_open, path ended with /\n", LEVEL_ERROR);
+    DEBUG_PRINT("r_open, path ended with /\n");
     return -ENOENT;
   }
 
-  file = get_fd(path, DIRECTORY);
+  file = get_rd_file(path, DIRECTORY, root);
 
-  if(!file) {
-    ret_val = -ENOENT;
+  if (!file) {
+    return -ENOENT;
   }
 
-  return ret_val;
+  return 0;
 }
 
 static int rd_open(const char *path, struct fuse_file_info *fi){
+  DEBUG_PRINT("f_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
+                              path, fi->flags&O_RDONLY, fi->flags&O_WRONLY, fi->flags&O_RDWR, fi->flags&O_APPEND, fi->flags&O_TRUNC);
+
   rd_file *file;
-  int ret_val = 0;
-
-  DEBUG_PRINT("f_open called, path:%s, fi:%ld, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n", path, file_info, file_info->flags&O_RDONLY, file_info->flags&O_WRONLY, file_info->flags&O_RDWR, file_info->flags&O_APPEND, file_info->flags&O_TRUNC);
-
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     DEBUG_PRINT("path is NULL or a directory\n");
     return -ENOENT;
   }
 
-  file = get_fd(path, REGULAR);
+  file = get_rd_file(path, REGULAR, root);
 
   if (!file) {
-    ret_val = -ENOENT;
+    return -ENOENT;
   }
 
-  return ret_val;
+  return 0;
 }
 
 static struct fuse_operations operations = {

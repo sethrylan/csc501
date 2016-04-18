@@ -25,6 +25,11 @@ typedef struct rd_file {
   struct node *files;
 } rd_file;
 
+char * get_rd_file_path(rd_file *file) {
+  char *result;// = malloc(strlen(file->name) + strlen(file->path) + 2); // +2 for \0 and path separate
+  asprintf(&result, "%s/%s", file->path, file->name);
+  return result;
+}
 
 /////// LIST ///////
 
