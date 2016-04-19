@@ -2,6 +2,8 @@
 typedef enum {REGULAR, DIRECTORY} rd_file_type;
 typedef enum {TRUE, FALSE} boolean;
 
+#define BLOCK_BYTES 4048
+
 struct node {
   void *file;
   struct node *next;
@@ -17,7 +19,7 @@ typedef struct rd_file {
 
   // REGULAR attributes
   int bytes;
-  int block_size;
+  int num_blocks;
   char **blocks;
   boolean opened;
 
