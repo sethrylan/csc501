@@ -5,14 +5,19 @@
 #include <fuse.h>
 #include <errno.h>
 // #include <strings.h>
-// #include <unistd.h>
+#include <unistd.h>
 // #include <signal.h>
 #include "ramdisk.h"
 #include "utils.h"
 
+// Global State
 char *mount_path;
 long max_bytes;
 long current_bytes;
+
+time_t init_time;
+uid_t uid;
+gid_t gid;
 
 rd_file *root;
 
@@ -352,19 +357,115 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   return ret_val;
 }
 
+static int rd_getattr (const char *path, struct stat *stbuf) {
+  char **file_names;
+  int i, count, flag;
+  rd_file *file, *parent_file, *current_file;
+  int ret_val = 0;
+
+  DEBUG_PRINT("rd_getattr:%s\n", path);
+
+  if (path==NULL || ends_with(path, "/")){
+    return -EPERM;
+  }
+
+  if (matches(path, "/")) {
+    stbuf->st_atime = init_time;
+    stbuf->st_mtime = init_time;
+    stbuf->st_ctime = init_time;
+    stbuf->st_size = DIRECTORY_BYTES;
+    stbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+    stbuf->st_nlink = 2;
+    stbuf->st_uid = uid;
+    stbuf->st_gid = gid;
+    return 0;
+  }
+
+  file_names = get_dirs(path, &count);
+  if (!file_names){
+    DEBUG_PRINT("rd_getattr: no directories\n");
+    return -EPERM;
+  }
+
+  // check for parent directory exist and get attributes if it exists
+  if (count != -1) {
+    if (count != 0) {
+      for (i = 0; i <= count - 1; i++) {
+        if (i == 0) {
+          parent_file = get_file(file_names[i], root->files);
+          if (parent_file==NULL || parent_file->type==REGULAR) {
+            // directory doesn't exist or it's actually a REGULAR file
+            ret_val = -ENOENT;
+            break;
+          }
+          continue;
+        }
+        current_file = get_file(file_names[i], parent_file->files);
+        if (current_file == NULL || current_file->type == REGULAR) {
+          // directory doesn't exist or it's actually a REGULAR file
+          ret_val = -ENOENT;
+          break;
+        }
+
+        parent_file = current_file;
+      } /* end of for */
+      if (ret_val == 0) { /* if parent-dir check pass */
+        file = get_file(file_names[count], parent_file->files);
+        if (file == NULL) { /* if file exists */
+          // file doesn't exist in the directory
+          ret_val = -ENOENT;
+        }
+      }
+    } else {  // count == 0
+      file = get_file(file_names[count], root->files);
+      if (file == NULL) {
+        // file doesn't exist under root directory
+        ret_val = -ENOENT;
+      }
+    }
+    if (ret_val == 0) {
+      stbuf->st_atime = init_time;
+      stbuf->st_mtime = init_time;
+      stbuf->st_ctime = init_time;
+      stbuf->st_uid = uid;
+      stbuf->st_gid = gid;
+
+      if (file->type == DIRECTORY) {
+        stbuf->st_size = DIRECTORY_BYTES;
+        stbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+        stbuf->st_nlink = 2;
+      } else {
+        stbuf->st_size = file->bytes;
+        stbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+        stbuf->st_nlink = 1;
+        stbuf->st_blksize = BLOCK_BYTES;
+        stbuf->st_blocks = file->num_blocks;
+      }
+    }
+  } else {
+    ret_val = -ENOENT;
+  }
+
+  for (i=0; i<=count; i++) {
+    free(file_names[i]);
+  }
+  free(file_names);
+  return ret_val;
+}
+
 
 static struct fuse_operations operations = {
   .open      = rd_open,
   .flush     = rd_flush,  // close()
   .read      = rd_read,
-  .create    = rd_create
+  .create    = rd_create,
   // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // .unlink    = rd_unlink,
   // .opendir   = rd_opendir,
   // .readdir   = rd_readdir,
   // .mkdir     = rd_mkdir,
   // .rmdir     = rd_rmdir,
-  // .getattr   = rd_getattr_wrapper,
+  .getattr   = rd_getattr
   // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // .truncate  = rd_truncate_wrapper,
   // .ftruncate = rd_ftruncate_wrapper,
@@ -389,6 +490,10 @@ int main (int argc, char *argv[]) {
     printf("size-MB cannot be less than 0\n");
     exit(1);
   }
+
+  gid = getgid();
+  uid = getuid();
+  init_time = time(NULL);
 
   return fuse_main(argc - 1, argv, &operations, NULL);
 }
