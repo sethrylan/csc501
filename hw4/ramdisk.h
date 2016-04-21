@@ -2,7 +2,8 @@
 typedef enum {REGULAR, DIRECTORY} rd_file_type;
 typedef enum {TRUE, FALSE} boolean;
 
-#define BLOCK_BYTES 4048
+#define BLOCK_BYTES             4048
+#define INITIAL_BLOCKS_PER_FILE 4
 
 struct node {
   void *file;
@@ -32,6 +33,31 @@ char * get_rd_file_path(rd_file *file) {
   asprintf(&result, "%s/%s", file->path, file->name);
   return result;
 }
+
+static rd_file* create_rd_file(char *name, char *path) {
+  rd_file *file;
+  if (name==NULL || path==NULL){
+    return NULL;
+  }
+
+  file = (rd_file*)malloc(sizeof(rd_file));
+  file->type = REGULAR;
+  file->name = (char*)malloc(sizeof(char)*strlen(name)+1);
+  file->path = (char*)malloc(sizeof(char)*strlen(path)+1);
+  file->blocks = (char**)malloc( sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1);
+  memset(file->name, 0, sizeof(char)*strlen(name)+1);
+  memset(file->path, 0, sizeof(char)*strlen(path)+1);
+  memcpy(file->name, name, sizeof(char)*strlen(name));
+  memcpy(file->path, path, sizeof(char)*strlen(path));
+  memset(file->blocks, 0, sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1 );
+  file->files = NULL;
+  file->num_blocks = INITIAL_BLOCKS_PER_FILE;
+  file->bytes = 0;
+  file->opened = FALSE;
+  file->parent = NULL;
+  return file;
+}
+
 
 /////// LIST ///////
 

@@ -55,6 +55,12 @@ void itoa(int n, char s[]) {
   reverse(s);
 }
 
+int count_occurences(const char c, const char *s) {
+  int i;
+  for (i=0; s[i]; s[i]==c ? i++ : *s++);
+  return i;
+}
+
 int contains (char **list, char *string, size_t length) {
   size_t i = 0;
   for( i = 0; i < length; i++) {

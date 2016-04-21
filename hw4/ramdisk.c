@@ -28,6 +28,69 @@ boolean valid_path(const char *path) {
   return TRUE;
 }
 
+rd_file* get_file(char *name, node *list){
+  node *current = list;
+  while (current != NULL) {
+    if (matches(name, ((rd_file*)current->file)->name)) {
+      return ((rd_file*)current->file);
+    }
+    current = current->next;
+  }
+  return NULL;
+}
+
+/*
+ * count will equal the number of parent directories in path. E.g.:
+ * path="/", count=0;
+ * path="/var", count=0;
+ * path="/var/log", count=1;
+ */
+char **get_dirs(const char *path, int *ret_count) {
+  int path_len, i, count, flag, start, end;
+  char ** file_names;
+
+  if (!path) {
+    return NULL;
+  }
+
+  path_len = strlen(path);
+  count = count_occurences('/', path);
+  file_names = (char**) malloc(sizeof(char*) * count+1);
+  memset(file_names, 0, sizeof(char*) * count+1);
+
+  for (i=0; i < count; i++) {
+    file_names[i]=NULL;
+  }
+
+  count = -1;  /* when the for-loop ends, count will be, the number of "/" -1 */
+  start = end = 0;
+  for (i = 0; i < path_len; i++) {
+    flag = 0;
+    if ((*(path + i)) == '/') {
+      end = i;
+      count++;
+      flag = 1;
+    }
+    if (!flag)
+      continue;
+    if (count == 0) {
+      start = end;
+      continue;
+    }
+    file_names[count - 1] = (char*) malloc(sizeof(char) * (end - start));
+    memset(file_names[count - 1], 0, sizeof(char) * (end - start));
+    memcpy(file_names[count - 1], path + start + 1, sizeof(char) * (end - start - 1));
+    start = end;
+  }
+  file_names[count] = (char*) malloc(sizeof(char) * (path_len - start));
+  memset(file_names[count], 0, sizeof(char) * (path_len - start));
+  memcpy(file_names[count], path + start + 1, sizeof(char) * (path_len - start - 1));
+
+  *ret_count = count;
+  return file_names;
+}
+
+
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", token);
   // if the path is matches the filename and type, then we have the right file
@@ -213,7 +276,8 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
   return r_size;
 }
 
-/*
+
+// TODO: add mode
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   char **file_names;
   int i, count, flag;
@@ -227,7 +291,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     return -EPERM;
   }
 
-  file_names = break_paths(path, &count);
+  file_names = get_dirs(path, &count);
   if( file_names==NULL ){
     // chat_log_level(ramdisk_engine->lgr, "r_create called, cannot create file_names\n", LEVEL_ERROR);
     return -EPERM;
@@ -236,9 +300,9 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   // check parent dir exist, and create file
   if (count != -1) {
     if (count != 0) { //if more than one level dir
-      for (i=0; i<=count-1; i++) { //this for only checks if parent dis exist, doesn't create dir
+      for (i=0; i<=count-1; i++) { //this for only checks if parent does not exist, doesn't create dir
         if (i == 0) {
-          file_p = is_file_exist(file_names[i], root->files);
+          file_p = get_file(file_names[i], root->files);
           if (file_p == NULL || file_p->type == REGULAR) {
             // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 1\n", file_names[i]);
             ret_val = -ENOENT;
@@ -246,7 +310,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
           }
           continue;
         }
-        file_c = is_file_exist(file_names[i], file_p->sub_files);
+        file_c = get_file(file_names[i], file_p->files);
         if (file_c == NULL || file_c->type == REGULAR) {
           // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 2\n", file_names[i]);
           ret_val = -ENOENT;
@@ -256,27 +320,27 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
       }
 
       if (ret_val == 0){ // if parent-dir check pass, create file
-        file = create_ramdisk_rf(file_names[count], file_p->name );
+        file = create_rd_file(file_names[count], file_p->name );
         if (file != NULL) {
           file->parent = file_p;
-          en_list(create_l_elem(file), file_p->sub_files );
+          push(file_p->files, file);
           // sprintf(s, "r_create, file:%s is created, and added to %s-dir\n", r_file->name, r_file_p->name);
         } else {
-          ret = -EPERM;
+          ret_val = -EPERM;
         }
       }
     } else {
       // count==0, something like, "/t1"; just create new file under root dir.
-      file = create_ramdisk_rf(file_names[count], "/");
+      file = create_rd_file(file_names[count], "/");
       if (file != NULL) {
-        en_list(create_l_elem(file), ramdisk_engine->root_files );
+        push(root->files, file);
         // sprintf(s, "r_create, file:%s is created, and added to root-dir\n", r_file->name);
       } else {
-        ret = -EPERM;
+        ret_val = -EPERM;
       }
     }
   } else {
-    ret = -ENOENT;
+    ret_val = -ENOENT;
     // chat_log_level(ramdisk_engine->lgr, "r_create, unknown mistakes, count is -1\n", LEVEL_ERROR);
   }
 
@@ -285,16 +349,15 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     free(file_names[i]);
   }
   free(file_names);
-  return ret;
+  return ret_val;
 }
-*/
 
 
 static struct fuse_operations operations = {
   .open      = rd_open,
   .flush     = rd_flush,  // close()
-  .read      = rd_read
-  // .create    = rd_create,
+  .read      = rd_read,
+  .create    = rd_create
   // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // .unlink    = rd_unlink,
   // .opendir   = rd_opendir,
