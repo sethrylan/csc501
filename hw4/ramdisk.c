@@ -286,7 +286,7 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   char **file_names;
   int i, count, flag;
-  rd_file *file, *file_p, *file_c;
+  rd_file *file, *parent_file, *current_file;
   int ret_val = 0;
 
   // sprintf(s, "r_create called, path:%s, fi:%ld\n", path, fi);
@@ -307,36 +307,35 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     if (count != 0) { //if more than one level dir
       for (i=0; i<=count-1; i++) { //this for only checks if parent does not exist, doesn't create dir
         if (i == 0) {
-          file_p = get_file(file_names[i], root->files);
-          if (file_p == NULL || file_p->type == REGULAR) {
+          parent_file = get_file(file_names[i], root->files);
+          if (parent_file == NULL || parent_file->type == REGULAR) {
             // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 1\n", file_names[i]);
             ret_val = -ENOENT;
             break;
           }
           continue;
         }
-        file_c = get_file(file_names[i], file_p->files);
-        if (file_c == NULL || file_c->type == REGULAR) {
+        current_file = get_file(file_names[i], parent_file->files);
+        if (current_file == NULL || current_file->type == REGULAR) {
           // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 2\n", file_names[i]);
           ret_val = -ENOENT;
           break;
         }
-        file_p = file_c;
+        parent_file = current_file;
       }
 
       if (ret_val == 0){ // if parent-dir check pass, create file
-        file = create_rd_file(file_names[count], file_p->name );
+        file = create_rd_file(file_names[count], parent_file->name );
         if (file != NULL) {
-          file->parent = file_p;
-          push(file_p->files, file);
+          file->parent = parent_file;
+          push(parent_file->files, file);
           // sprintf(s, "r_create, file:%s is created, and added to %s-dir\n", r_file->name, r_file_p->name);
         } else {
           ret_val = -EPERM;
         }
       }
-    } else {
-      // count==0, something like, "/t1"; just create new file under root dir.
-      file = create_rd_file(file_names[count], "/");
+    } else { // count==0
+      file = create_rd_file(file_names[count], "/"); // create new file under root directory
       if (file != NULL) {
         push(root->files, file);
         // sprintf(s, "r_create, file:%s is created, and added to root-dir\n", r_file->name);
@@ -350,7 +349,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   }
 
   // free files
-  for(i=0; i<=count; i++) {
+  for (i=0; i<=count; i++) {
     free(file_names[i]);
   }
   free(file_names);
