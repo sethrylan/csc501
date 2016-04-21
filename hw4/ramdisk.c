@@ -227,7 +227,6 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
   block_index_offset = current_offset / BLOCK_BYTES;
   block_byte_offset = (current_offset % BLOCK_BYTES);
 
-
   // sprintf(s, "r_read, current_offset:%d, block_index_offset:%d, block_byte_offset:%d\n",
   //     current_offset, block_index_offset, block_byte_offset);
 
@@ -289,16 +288,14 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   rd_file *file, *parent_file, *current_file;
   int ret_val = 0;
 
-  // sprintf(s, "r_create called, path:%s, fi:%ld\n", path, fi);
+  DEBUG_PRINT("rd_create: path:%s\n", path);
 
   if (path ==NULL || matches(path, "/") || ends_with(path, "/")) {
-    // chat_log_level(ramdisk_engine->lgr, "r_create called, path is NULL, or only /, or ended with /\n", LEVEL_ERROR);
     return -EPERM;
   }
 
   file_names = get_dirs(path, &count);
   if( file_names==NULL ){
-    // chat_log_level(ramdisk_engine->lgr, "r_create called, cannot create file_names\n", LEVEL_ERROR);
     return -EPERM;
   }
 
@@ -309,7 +306,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
         if (i == 0) {
           parent_file = get_file(file_names[i], root->files);
           if (parent_file == NULL || parent_file->type == REGULAR) {
-            // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 1\n", file_names[i]);
+            DEBUG_PRINT("parent_file is NULL or not a directory");
             ret_val = -ENOENT;
             break;
           }
@@ -317,19 +314,18 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
         }
         current_file = get_file(file_names[i], parent_file->files);
         if (current_file == NULL || current_file->type == REGULAR) {
-          // sprintf(s, "r_create, dir:%s doesn't exist or it's REG-file, cannot create file, 2\n", file_names[i]);
+          DEBUG_PRINT("current_file is NULL or not a directory");
           ret_val = -ENOENT;
           break;
         }
         parent_file = current_file;
       }
 
-      if (ret_val == 0){ // if parent-dir check pass, create file
-        file = create_rd_file(file_names[count], parent_file->name );
+      if (ret_val == 0){
+        file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
         if (file != NULL) {
           file->parent = parent_file;
           push(parent_file->files, file);
-          // sprintf(s, "r_create, file:%s is created, and added to %s-dir\n", r_file->name, r_file_p->name);
         } else {
           ret_val = -EPERM;
         }
@@ -338,14 +334,13 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
       file = create_rd_file(file_names[count], "/"); // create new file under root directory
       if (file != NULL) {
         push(root->files, file);
-        // sprintf(s, "r_create, file:%s is created, and added to root-dir\n", r_file->name);
       } else {
         ret_val = -EPERM;
       }
     }
   } else {
+    DEBUG_PRINT("count was -1\n");
     ret_val = -ENOENT;
-    // chat_log_level(ramdisk_engine->lgr, "r_create, unknown mistakes, count is -1\n", LEVEL_ERROR);
   }
 
   // free files
@@ -442,6 +437,7 @@ static int rd_getattr (const char *path, struct stat *stbuf) {
       }
     }
   } else {
+    DEBUG_PRINT("count was -1\n");
     ret_val = -ENOENT;
   }
 
