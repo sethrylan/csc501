@@ -442,11 +442,9 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
   char **file_names;
-  int count=0;
-  int i=0;
-  int ret_val = EXIT_SUCCESS;
+  int i, count, ret_val = EXIT_SUCCESS;
   struct stat st;
-  rd_file *file = NULL, *current_file = NULL, *parent_file = NULL;
+  rd_file *file = NULL, *parent_file = NULL;
   node *node;
 
   if (!path) {
@@ -488,44 +486,17 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
     if (file_names) {
       return -EPERM;
     }
+    parent_file = get_parent_directory(path, file_names, count);
 
-    /* check parent dir exist, and get files' attributes */
-    if (count != -1) {
-      if (count != 0) { /* if count!=0, something like, /home/wenzhao */
-        for (i = 0; i <= count - 1; i++) { /* this for only checks if parent dis exist, doesn't create dir */
-          if (i == 0) {
-            parent_file = get_file(file_names[i], root->files);
-            if (parent_file == NULL || parent_file->type == REGULAR) {
-              ret_val = -ENOENT;
-              break;
-            }
-            continue;
-          }
-          current_file = get_file(file_names[i],
-              parent_file->files);
-          if (current_file == NULL || current_file->type == REGULAR) {
-            // directory doesn't exist or it's a REGULAR file
-            ret_val = -ENOENT;
-            break;
-          }
-          parent_file = current_file;
-        }
+    if (!parent_file) {
+      return -ENOENT;
+    } else {
 
-        if (ret_val == 0) { /* if parent-dir check pass, check the last dir  */
-          file = get_file(file_names[count], parent_file->files);
-          if (file == NULL || file->type == REGULAR) {
-            // directory doesn't exist or it's a REGULAR file
-            ret_val = -ENOENT;
-          }
-        }
+      file = get_file(file_names[count], root->files);
+      if (file == NULL || file->type == REGULAR) {
+        DEBUG_PRINT("rd_readdir(): %s does not exist or is not a directory\n", file_names[count]);
+        ret_val = -ENOENT;
       } else {
-        file = get_file(file_names[count], root->files);
-        if (file == NULL || file->type == REGULAR) { /* if file exists, and it's not a dir */
-          ret_val = -ENOENT;
-        }
-      }
-
-      if (ret_val == 0) {  // file was found
         node = file->files;
         while (node) {
           file = (rd_file*)node->file;
@@ -552,14 +523,11 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
           node = node->next;
         }
       }
-
-    } else {
-      /* some unknown mistakes */
-      ret_val = -ENOENT;
     }
 
-    for(i=0; i<=count; i++)
+    for(i=0; i<=count; i++) {
       free(file_names[i]);
+    }
     free(file_names);
   }
 
