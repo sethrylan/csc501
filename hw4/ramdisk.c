@@ -147,34 +147,9 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
   int count;
-  // if the path is matches the filename and type, then we have the right file
-
-  // if (matches(path, root->name) && root->type == file_type) {
-  //   return root;
-  // }
-
   char **file_names = get_dirs(path, &count);
   rd_file *parent_file = get_parent_directory(path, file_names, count);
   return get_file(file_names[count], parent_file->files);
-
-  // char* path_c = strdup(path);
-  // char *token = strtok(path_c, "/");
-  // free(path_c);
-  // if (token) {                                                      // for each part of the path
-  //   node *current = root->files;                                    // look through the list of files/directories
-  //   while (current) {
-  //     rd_file *file = (rd_file*)current->file;
-  //     // printf("%s\n", file->name);
-  //     if (matches(token, file->name)) {                             // if one of the files matches the path piece
-  //       int lookahead = strlen(token);
-  //       free(token);
-  //       return get_rd_file(path+lookahead, file_type, file);      // then try it next;
-  //     }
-  //     current = current->next;                                      // otherwise, keep looking through the list.
-  //   }
-  //   free(token);
-  // }
-  // return NULL;
 }
 
 
@@ -336,19 +311,17 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 // TODO: add mode and decrement memory
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
-  char **file_names;
   int i, count, ret_val = EXIT_SUCCESS;
-  rd_file *parent_file;
 
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     return -EPERM;
   }
 
-  file_names = get_dirs(path, &count);
+  char **file_names = get_dirs(path, &count);
   if (file_names == NULL) {
     return -EPERM;
   }
-  parent_file = get_parent_directory(path, file_names, count);
+  rd_file *parent_file = get_parent_directory(path, file_names, count);
 
   if (!parent_file) {
     return -ENOENT;
@@ -376,9 +349,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
-  char **file_names;
   int i, count, ret_val = EXIT_SUCCESS;
-  rd_file *file, *parent_file;
 
   if (path==NULL || ends_with(path, "/")){
     return -EPERM;
@@ -401,16 +372,16 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
     return EXIT_SUCCESS;
   }
 
-  file_names = get_dirs(path, &count);
+  char **file_names = get_dirs(path, &count);
   if (!file_names){
     return -EPERM;
   }
-  parent_file = get_parent_directory(path, file_names, count);
+  rd_file *parent_file = get_parent_directory(path, file_names, count);
 
   if (!parent_file) {
     return -ENOENT;
   } else {
-    file = get_file(file_names[count], parent_file->files);
+    rd_file *file = get_file(file_names[count], parent_file->files);
     if (!file) {
       DEBUG_PRINT("rd_getattr(): %s doesn't exist in %s\n", file_names[count], parent_file->name);
       ret_val = -ENOENT;
@@ -450,10 +421,9 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
-  char **file_names;
   int i, count, ret_val = EXIT_SUCCESS;
   struct stat st;
-  rd_file *file = NULL, *parent_file = NULL;
+  rd_file *file, *parent_file;
   node *node;
 
   if (!path) {
@@ -491,7 +461,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
       node = node->next;
     }
   } else {
-    file_names = get_dirs(path, &count);
+    char **file_names = get_dirs(path, &count);
     if (file_names) {
       return -EPERM;
     }
@@ -555,9 +525,7 @@ static int rd_utimens (const char *path, const struct timespec tv[2]) {
 
 int rd_mkdir (const char *path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
-  char **file_names;;
   int i, count, ret_val = EXIT_SUCCESS;
-  rd_file *file, *parent_file;
 
   if (!path || matches(path, "/")) {
     return -EPERM;
@@ -567,16 +535,16 @@ int rd_mkdir (const char *path, mode_t mode) {
     return -EFBIG;
   }
 
-  file_names = get_dirs(path, &count);
+  char **file_names = get_dirs(path, &count);
   if (!file_names){
     return -EPERM;
   }
-  parent_file = get_parent_directory(path, file_names, count);
+  rd_file *parent_file = get_parent_directory(path, file_names, count);
 
   if (!parent_file) {
     return -EPERM;
   } else {
-    file = get_file(file_names[count], parent_file->files);
+    rd_file *file = get_file(file_names[count], parent_file->files);
     if (file != NULL) {
       ret_val = -EPERM;
     } else {
