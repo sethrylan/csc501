@@ -34,13 +34,19 @@ boolean valid_path(const char *path) {
 }
 
 rd_file* get_file(char *name, node *list){
+  DEBUG_PRINT("get_file(): %s\n", name);
+
   node *current = list;
   while (current != NULL) {
-    if (matches(name, ((rd_file*)current->file)->name)) {
-      return ((rd_file*)current->file);
+    rd_file *current_file = (rd_file*)current->file;
+    DEBUG_PRINT("get_file(): checking %s\n", current_file->name);
+
+    if (matches(name, current_file->name)) {
+      return current_file;
     }
     current = current->next;
   }
+  DEBUG_PRINT("get_file(): returning NULL\n");
   return NULL;
 }
 
@@ -286,7 +292,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   rd_file *file, *parent_file, *current_file;
   int ret_val = 0;
 
-  if (path ==NULL || matches(path, "/") || ends_with(path, "/")) {
+  if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     return -EPERM;
   }
 
@@ -321,7 +327,11 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
         file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
         if (file != NULL) {
           file->parent = parent_file;
-          push(parent_file->files, file);
+          if (parent_file->files) {
+            push(parent_file->files, file);
+          } else {
+            parent_file = make_node(file);
+          }
         } else {
           ret_val = -EPERM;
         }
@@ -329,7 +339,12 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     } else { // count==0
       file = create_rd_file(file_names[count], "/"); // create new file under root directory
       if (file != NULL) {
-        push(root->files, file);
+        DEBUG_PRINT("rd_create(): adding new file to root->files\n");
+        if (root->files) {
+          push(root->files, file);
+        } else {
+          root->files = make_node(file);
+        }
       } else {
         ret_val = -EPERM;
       }
@@ -592,17 +607,19 @@ static struct fuse_operations operations = {
   .getattr = rd_getattr,
   .opendir = rd_opendir,
   .readdir = rd_readdir,
+  .create   = rd_create,
+
+  // // .mkdir   = rd_mkdir,
+  // // .rmdir     = rd_rmdir,
+
 
   // .open      = rd_open,
   // .flush     = rd_flush,  // close()
   // .read      = rd_read,
-  // .create    = rd_create,
   // // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // // .unlink    = rd_unlink,
   // .opendir   = rd_opendir,
   // .readdir   = rd_readdir,
-  // // .mkdir     = rd_mkdir,
-  // // .rmdir     = rd_rmdir,
   // .getattr   = rd_getattr,
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
