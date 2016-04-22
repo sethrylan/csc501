@@ -27,7 +27,7 @@ build:
         name: build and test
         code: |
           yum -y install make gcc fuse-devel
-          sudo usermod -a -G fuse `whoami`
+          chmod a+rw /dev/fuse
           # yum -i fuse-devel-2.9.3-4.1.2.x86_64.rpm
           make clean test
 
