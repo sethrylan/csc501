@@ -430,76 +430,48 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
     return -EPERM;
   }
 
-  if (matches(path, "/")) {
-    // read root directory
-    node = root->files;
-    while (node){
-      file = (rd_file*)node->file;
+  char **file_names = get_dirs(path, &count);
+  if (!file_names) {
+    return -EPERM;
+  }
+  parent_file = get_parent_directory(path, file_names, count);
 
-      memset(&st, 0, sizeof(struct stat));
-
-      time(&(st.st_atime));
-      time(&(st.st_mtime));
-      time(&(st.st_ctime));
-
-      st.st_uid = uid;
-      st.st_gid = gid;
-
-      if (file->type == REGULAR) {
-        st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
-        st.st_nlink = 1;
-        st.st_size = file->bytes;
-        /* st.st_blksize = BLOCK_SIZE;
-        st.st_blocks = r_file->block_number; */
-      } else {
-        st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-        st.st_nlink = 2;
-        st.st_size = DIRECTORY_BYTES;
-      }
-      filler(buffer, file->name, &st, 0);
-
-      node = node->next;
-    }
+  if (!parent_file) {
+    return -ENOENT;
   } else {
-    char **file_names = get_dirs(path, &count);
-    if (!file_names) {
-      return -EPERM;
-    }
-    parent_file = get_parent_directory(path, file_names, count);
-
-    if (!parent_file) {
-      return -ENOENT;
+    if (matches(path, "/")) {
+      file = root;
     } else {
       file = get_file(file_names[count], parent_file->files);
-      if (!file || file->type == REGULAR) {
-        DEBUG_PRINT("rd_readdir(): %s does not exist or is not a directory\n", file_names[count]);
-        ret_val = -ENOENT;
-      } else {
-        node = file->files;
-        while (node) {
-          file = (rd_file*)node->file;
+    }
+    if (!file || file->type == REGULAR) {
+      DEBUG_PRINT("rd_readdir(): %s does not exist or is not a directory\n", file_names[count]);
+      ret_val = -ENOENT;
+    } else {
+      node = file->files;
+      while (node) {
+        file = (rd_file*)node->file;
 
-          memset(&st, 0, sizeof(struct stat));
-          time(&(st.st_atime));
-          time(&(st.st_mtime));
-          time(&(st.st_ctime));
+        memset(&st, 0, sizeof(struct stat));
+        time(&(st.st_atime));
+        time(&(st.st_mtime));
+        time(&(st.st_ctime));
 
-          st.st_uid = uid;
-          st.st_gid = gid;
-          if (file->type == REGULAR) {
-            st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
-            st.st_nlink = 1;
-            st.st_size = file->bytes;
-            /* st.st_blksize = BLOCK_SIZE;
-            st.st_blocks = r_file->block_number; */
-          } else {
-            st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-            st.st_nlink = 2;
-            st.st_size = DIRECTORY_BYTES;
-          }
-          filler(buffer, file->name, &st, 0);
-          node = node->next;
+        st.st_uid = uid;
+        st.st_gid = gid;
+        if (file->type == REGULAR) {
+          st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+          st.st_nlink = 1;
+          st.st_size = file->bytes;
+          /* st.st_blksize = BLOCK_SIZE;
+          st.st_blocks = r_file->block_number; */
+        } else {
+          st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+          st.st_nlink = 2;
+          st.st_size = DIRECTORY_BYTES;
         }
+        filler(buffer, file->name, &st, 0);
+        node = node->next;
       }
     }
 
