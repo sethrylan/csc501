@@ -337,63 +337,10 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   }
 
   file_names = get_dirs(path, &count);
+  if( file_names==NULL ){
+    return -EPERM;
+  }
   parent_file = get_parent_directory(path, file_names, count);
-  // if( file_names==NULL ){
-  //   return -EPERM;
-  // }
-
-  // // check parent dir exist, and create file
-  // if (count != -1) {
-  //   if (count != 0) { //if more than one level dir
-  //     for (i=0; i<=count-1; i++) { //this for only checks if parent does not exist, doesn't create dir
-  //       if (i == 0) {
-  //         parent_file = get_file(file_names[i], root->files);
-  //         if (parent_file == NULL || parent_file->type == REGULAR) {
-  //           DEBUG_PRINT("parent_file is NULL or not a directory");
-  //           ret_val = -ENOENT;
-  //           break;
-  //         }
-  //         continue;
-  //       }
-  //       current_file = get_file(file_names[i], parent_file->files);
-  //       if (current_file == NULL || current_file->type == REGULAR) {
-  //         DEBUG_PRINT("current_file is NULL or not a directory");
-  //         ret_val = -ENOENT;
-  //         break;
-  //       }
-  //       parent_file = current_file;
-  //     }
-
-  //     if (ret_val == 0){
-  //       file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
-  //       if (file != NULL) {
-  //         file->parent = parent_file;
-  //         if (parent_file->files) {
-  //           push(parent_file->files, file);
-  //         } else {
-  //           parent_file->files = make_node(file);
-  //         }
-  //       } else {
-  //         ret_val = -EPERM;
-  //       }
-  //     }
-  //   } else { // count==0
-  //     file = create_rd_file(file_names[count], "/"); // create new file under root directory
-  //     if (file != NULL) {
-  //       DEBUG_PRINT("rd_create(): adding new file to root->files\n");
-  //       if (root->files) {
-  //         push(root->files, file);
-  //       } else {
-  //         root->files = make_node(file);
-  //       }
-  //     } else {
-  //       ret_val = -EPERM;
-  //     }
-  //   }
-  // } else {
-  //   DEBUG_PRINT("count was -1\n");
-  //   ret_val = -ENOENT;
-  // }
 
   if (!parent_file) {
     return -ENOENT;
