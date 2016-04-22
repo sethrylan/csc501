@@ -61,6 +61,7 @@ testmount: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
 	ls -l | diff <(echo "total 0") - && \
+	pwd | diff <(echo $(TEST_DIR)) - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \

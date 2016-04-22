@@ -26,15 +26,13 @@ rd_file *root;
 // https://lastlog.de/misc/fuse-doc/doc/html/
 // http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
-// TODO: replace "/" with root->name
-
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
   return (current_bytes + bytes) <= max_bytes;
 }
 
 boolean valid_path(const char *path) {
-  if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
+  if (path == NULL || matches(path, root->name) || ends_with(path, "/")) {
     DEBUG_PRINT("path is NULL or a directory\n");
     return FALSE;
   }
@@ -160,7 +158,7 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
 
   if (!path ) {
     return -ENOENT;
-  } else if (matches(path, "/")) {
+  } else if (matches(path, root->name)) {
     return EXIT_SUCCESS;
   } else if (ends_with(path, "/")){
     return -ENOENT;
@@ -313,7 +311,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   DEBUG_PRINT("rd_create(): %s\n", path);
   int i, count, ret_val = EXIT_SUCCESS;
 
-  if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
+  if (path == NULL || matches(path, root->name) || ends_with(path, "/")) {
     return -EPERM;
   }
 
@@ -365,7 +363,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
   if (!parent_file) {
     return -ENOENT;
   } else {
-    if (matches(path, "/")) {
+    if (matches(path, root->name)) {
       file = root;
     } else {
       file = get_file(file_names[count], parent_file->files);
@@ -427,7 +425,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
   if (!parent_file) {
     return -ENOENT;
   } else {
-    if (matches(path, "/")) {
+    if (matches(path, root->name)) {
       file = root;
     } else {
       file = get_file(file_names[count], parent_file->files);
@@ -486,7 +484,7 @@ int rd_mkdir (const char *path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
   int i, count, ret_val = EXIT_SUCCESS;
 
-  if (!path || matches(path, "/")) {
+  if (!path || matches(path, root->name)) {
     return -EPERM;
   }
 
