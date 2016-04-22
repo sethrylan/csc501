@@ -24,6 +24,7 @@ rd_file *root;
 // http://www.cs.nmsu.edu/~pfeiffer/fuse-tutorial/html/callbacks.html
 // http://gauss.ececs.uc.edu/Courses/c4029/code/fuse/notes.html
 // https://lastlog.de/misc/fuse-doc/doc/html/
+// http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
 boolean valid_path(const char *path) {
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
@@ -137,7 +138,7 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   if (!path ) {
     return -ENOENT;
   } else if (matches(path, "/")) {
-    return 0;
+    return EXIT_SUCCESS;
   } else if (ends_with(path, "/")){
     return -ENOENT;
   }
@@ -167,7 +168,7 @@ static int rd_open(const char *path, struct fuse_file_info *fi){
     return -ENOENT;
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 int rd_flush (const char * path, struct fuse_file_info * fi) {
@@ -180,7 +181,7 @@ int rd_flush (const char * path, struct fuse_file_info * fi) {
   if (!file) {
     return -ENOENT;
   }
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 /** Read data from an open file
@@ -600,7 +601,11 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
 
 static int rd_access(const char *path, int mask) {
   DEBUG_PRINT("rd_access:%s\n", path);
-  return 0;
+  return EXIT_SUCCESS;
+}
+
+static int rd_utimens(const char *path, const struct timespec tv[2]) {
+  return EXIT_SUCCESS;
 }
 
 static struct fuse_operations operations = {
@@ -608,6 +613,7 @@ static struct fuse_operations operations = {
   .opendir = rd_opendir,
   .readdir = rd_readdir,
   .create   = rd_create,
+  .utimens  = rd_utimens,
 
   // // .mkdir   = rd_mkdir,
   // // .rmdir     = rd_rmdir,
@@ -628,7 +634,6 @@ static struct fuse_operations operations = {
   // .access   = rd_access
   // // .chmod    = rd_chmod,
   // // .chown    = rd_chown,
-  // // .utimens  = rd_utimens,
 };
 
 int main (int argc, char *argv[]) {
