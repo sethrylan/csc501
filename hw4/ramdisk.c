@@ -462,7 +462,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
     }
   } else {
     char **file_names = get_dirs(path, &count);
-    if (file_names) {
+    if (!file_names) {
       return -EPERM;
     }
     parent_file = get_parent_directory(path, file_names, count);
@@ -470,9 +470,8 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
     if (!parent_file) {
       return -ENOENT;
     } else {
-
       file = get_file(file_names[count], parent_file->files);
-      if (file == NULL || file->type == REGULAR) {
+      if (!file || file->type == REGULAR) {
         DEBUG_PRINT("rd_readdir(): %s does not exist or is not a directory\n", file_names[count]);
         ret_val = -ENOENT;
       } else {
