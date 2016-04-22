@@ -26,6 +26,11 @@ rd_file *root;
 // https://lastlog.de/misc/fuse-doc/doc/html/
 // http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
+int memory_available (int bytes) {
+  DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
+  return (current_bytes + bytes) <= max_bytes;
+}
+
 boolean valid_path(const char *path) {
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     DEBUG_PRINT("path is NULL or a directory\n");
@@ -285,7 +290,7 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 }
 
 
-// TODO: add mode
+// TODO: add mode and decrement memory
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
   char **file_names;
@@ -331,7 +336,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
           if (parent_file->files) {
             push(parent_file->files, file);
           } else {
-            parent_file = make_node(file);
+            parent_file->files = make_node(file);
           }
         } else {
           ret_val = -EPERM;
@@ -472,7 +477,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 
 
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
-  DEBUG_PRINT("rd_readdir:%s\n", path);
+  DEBUG_PRINT("rd_readdir: %s\n", path);
 
   char **file_names;
   int count=0;
@@ -599,26 +604,107 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
   return ret_val;
 }
 
-static int rd_access(const char *path, int mask) {
-  DEBUG_PRINT("rd_access:%s\n", path);
+static int rd_access (const char *path, int mask) {
+  DEBUG_PRINT("rd_access: %s\n", path);
   return EXIT_SUCCESS;
 }
 
-static int rd_utimens(const char *path, const struct timespec tv[2]) {
+static int rd_utimens (const char *path, const struct timespec tv[2]) {
+  DEBUG_PRINT("rd_utimens: %s\n", path);
   return EXIT_SUCCESS;
 }
+
+int rd_mkdir (const char * path, mode_t mode) {
+  DEBUG_PRINT("rd_mkdir: %s\n", path);
+  char **file_names = NULL;
+  int i, count, flag;
+  rd_file * file, *parent_file, *current_file;
+  int ret_val = 0;
+
+  if (!path || matches(path, "/")) {
+    return -EPERM;
+  }
+
+  if (!memory_available(DIRECTORY_BYTES)) {
+    return -EFBIG;
+  }
+
+  file_names = get_dirs(path, &count);
+  if (!file_names){
+    return -EPERM;
+  }
+
+  if(count!=-1){
+    if(count!=0){
+      for(i=0;i<=count-1;i++){
+        if(i==0){
+          parent_file = get_file(file_names[i], root->files);
+          if(parent_file==NULL || parent_file->type == REGULAR){
+            ret_val = -EPERM;
+            break;
+          }
+          continue;
+        }
+        current_file = get_file(file_names[i], parent_file->files);
+        if(current_file==NULL || current_file->type == REGULAR ){
+          ret_val = -EPERM;
+          break;
+        }
+
+        parent_file = current_file;
+      }
+      if (ret_val == 0) {
+        file = get_file(file_names[count], parent_file->files);
+        if (file != NULL) {
+          ret_val = -EPERM;
+        } else {
+          rd_file *new_file = create_rd_file(file_names[count], parent_file->name);
+          if (parent_file->files) {
+            push(parent_file->files, new_file);
+          } else {
+            parent_file->files = make_node(new_file);
+          }
+        }
+      }
+    } else { // e.g., "/file";
+      file = get_file(file_names[count], root->files);
+      if (file!=NULL) {
+        ret_val = -EPERM;
+      } else {
+        rd_file *new_file = create_rd_file(file_names[count], root->name);  // e.g., "/"
+        if (root->files) {
+          push(root->files, new_file);
+        } else {
+          root->files = make_node(new_file);
+        }
+      }
+    }
+  } else {
+    ret_val = -EPERM;
+  }
+
+  for(i=0; i<=count; i++) {
+    free(file_names[i]);
+  }
+  free(file_names);
+
+  if (ret_val ==0 ) {
+    current_bytes += DIRECTORY_BYTES;
+  }
+
+  return ret_val;
+}
+
 
 static struct fuse_operations operations = {
-  .getattr = rd_getattr,
-  .opendir = rd_opendir,
-  .readdir = rd_readdir,
+  .getattr  = rd_getattr,
+  .opendir  = rd_opendir,
+  .readdir  = rd_readdir,
   .create   = rd_create,
   .utimens  = rd_utimens,
+  .mkdir    = rd_mkdir,
 
-  // // .mkdir   = rd_mkdir,
   // // .rmdir     = rd_rmdir,
-
-
   // .open      = rd_open,
   // .flush     = rd_flush,  // close()
   // .read      = rd_read,
@@ -643,8 +729,16 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  mount_path = argv[1];
-  max_bytes = atoi(argv[2]) * 1024 * 1024;
+  if (matches(argv[1], "-f")) {
+    DEBUG_PRINT("-f used for foreground process.\n");
+    mount_path = argv[2];
+    max_bytes = atoi(argv[3]) * 1024 * 1024;
+  } else {
+    mount_path = argv[1];
+    max_bytes = atoi(argv[2]) * 1024 * 1024;
+  }
+
+  DEBUG_PRINT("max_bytes = %ld\n", max_bytes);
 
   if (max_bytes < 0) {
     printf("size-MB cannot be less than 0\n");
