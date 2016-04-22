@@ -6,6 +6,10 @@ DIFF      = diff -w
 SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
+TEST_DIR  = ~/rd
+PUSHD     = pushd $(TEST_DIR) > /dev/null
+POPD      = popd > /dev/null
+WAIT      = sleep .1
 
 all: ramdisk
 
@@ -15,10 +19,12 @@ all: ramdisk
 ifeq ($(UNAME), Darwin)
 CFLAGS += `pkg-config fuse --cflags --libs`
 CFLAGS += -DFUSE_USE_VERSION=26
+UMOUNT = umount
 all: signcode
 else
 CFLAGS += `pkg-config fuse --cflags --libs`
 CFLAGS += -DFUSE_USE_VERSION=26
+UMOUNT = fusermount -u -q
 endif
 
 debug: CFLAGS += -DDEBUG
@@ -36,12 +42,27 @@ signcode:
 clean:
 	$(RM) ramdisk *.o *.testoutput ramdisk.tar.gz
 
+unmount:
+	$(UMOUNT) $(TEST_DIR)
+
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage
+test: all testusage testmount
 
-testusage: ramdisk
+maketestdir:
+	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
+
+testusage: maketestdir ramdisk
 	./ramdisk 2>&1 | $(DIFF) - tests/usage.output && echo "OK PASS";
+
+testmount: maketestdir ramdisk
+	./ramdisk $(TEST_DIR) 100 && \
+	$(PUSHD) && \
+	ls -l && \
+	$(POPD) && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
 
 # ./postmark benchmark.conf
