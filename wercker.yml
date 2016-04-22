@@ -28,6 +28,7 @@ build:
         code: |
           yum -y install make gcc fuse fuse-devel
           chmod a+rw /dev/fuse
+          chmod a+s /usr/bin/fusermount
           # yum -i fuse-devel-2.9.3-4.1.2.x86_64.rpm
           make clean test
 
