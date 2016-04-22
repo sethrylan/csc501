@@ -8,7 +8,7 @@ typedef enum {TRUE, FALSE} boolean;
 
 
 #define DEFAULT_DIRECTORY_PERMISSION 0755
-#define DEFAULT_FILE_PERMISSION 0766
+#define DEFAULT_FILE_PERMISSION      0766
 
 typedef struct node {
   void *file;
