@@ -387,22 +387,6 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
     return EXIT_SUCCESS;
   }
 
-  statbuf->st_dev = 2049;
-  statbuf->st_ino = 14450705;
-  statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-  statbuf->st_nlink = 2;
-  statbuf->st_uid = uid;
-  statbuf->st_gid = gid;
-  statbuf->st_rdev = 0;
-  statbuf->st_size = DIRECTORY_BYTES;
-  statbuf->st_blksize = BLOCK_BYTES;
-  statbuf->st_blocks = 8;
-  time(&(statbuf->st_atime));
-  time(&(statbuf->st_mtime));
-  time(&(statbuf->st_ctime));
-  return EXIT_SUCCESS;
-
-  /*
   file_names = get_dirs(path, &count);
   if (!file_names){
     DEBUG_PRINT("rd_getattr: no directories\n");
@@ -451,11 +435,16 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
       time(&(statbuf->st_ctime));
       statbuf->st_uid = uid;
       statbuf->st_gid = gid;
+      statbuf->st_dev = 2049;
+      statbuf->st_ino = 14450705;
+      statbuf->st_rdev = 0;
 
       if (file->type == DIRECTORY) {
         statbuf->st_size = DIRECTORY_BYTES;
         statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
         statbuf->st_nlink = 2;
+        statbuf->st_blksize = BLOCK_BYTES;
+        statbuf->st_blocks = 8;
       } else {
         statbuf->st_size = file->bytes;
         statbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
@@ -474,8 +463,6 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
   }
   free(file_names);
   return ret_val;
-
-  */
 }
 
 
