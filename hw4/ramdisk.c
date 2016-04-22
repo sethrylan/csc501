@@ -26,6 +26,8 @@ rd_file *root;
 // https://lastlog.de/misc/fuse-doc/doc/html/
 // http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
+// TODO: replace "/" with root->name
+
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
   return (current_bytes + bytes) <= max_bytes;
@@ -61,7 +63,7 @@ rd_file* get_file(const char *name, node *list){
  * path="/var", count=0;
  * path="/var/log", count=1;
  */
-char **get_dirs(const char *path, int *ret_count) {
+char** get_dirs(const char *path, int *ret_count) {
   int path_len, i, count, flag, start, end;
   char **file_names;
 
@@ -144,28 +146,35 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
 
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
+  int count;
   // if the path is matches the filename and type, then we have the right file
-  if (matches(path, root->name) && root->type == file_type) {
-    return root;
-  }
-  char* path_c = strdup(path);
-  char *token = strtok(path_c, "/");
-  free(path_c);
-  if (token) {                                                      // for each part of the path
-    node *current = root->files;                                    // look through the list of files/directories
-    while (current) {
-      rd_file *file = (rd_file*)current->file;
-      // printf("%s\n", file->name);
-      if (matches(token, file->name)) {                             // if one of the files matches the path piece
-        int lookahead = strlen(token);
-        free(token);
-        return get_rd_file(path+lookahead, file_type, file);      // then try it next;
-      }
-      current = current->next;                                      // otherwise, keep looking through the list.
-    }
-  }
-  free(token);
-  return NULL;
+
+  // if (matches(path, root->name) && root->type == file_type) {
+  //   return root;
+  // }
+
+  char **file_names = get_dirs(path, &count);
+  rd_file *parent_file = get_parent_directory(path, file_names, count);
+  return get_file(file_names[count], parent_file->files);
+
+  // char* path_c = strdup(path);
+  // char *token = strtok(path_c, "/");
+  // free(path_c);
+  // if (token) {                                                      // for each part of the path
+  //   node *current = root->files;                                    // look through the list of files/directories
+  //   while (current) {
+  //     rd_file *file = (rd_file*)current->file;
+  //     // printf("%s\n", file->name);
+  //     if (matches(token, file->name)) {                             // if one of the files matches the path piece
+  //       int lookahead = strlen(token);
+  //       free(token);
+  //       return get_rd_file(path+lookahead, file_type, file);      // then try it next;
+  //     }
+  //     current = current->next;                                      // otherwise, keep looking through the list.
+  //   }
+  //   free(token);
+  // }
+  // return NULL;
 }
 
 
@@ -336,7 +345,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   }
 
   file_names = get_dirs(path, &count);
-  if( file_names==NULL ){
+  if (file_names == NULL) {
     return -EPERM;
   }
   parent_file = get_parent_directory(path, file_names, count);
