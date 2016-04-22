@@ -347,17 +347,6 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   return ret_val;
 }
 
-int fuse_opendir(const char *path, struct fuse_file_info *fi) {
-    printf("opendir path=%s\n", path);
-    return(0);
-}
-
-int fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
-    printf("readdir path=%s\n", path);
-    filler(buf, "11", NULL, 0);
-    return 0;
-}
-
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
 
@@ -601,7 +590,7 @@ static int rd_access(const char *path, int mask) {
 
 static struct fuse_operations operations = {
   .getattr = rd_getattr,
-  .opendir = fuse_opendir,
+  .opendir = rd_opendir,
   .readdir = rd_readdir,
 
   // .open      = rd_open,
