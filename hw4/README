@@ -17,6 +17,8 @@ or
 
 where size is in MB.
 
+Use ```ramdisk -f ...``` to run in foreground.
+
 # Tests
 
 ```make clean test```

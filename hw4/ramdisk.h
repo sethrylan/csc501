@@ -2,7 +2,7 @@
 typedef enum {REGULAR, DIRECTORY} rd_file_type;
 typedef enum {TRUE, FALSE} boolean;
 
-#define BLOCK_BYTES             4048
+#define BLOCK_BYTES             4096
 #define INITIAL_BLOCKS_PER_FILE 4
 #define DIRECTORY_BYTES         4096
 

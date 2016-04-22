@@ -97,7 +97,7 @@ char **get_dirs(const char *path, int *ret_count) {
 
 
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
-  DEBUG_PRINT("get_rd_file(): %s\n", token);
+  DEBUG_PRINT("get_rd_file(): %s\n", path);
   // if the path is matches the filename and type, then we have the right file
   if (matches(path, root->name) && root->type == file_type) {
     return root;
@@ -122,30 +122,27 @@ rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   return NULL;
 }
 
-int rd_opendir (const char * path, struct fuse_file_info *fi) {
-  DEBUG_PRINT("rd_opendir called, path:%s\n", path);
+
+int rd_opendir (const char *path, struct fuse_file_info *fi) {
+  DEBUG_PRINT("rd_opendir: %s\n", path);
   rd_file *file;
+  int ret_val = 0;
 
-  if (!path) {
+  if (!path ) {
     return -ENOENT;
-  }
-
-  if (matches(path, "/")){
+  } else if (matches(path, "/")) {
     return 0;
-  }
-
-  if (ends_with(path, "/")) {
-    DEBUG_PRINT("r_open, path ended with /\n");
+  } else if (ends_with(path, "/")){
     return -ENOENT;
   }
 
   file = get_rd_file(path, DIRECTORY, root);
 
   if (!file) {
-    return -ENOENT;
+    ret_val = -ENOENT;
   }
 
-  return 0;
+  return ret_val;
 }
 
 static int rd_open(const char *path, struct fuse_file_info *fi){
@@ -168,7 +165,7 @@ static int rd_open(const char *path, struct fuse_file_info *fi){
 }
 
 int rd_flush (const char * path, struct fuse_file_info * fi) {
-  DEBUG_PRINT("rd_flush called, path:%s\n", path);
+  DEBUG_PRINT("rd_flush(): %s\n", path);
   rd_file *file;
   if (!valid_path(path)) {
     return -ENOENT;
@@ -195,6 +192,7 @@ int rd_flush (const char * path, struct fuse_file_info * fi) {
  * offset - offset (from the beginning of file)
  */
 static int rd_read (const char *path, char *buffer, size_t size, off_t offset, struct fuse_file_info *fi) {
+  DEBUG_PRINT("rd_read(): %s, %d, %d\n", path, size, offset);
   rd_file *file = NULL;
   //int read_block_num=0; /* how many blocks to read */
   int current_offset = 0; // offset of the file during this reading, in byte
@@ -207,7 +205,6 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
   int to_copy_block_num = 0; /* number of blocks to copy, excluding current block */
   int current_block_remaining = 0; /* current block's bytes after the offset */
 
-  // sprintf(s, "r_read called, path:%s, size:%d, offset:%d, fi:%ld\n", path, size, offset, fi);
 
   if (!valid_path(path)) {
     return -ENOENT;
@@ -283,12 +280,11 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 
 // TODO: add mode
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
+  DEBUG_PRINT("rd_create(): %s\n", path);
   char **file_names;
   int i, count, flag;
   rd_file *file, *parent_file, *current_file;
   int ret_val = 0;
-
-  DEBUG_PRINT("rd_create: path:%s\n", path);
 
   if (path ==NULL || matches(path, "/") || ends_with(path, "/")) {
     return -EPERM;
@@ -351,30 +347,62 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   return ret_val;
 }
 
-static int rd_getattr (const char *path, struct stat *stbuf) {
+int fuse_opendir(const char *path, struct fuse_file_info *fi) {
+    printf("opendir path=%s\n", path);
+    return(0);
+}
+
+int fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+    printf("readdir path=%s\n", path);
+    filler(buf, "11", NULL, 0);
+    return 0;
+}
+
+static int rd_getattr (const char *path, struct stat *statbuf) {
+  DEBUG_PRINT("rd_getattr(): %s\n", path);
+
   char **file_names;
   int i, count, flag;
   rd_file *file, *parent_file, *current_file;
   int ret_val = 0;
-
-  DEBUG_PRINT("rd_getattr:%s\n", path);
 
   if (path==NULL || ends_with(path, "/")){
     return -EPERM;
   }
 
   if (matches(path, "/")) {
-    stbuf->st_atime = init_time;
-    stbuf->st_mtime = init_time;
-    stbuf->st_ctime = init_time;
-    stbuf->st_size = DIRECTORY_BYTES;
-    stbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-    stbuf->st_nlink = 2;
-    stbuf->st_uid = uid;
-    stbuf->st_gid = gid;
-    return 0;
+    statbuf->st_dev = 2049;
+    statbuf->st_ino = 14450705;
+    statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+    statbuf->st_nlink = 2;
+    statbuf->st_uid = uid;
+    statbuf->st_gid = gid;
+    statbuf->st_rdev = 0;
+    statbuf->st_size = DIRECTORY_BYTES;
+    statbuf->st_blksize = BLOCK_BYTES;
+    statbuf->st_blocks = 8;
+    time(&(statbuf->st_atime));
+    time(&(statbuf->st_mtime));
+    time(&(statbuf->st_ctime));
+    return EXIT_SUCCESS;
   }
 
+  statbuf->st_dev = 2049;
+  statbuf->st_ino = 14450705;
+  statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+  statbuf->st_nlink = 2;
+  statbuf->st_uid = uid;
+  statbuf->st_gid = gid;
+  statbuf->st_rdev = 0;
+  statbuf->st_size = DIRECTORY_BYTES;
+  statbuf->st_blksize = BLOCK_BYTES;
+  statbuf->st_blocks = 8;
+  time(&(statbuf->st_atime));
+  time(&(statbuf->st_mtime));
+  time(&(statbuf->st_ctime));
+  return EXIT_SUCCESS;
+
+  /*
   file_names = get_dirs(path, &count);
   if (!file_names){
     DEBUG_PRINT("rd_getattr: no directories\n");
@@ -402,10 +430,10 @@ static int rd_getattr (const char *path, struct stat *stbuf) {
         }
 
         parent_file = current_file;
-      } /* end of for */
-      if (ret_val == 0) { /* if parent-dir check pass */
+      }
+      if (ret_val == 0) {
         file = get_file(file_names[count], parent_file->files);
-        if (file == NULL) { /* if file exists */
+        if (file == NULL) {
           // file doesn't exist in the directory
           ret_val = -ENOENT;
         }
@@ -418,22 +446,22 @@ static int rd_getattr (const char *path, struct stat *stbuf) {
       }
     }
     if (ret_val == 0) {
-      stbuf->st_atime = init_time;
-      stbuf->st_mtime = init_time;
-      stbuf->st_ctime = init_time;
-      stbuf->st_uid = uid;
-      stbuf->st_gid = gid;
+      time(&(statbuf->st_atime));
+      time(&(statbuf->st_mtime));
+      time(&(statbuf->st_ctime));
+      statbuf->st_uid = uid;
+      statbuf->st_gid = gid;
 
       if (file->type == DIRECTORY) {
-        stbuf->st_size = DIRECTORY_BYTES;
-        stbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-        stbuf->st_nlink = 2;
+        statbuf->st_size = DIRECTORY_BYTES;
+        statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+        statbuf->st_nlink = 2;
       } else {
-        stbuf->st_size = file->bytes;
-        stbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
-        stbuf->st_nlink = 1;
-        stbuf->st_blksize = BLOCK_BYTES;
-        stbuf->st_blocks = file->num_blocks;
+        statbuf->st_size = file->bytes;
+        statbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+        statbuf->st_nlink = 1;
+        statbuf->st_blksize = BLOCK_BYTES;
+        statbuf->st_blocks = file->num_blocks;
       }
     }
   } else {
@@ -446,29 +474,168 @@ static int rd_getattr (const char *path, struct stat *stbuf) {
   }
   free(file_names);
   return ret_val;
+
+  */
 }
 
 
+static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+  DEBUG_PRINT("rd_readdir:%s\n", path);
+
+  char **file_names;
+  int count=0;
+  int i=0;
+  int ret_val = 0;
+  struct stat st;
+  rd_file *file = NULL, *current_file = NULL, *parent_file = NULL;
+  node *node;
+
+  if (!path) {
+    return -EPERM;
+  }
+
+  if (matches(path, "/")) {
+    // read root directory
+    node = root->files;
+    while (node){
+      file = (rd_file*)node->file;
+
+      memset(&st, 0, sizeof(struct stat));
+
+      time(&(st.st_atime));
+      time(&(st.st_mtime));
+      time(&(st.st_ctime));
+
+      st.st_uid = uid;
+      st.st_gid = gid;
+
+      if (file->type == REGULAR) {
+        st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+        st.st_nlink = 1;
+        st.st_size = file->bytes;
+        /* st.st_blksize = BLOCK_SIZE;
+        st.st_blocks = r_file->block_number; */
+      } else {
+        st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+        st.st_nlink = 2;
+        st.st_size = DIRECTORY_BYTES;
+      }
+      filler(buffer, file->name, &st, 0);
+
+      node = node->next;
+    }
+  } else {
+    file_names = get_dirs(path, &count);
+    if (file_names) {
+      return -EPERM;
+    }
+
+    /* check parent dir exist, and get files' attributes */
+    if (count != -1) {
+      if (count != 0) { /* if count!=0, something like, /home/wenzhao */
+        for (i = 0; i <= count - 1; i++) { /* this for only checks if parent dis exist, doesn't create dir */
+          if (i == 0) {
+            parent_file = get_file(file_names[i], root->files);
+            if (parent_file == NULL || parent_file->type == REGULAR) {
+              ret_val = -ENOENT;
+              break;
+            }
+            continue;
+          }
+          current_file = get_file(file_names[i],
+              parent_file->files);
+          if (current_file == NULL || current_file->type == REGULAR) {
+            // directory doesn't exist or it's a REGULAR file
+            ret_val = -ENOENT;
+            break;
+          }
+          parent_file = current_file;
+        }
+
+        if (ret_val == 0) { /* if parent-dir check pass, check the last dir  */
+          file = get_file(file_names[count], parent_file->files);
+          if (file == NULL || file->type == REGULAR) {
+            // directory doesn't exist or it's a REGULAR file
+            ret_val = -ENOENT;
+          }
+        }
+      } else {
+        file = get_file(file_names[count], root->files);
+        if (file == NULL || file->type == REGULAR) { /* if file exists, and it's not a dir */
+          ret_val = -ENOENT;
+        }
+      }
+
+      if (ret_val == 0) {  // file was found
+        node = file->files;
+        while (node) {
+          file = (rd_file*)node->file;
+
+          memset(&st, 0, sizeof(struct stat));
+          time(&(st.st_atime));
+          time(&(st.st_mtime));
+          time(&(st.st_ctime));
+
+          st.st_uid = uid;
+          st.st_gid = gid;
+          if (file->type == REGULAR) {
+            st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+            st.st_nlink = 1;
+            st.st_size = file->bytes;
+            /* st.st_blksize = BLOCK_SIZE;
+            st.st_blocks = r_file->block_number; */
+          } else {
+            st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+            st.st_nlink = 2;
+            st.st_size = DIRECTORY_BYTES;
+          }
+          filler(buffer, file->name, &st, 0);
+          node = node->next;
+        }
+      }
+
+    } else {
+      /* some unknown mistakes */
+      ret_val = -ENOENT;
+    }
+
+    for(i=0; i<=count; i++)
+      free(file_names[i]);
+    free(file_names);
+  }
+
+  return ret_val;
+}
+
+static int rd_access(const char *path, int mask) {
+  DEBUG_PRINT("rd_access:%s\n", path);
+  return 0;
+}
+
 static struct fuse_operations operations = {
-  .open      = rd_open,
-  .flush     = rd_flush,  // close()
-  .read      = rd_read,
-  .create    = rd_create,
-  // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
-  // .unlink    = rd_unlink,
+  .getattr = rd_getattr,
+  .opendir = fuse_opendir,
+  .readdir = rd_readdir,
+
+  // .open      = rd_open,
+  // .flush     = rd_flush,  // close()
+  // .read      = rd_read,
+  // .create    = rd_create,
+  // // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
+  // // .unlink    = rd_unlink,
   // .opendir   = rd_opendir,
   // .readdir   = rd_readdir,
-  // .mkdir     = rd_mkdir,
-  // .rmdir     = rd_rmdir,
-  .getattr   = rd_getattr
-  // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
-  // .truncate  = rd_truncate_wrapper,
-  // .ftruncate = rd_ftruncate_wrapper,
-  // .rename   = rd_rename,
-  // .access   = rd_access,
-  // .chmod    = rd_chmod,
-  // .chown    = rd_chown,
-  // .utimens  = rd_utimens,
+  // // .mkdir     = rd_mkdir,
+  // // .rmdir     = rd_rmdir,
+  // .getattr   = rd_getattr,
+  // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
+  // // .truncate  = rd_truncate_wrapper,
+  // // .ftruncate = rd_ftruncate_wrapper,
+  // // .rename   = rd_rename,
+  // .access   = rd_access
+  // // .chmod    = rd_chmod,
+  // // .chown    = rd_chown,
+  // // .utimens  = rd_utimens,
 };
 
 int main (int argc, char *argv[]) {
@@ -486,6 +653,7 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
+  root = create_rd_file("/","");
   gid = getgid();
   uid = getuid();
   init_time = time(NULL);
