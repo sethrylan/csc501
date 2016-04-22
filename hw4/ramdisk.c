@@ -350,26 +350,10 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
   int i, count, ret_val = EXIT_SUCCESS;
+  rd_file *file;
 
   if (path==NULL || ends_with(path, "/")){
     return -EPERM;
-  }
-
-  if (matches(path, "/")) {
-    statbuf->st_dev = 2049;
-    statbuf->st_ino = 14450705;
-    statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-    statbuf->st_nlink = 2;
-    statbuf->st_uid = uid;
-    statbuf->st_gid = gid;
-    statbuf->st_rdev = 0;
-    statbuf->st_size = DIRECTORY_BYTES;
-    statbuf->st_blksize = BLOCK_BYTES;
-    statbuf->st_blocks = 8;
-    time(&(statbuf->st_atime));
-    time(&(statbuf->st_mtime));
-    time(&(statbuf->st_ctime));
-    return EXIT_SUCCESS;
   }
 
   char **file_names = get_dirs(path, &count);
@@ -381,7 +365,11 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
   if (!parent_file) {
     return -ENOENT;
   } else {
-    rd_file *file = get_file(file_names[count], parent_file->files);
+    if (matches(path, "/")) {
+      file = root;
+    } else {
+      file = get_file(file_names[count], parent_file->files);
+    }
     if (!file) {
       DEBUG_PRINT("rd_getattr(): %s doesn't exist in %s\n", file_names[count], parent_file->name);
       ret_val = -ENOENT;
