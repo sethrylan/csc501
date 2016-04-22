@@ -39,9 +39,8 @@ boolean valid_path(const char *path) {
   return TRUE;
 }
 
-rd_file* get_file(char *name, node *list){
+rd_file* get_file(const char *name, node *list){
   DEBUG_PRINT("get_file(): %s\n", name);
-
   node *current = list;
   while (current != NULL) {
     rd_file *current_file = (rd_file*)current->file;
@@ -64,7 +63,7 @@ rd_file* get_file(char *name, node *list){
  */
 char **get_dirs(const char *path, int *ret_count) {
   int path_len, i, count, flag, start, end;
-  char ** file_names;
+  char **file_names;
 
   if (!path) {
     return NULL;
@@ -88,8 +87,9 @@ char **get_dirs(const char *path, int *ret_count) {
       count++;
       flag = 1;
     }
-    if (!flag)
+    if (!flag) {
       continue;
+    }
     if (count == 0) {
       start = end;
       continue;
@@ -107,6 +107,40 @@ char **get_dirs(const char *path, int *ret_count) {
   return file_names;
 }
 
+rd_file* get_parent_directory (const char* path, const char **file_names, const int count) {
+  rd_file *parent_file = NULL, *current_file = NULL;
+  int i;
+  if (!file_names) {
+    DEBUG_PRINT("get_parent_directory: no directories\n");
+    return NULL;
+  }
+
+  if (count < 0) {
+    return NULL;
+  }
+
+  if (count == 0) {     // e.g., "/example";
+    parent_file = root;
+  } else {              // count > 0
+    for (i = 0; i <= count - 1; i++) {
+      if (i == 0) {
+        parent_file = get_file(file_names[i], root->files);
+        if (parent_file == NULL || parent_file->type == REGULAR) {
+          DEBUG_PRINT("parent_file is NULL or not a directory");
+          return NULL;
+        }
+        continue;
+      }
+      current_file = get_file(file_names[i], parent_file->files);
+      if (current_file == NULL || current_file->type == REGULAR) {
+        DEBUG_PRINT("current_file is NULL or not a directory");
+        return NULL;
+      }
+      parent_file = current_file;
+    }
+  }
+  return parent_file;
+}
 
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
@@ -295,7 +329,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   DEBUG_PRINT("rd_create(): %s\n", path);
   char **file_names;
   int i, count, flag;
-  rd_file *file, *parent_file, *current_file;
+  rd_file *parent_file;
   int ret_val = EXIT_SUCCESS;
 
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
@@ -303,61 +337,78 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   }
 
   file_names = get_dirs(path, &count);
-  if( file_names==NULL ){
-    return -EPERM;
-  }
+  parent_file = get_parent_directory(path, file_names, count);
+  // if( file_names==NULL ){
+  //   return -EPERM;
+  // }
 
-  // check parent dir exist, and create file
-  if (count != -1) {
-    if (count != 0) { //if more than one level dir
-      for (i=0; i<=count-1; i++) { //this for only checks if parent does not exist, doesn't create dir
-        if (i == 0) {
-          parent_file = get_file(file_names[i], root->files);
-          if (parent_file == NULL || parent_file->type == REGULAR) {
-            DEBUG_PRINT("parent_file is NULL or not a directory");
-            ret_val = -ENOENT;
-            break;
-          }
-          continue;
-        }
-        current_file = get_file(file_names[i], parent_file->files);
-        if (current_file == NULL || current_file->type == REGULAR) {
-          DEBUG_PRINT("current_file is NULL or not a directory");
-          ret_val = -ENOENT;
-          break;
-        }
-        parent_file = current_file;
-      }
+  // // check parent dir exist, and create file
+  // if (count != -1) {
+  //   if (count != 0) { //if more than one level dir
+  //     for (i=0; i<=count-1; i++) { //this for only checks if parent does not exist, doesn't create dir
+  //       if (i == 0) {
+  //         parent_file = get_file(file_names[i], root->files);
+  //         if (parent_file == NULL || parent_file->type == REGULAR) {
+  //           DEBUG_PRINT("parent_file is NULL or not a directory");
+  //           ret_val = -ENOENT;
+  //           break;
+  //         }
+  //         continue;
+  //       }
+  //       current_file = get_file(file_names[i], parent_file->files);
+  //       if (current_file == NULL || current_file->type == REGULAR) {
+  //         DEBUG_PRINT("current_file is NULL or not a directory");
+  //         ret_val = -ENOENT;
+  //         break;
+  //       }
+  //       parent_file = current_file;
+  //     }
 
-      if (ret_val == 0){
-        file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
-        if (file != NULL) {
-          file->parent = parent_file;
-          if (parent_file->files) {
-            push(parent_file->files, file);
-          } else {
-            parent_file->files = make_node(file);
-          }
-        } else {
-          ret_val = -EPERM;
-        }
-      }
-    } else { // count==0
-      file = create_rd_file(file_names[count], "/"); // create new file under root directory
-      if (file != NULL) {
-        DEBUG_PRINT("rd_create(): adding new file to root->files\n");
-        if (root->files) {
-          push(root->files, file);
-        } else {
-          root->files = make_node(file);
-        }
-      } else {
-        ret_val = -EPERM;
-      }
-    }
+  //     if (ret_val == 0){
+  //       file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
+  //       if (file != NULL) {
+  //         file->parent = parent_file;
+  //         if (parent_file->files) {
+  //           push(parent_file->files, file);
+  //         } else {
+  //           parent_file->files = make_node(file);
+  //         }
+  //       } else {
+  //         ret_val = -EPERM;
+  //       }
+  //     }
+  //   } else { // count==0
+  //     file = create_rd_file(file_names[count], "/"); // create new file under root directory
+  //     if (file != NULL) {
+  //       DEBUG_PRINT("rd_create(): adding new file to root->files\n");
+  //       if (root->files) {
+  //         push(root->files, file);
+  //       } else {
+  //         root->files = make_node(file);
+  //       }
+  //     } else {
+  //       ret_val = -EPERM;
+  //     }
+  //   }
+  // } else {
+  //   DEBUG_PRINT("count was -1\n");
+  //   ret_val = -ENOENT;
+  // }
+
+  if (!parent_file) {
+    return -ENOENT;
   } else {
-    DEBUG_PRINT("count was -1\n");
-    ret_val = -ENOENT;
+    rd_file *file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
+    if (file != NULL) {
+      file->parent = parent_file;
+      if (parent_file->files) {
+        push(parent_file->files, file);
+      } else {
+        parent_file->files = make_node(file);
+      }
+    } else {
+      ret_val = -EPERM;
+    }
   }
 
   // free files
@@ -745,6 +796,7 @@ int main (int argc, char *argv[]) {
   }
 
   root = create_rd_file("/","");
+  root->type = DIRECTORY;
   gid = getgid();
   uid = getuid();
   init_time = time(NULL);
