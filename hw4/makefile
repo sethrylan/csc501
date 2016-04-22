@@ -6,7 +6,6 @@ DIFF      = diff -w
 SHELL     = /bin/bash
 UNAME     = $(shell uname -s)
 CERT_NAME = gcc-signature
-TEST_DIR  = /tmp/rd
 PUSHD     = pushd $(TEST_DIR) > /dev/null
 POPD      = popd > /dev/null
 WAIT      = sleep .1
@@ -20,11 +19,13 @@ ifeq ($(UNAME), Darwin)
 CFLAGS += `pkg-config fuse --cflags --libs`
 CFLAGS += -DFUSE_USE_VERSION=26
 UMOUNT = umount
+TEST_DIR  = /private/tmp/rd
 all: signcode
 else
 CFLAGS += `pkg-config fuse --cflags --libs`
 CFLAGS += -DFUSE_USE_VERSION=26
 UMOUNT = fusermount -u -q
+TEST_DIR  = /tmp/rd
 endif
 
 debug: CFLAGS += -DDEBUG
