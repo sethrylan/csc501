@@ -328,9 +328,8 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
   char **file_names;
-  int i, count, flag;
+  int i, count, ret_val = EXIT_SUCCESS;
   rd_file *parent_file;
-  int ret_val = EXIT_SUCCESS;
 
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     return -EPERM;
@@ -368,11 +367,9 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
-
   char **file_names;
-  int i, count, flag;
-  rd_file *file, *parent_file, *current_file;
-  int ret_val = EXIT_SUCCESS;
+  int i, count, ret_val = EXIT_SUCCESS;
+  rd_file *file, *parent_file;
 
   if (path==NULL || ends_with(path, "/")){
     return -EPERM;
@@ -397,47 +394,18 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 
   file_names = get_dirs(path, &count);
   if (!file_names){
-    DEBUG_PRINT("rd_getattr: no directories\n");
     return -EPERM;
   }
+  parent_file = get_parent_directory(path, file_names, count);
 
-  // check for parent directory exist and get attributes if it exists
-  if (count != -1) {
-    if (count != 0) {
-      for (i = 0; i <= count - 1; i++) {
-        if (i == 0) {
-          parent_file = get_file(file_names[i], root->files);
-          if (parent_file==NULL || parent_file->type==REGULAR) {
-            // directory doesn't exist or it's actually a REGULAR file
-            ret_val = -ENOENT;
-            break;
-          }
-          continue;
-        }
-        current_file = get_file(file_names[i], parent_file->files);
-        if (current_file == NULL || current_file->type == REGULAR) {
-          // directory doesn't exist or it's actually a REGULAR file
-          ret_val = -ENOENT;
-          break;
-        }
-
-        parent_file = current_file;
-      }
-      if (ret_val == 0) {
-        file = get_file(file_names[count], parent_file->files);
-        if (file == NULL) {
-          // file doesn't exist in the directory
-          ret_val = -ENOENT;
-        }
-      }
-    } else {  // count == 0
-      file = get_file(file_names[count], root->files);
-      if (file == NULL) {
-        // file doesn't exist under root directory
-        ret_val = -ENOENT;
-      }
-    }
-    if (ret_val == 0) {
+  if (!parent_file) {
+    return -ENOENT;
+  } else {
+    file = get_file(file_names[count], parent_file->files);
+    if (!file) {
+      DEBUG_PRINT("rd_getattr(): %s doesn't exist in %s\n", file_names[count], parent_file->name);
+      ret_val = -ENOENT;
+    } else {
       time(&(statbuf->st_atime));
       time(&(statbuf->st_mtime));
       time(&(statbuf->st_ctime));
@@ -461,9 +429,6 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
         statbuf->st_blocks = file->num_blocks;
       }
     }
-  } else {
-    DEBUG_PRINT("count was -1\n");
-    ret_val = -ENOENT;
   }
 
   for (i=0; i<=count; i++) {
