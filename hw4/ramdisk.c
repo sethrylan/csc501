@@ -107,7 +107,7 @@ char **get_dirs(const char *path, int *ret_count) {
   return file_names;
 }
 
-rd_file* get_parent_directory (const char* path, const char **file_names, const int count) {
+rd_file* get_parent_directory (const char *path, char **file_names, const int count) {
   rd_file *parent_file = NULL, *current_file = NULL;
   int i;
   if (!file_names) {
@@ -544,7 +544,7 @@ static int rd_utimens (const char *path, const struct timespec tv[2]) {
   return EXIT_SUCCESS;
 }
 
-int rd_mkdir (const char * path, mode_t mode) {
+int rd_mkdir (const char *path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
   char **file_names;;
   int i, count, ret_val = EXIT_SUCCESS;
@@ -600,6 +600,7 @@ static struct fuse_operations operations = {
   .create   = rd_create,
   .utimens  = rd_utimens,
   .mkdir    = rd_mkdir,
+  .access   = rd_access,
 
   // // .rmdir     = rd_rmdir,
   // .open      = rd_open,
@@ -607,14 +608,10 @@ static struct fuse_operations operations = {
   // .read      = rd_read,
   // // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // // .unlink    = rd_unlink,
-  // .opendir   = rd_opendir,
-  // .readdir   = rd_readdir,
-  // .getattr   = rd_getattr,
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
   // // .ftruncate = rd_ftruncate_wrapper,
   // // .rename   = rd_rename,
-  // .access   = rd_access
   // // .chmod    = rd_chmod,
   // // .chown    = rd_chown,
 };
