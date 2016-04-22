@@ -39,27 +39,34 @@ char* get_rd_file_path(rd_file *file) {
   return result;
 }
 
-rd_file* create_rd_file(char *name, char *path) {
+rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
   rd_file *file;
   if (name==NULL || path==NULL){
     return NULL;
   }
 
   file = (rd_file*)malloc(sizeof(rd_file));
-  file->type = REGULAR;
+  file->type = type;
   file->name = malloc(strlen(name)+1);
   file->path = malloc(strlen(path)+1);
-  file->blocks = (char**)malloc(sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1);
   memset(file->name, 0, sizeof(strlen(name)+1));
   memset(file->path, 0, sizeof(strlen(path)+1));
   memcpy(file->name, name, sizeof(strlen(name)));
   memcpy(file->path, path, sizeof(strlen(path)));
-  memset(file->blocks, 0, sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1 );
   file->files = NULL;
-  file->num_blocks = INITIAL_BLOCKS_PER_FILE;
   file->bytes = 0;
   file->opened = FALSE;
   file->parent = NULL;
+
+  if (type == REGULAR) {
+    file->blocks = (char**)malloc(sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1);
+    memset(file->blocks, 0, sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1 );
+    file->num_blocks = INITIAL_BLOCKS_PER_FILE;
+    file->bytes = 0;
+  } else {  // DIRECTORY file
+    file->bytes = DIRECTORY_BYTES;
+  }
+
   return file;
 }
 

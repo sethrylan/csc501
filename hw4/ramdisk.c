@@ -344,7 +344,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   if (!parent_file) {
     return -ENOENT;
   } else {
-    rd_file *file = create_rd_file(file_names[count], parent_file->name );  // create file under parent directory
+    rd_file *file = create_rd_file(file_names[count], parent_file->name, REGULAR);  // create file under parent directory
     if (file != NULL) {
       file->parent = parent_file;
       if (parent_file->files) {
@@ -571,11 +571,11 @@ int rd_mkdir (const char *path, mode_t mode) {
     if (file != NULL) {
       ret_val = -EPERM;
     } else {
-      rd_file *new_file = create_rd_file(file_names[count], parent_file->name);  // e.g., "/"
+      rd_file *new_dir = create_rd_file(file_names[count], parent_file->name, DIRECTORY);  // e.g., "/"
       if (parent_file->files) {
-        push(parent_file->files, new_file);
+        push(parent_file->files, new_dir);
       } else {
-        parent_file->files = make_node(new_file);
+        parent_file->files = make_node(new_dir);
       }
     }
   }
@@ -639,8 +639,7 @@ int main (int argc, char *argv[]) {
     exit(1);
   }
 
-  root = create_rd_file("/","");
-  root->type = DIRECTORY;
+  root = create_rd_file("/","", DIRECTORY);
   gid = getgid();
   uid = getuid();
   init_time = time(NULL);
