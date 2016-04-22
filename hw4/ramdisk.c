@@ -492,7 +492,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
       return -ENOENT;
     } else {
 
-      file = get_file(file_names[count], root->files);
+      file = get_file(file_names[count], parent_file->files);
       if (file == NULL || file->type == REGULAR) {
         DEBUG_PRINT("rd_readdir(): %s does not exist or is not a directory\n", file_names[count]);
         ret_val = -ENOENT;
@@ -546,10 +546,9 @@ static int rd_utimens (const char *path, const struct timespec tv[2]) {
 
 int rd_mkdir (const char * path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
-  char **file_names = NULL;
-  int i, count, flag;
-  rd_file * file, *parent_file, *current_file;
-  int ret_val = EXIT_SUCCESS;
+  char **file_names;;
+  int i, count, ret_val = EXIT_SUCCESS;
+  rd_file *file, *parent_file;
 
   if (!path || matches(path, "/")) {
     return -EPERM;
@@ -563,54 +562,22 @@ int rd_mkdir (const char * path, mode_t mode) {
   if (!file_names){
     return -EPERM;
   }
+  parent_file = get_parent_directory(path, file_names, count);
 
-  if(count!=-1){
-    if(count!=0){
-      for(i=0;i<=count-1;i++){
-        if(i==0){
-          parent_file = get_file(file_names[i], root->files);
-          if(parent_file==NULL || parent_file->type == REGULAR){
-            ret_val = -EPERM;
-            break;
-          }
-          continue;
-        }
-        current_file = get_file(file_names[i], parent_file->files);
-        if(current_file==NULL || current_file->type == REGULAR ){
-          ret_val = -EPERM;
-          break;
-        }
-
-        parent_file = current_file;
-      }
-      if (ret_val == 0) {
-        file = get_file(file_names[count], parent_file->files);
-        if (file != NULL) {
-          ret_val = -EPERM;
-        } else {
-          rd_file *new_file = create_rd_file(file_names[count], parent_file->name);
-          if (parent_file->files) {
-            push(parent_file->files, new_file);
-          } else {
-            parent_file->files = make_node(new_file);
-          }
-        }
-      }
-    } else { // e.g., "/file";
-      file = get_file(file_names[count], root->files);
-      if (file!=NULL) {
-        ret_val = -EPERM;
+  if (!parent_file) {
+    return -EPERM;
+  } else {
+    file = get_file(file_names[count], parent_file->files);
+    if (file != NULL) {
+      ret_val = -EPERM;
+    } else {
+      rd_file *new_file = create_rd_file(file_names[count], parent_file->name);  // e.g., "/"
+      if (parent_file->files) {
+        push(parent_file->files, new_file);
       } else {
-        rd_file *new_file = create_rd_file(file_names[count], root->name);  // e.g., "/"
-        if (root->files) {
-          push(root->files, new_file);
-        } else {
-          root->files = make_node(new_file);
-        }
+        parent_file->files = make_node(new_file);
       }
     }
-  } else {
-    ret_val = -EPERM;
   }
 
   for(i=0; i<=count; i++) {
