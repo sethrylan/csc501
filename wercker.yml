@@ -26,7 +26,7 @@ build:
         cwd: hw4/
         name: build and test
         code: |
-          yum -y install make gcc fuse-devel
+          yum -y install make gcc fuse fuse-devel
           chmod a+rw /dev/fuse
           # yum -i fuse-devel-2.9.3-4.1.2.x86_64.rpm
           make clean test
