@@ -138,7 +138,7 @@ rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
 int rd_opendir (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_opendir: %s\n", path);
   rd_file *file;
-  int ret_val = 0;
+  int ret_val = EXIT_SUCCESS;
 
   if (!path ) {
     return -ENOENT;
@@ -296,7 +296,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   char **file_names;
   int i, count, flag;
   rd_file *file, *parent_file, *current_file;
-  int ret_val = 0;
+  int ret_val = EXIT_SUCCESS;
 
   if (path == NULL || matches(path, "/") || ends_with(path, "/")) {
     return -EPERM;
@@ -374,7 +374,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
   char **file_names;
   int i, count, flag;
   rd_file *file, *parent_file, *current_file;
-  int ret_val = 0;
+  int ret_val = EXIT_SUCCESS;
 
   if (path==NULL || ends_with(path, "/")){
     return -EPERM;
@@ -478,11 +478,10 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
-
   char **file_names;
   int count=0;
   int i=0;
-  int ret_val = 0;
+  int ret_val = EXIT_SUCCESS;
   struct stat st;
   rd_file *file = NULL, *current_file = NULL, *parent_file = NULL;
   node *node;
@@ -619,7 +618,7 @@ int rd_mkdir (const char * path, mode_t mode) {
   char **file_names = NULL;
   int i, count, flag;
   rd_file * file, *parent_file, *current_file;
-  int ret_val = 0;
+  int ret_val = EXIT_SUCCESS;
 
   if (!path || matches(path, "/")) {
     return -EPERM;
