@@ -26,6 +26,9 @@ rd_file *root;
 // https://lastlog.de/misc/fuse-doc/doc/html/
 // http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
+// TODO: rename ->size to bytes
+// TODO: move int i into loops
+
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
   return (current_bytes + bytes) <= max_bytes;
@@ -506,6 +509,7 @@ int rd_mkdir (const char *path, mode_t mode) {
       ret_val = -EPERM;
     } else {
       rd_file *new_dir = create_rd_file(file_names[count], parent_file->name, DIRECTORY);  // e.g., "/"
+      new_dir->parent = parent_file;
       if (parent_file->files) {
         push(parent_file->files, new_dir);
       } else {
