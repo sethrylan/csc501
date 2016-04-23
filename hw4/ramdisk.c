@@ -26,6 +26,7 @@ rd_file *root;
 // http://www.cs.cmu.edu/~./fp/courses/15213-s07/lectures/15-filesys/index.html
 
 // TODO: support 'cat > file && cat > file'
+// TODO: remove blocks
 
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
@@ -331,17 +332,21 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
-  rd_file *file;
+  rd_file *file, *parent_file;
 
-  if (!path || ends_with(path, "/")){
+  if (!path){
     return -EPERM;
   }
 
   char **file_names = get_dirs(path, &count);
-  if (!file_names){
-    return -EPERM;
+  if (matches(path, root->name)) {
+    parent_file = root;
+  } else {
+    if (!file_names){
+      return -EPERM;
+    }
+    parent_file = get_parent_directory(path, file_names, count);
   }
-  rd_file *parent_file = get_parent_directory(path, file_names, count);
 
   if (!parent_file) {
     return -ENOENT;
@@ -541,6 +546,7 @@ int rd_unlink(const char * path) {
 }
 
 
+
 static struct fuse_operations operations = {
   .getattr  = rd_getattr,
   .opendir  = rd_opendir,
@@ -553,9 +559,8 @@ static struct fuse_operations operations = {
   .open     = rd_open,
   .flush    = rd_flush,  // called on close()
   .write    = rd_write,
-  .read      = rd_read,
-
-  // .rmdir     = rd_rmdir,
+  .read     = rd_read,
+  // .rmdir    = rd_rmdir,
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
   // // .ftruncate = rd_ftruncate_wrapper,

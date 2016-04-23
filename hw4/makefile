@@ -131,6 +131,7 @@ testremove: maketestdir ramdisk
 	echo "OK PASS";
 
 # cat to /testfile and /testdir/testfile2
+# delete both files using full-qualified paths
 testwrite: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
@@ -141,6 +142,11 @@ testwrite: maketestdir ramdisk
 	echo "test content two" > testfile2 && \
 	cat testfile2 | diff <(echo "test content two") - && \
 	stat -c "%s" testfile2 | diff <(echo "17") - && \
+	rm $(TEST_DIR)/testfile && rm $(TEST_DIR)/testdir/testfile2 && \
+	ls $(TEST_DIR)  | diff <(echo "testdir") - && \
+	ls $(TEST_DIR)/ | diff <(echo "testdir") - && \
+	ls -l $(TEST_DIR)/testdir  | diff <(echo "total 0") - && \
+	ls -l $(TEST_DIR)/testdir/ | diff <(echo "total 0") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
