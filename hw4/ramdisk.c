@@ -136,7 +136,7 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
 
 
 // TODO: remove unused file_type
-rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
+rd_file* get_rd_file (const char *path, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
   int count;
   char **file_names = get_dirs(path, &count);
@@ -161,10 +161,14 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   //   return -ENOENT;
   // }
 
-  file = get_rd_file(path, DIRECTORY, root);
+  file = get_rd_file(path, root);
 
   if (!file) {
     return -ENOENT;
+  }
+
+  if (file->type != DIRECTORY) {
+    return -ENOTDIR;
   }
 
   return EXIT_SUCCESS;
@@ -178,23 +182,49 @@ static int rd_open (const char *path, struct fuse_file_info *fi){
     return -ENOENT;
   }
 
-  rd_file *file = get_rd_file(path, REGULAR, root);
+  rd_file *file = get_rd_file(path, root);
 
   if (!file) {
     return -ENOENT;
   }
+
+  if (file->type == DIRECTORY && (fi->flags&O_RDONLY || fi->flags&O_RDWR || fi->flags&O_APPEND)) {
+    return -EISDIR;
+  }
+
   file->opened = TRUE;
 
   return EXIT_SUCCESS;
 }
 
+/** Possibly flush cached data
+ *
+ * BIG NOTE: This is not equivalent to fsync().  It's not a
+ * request to sync dirty data.
+ *
+ * Flush is called on each close() of a file descriptor.  So if a
+ * filesystem wants to return write errors in close() and the file
+ * has cached dirty data, this is a good place to write back data
+ * and return any errors.  Since many applications ignore close()
+ * errors this is not always useful.
+ *
+ * NOTE: The flush() method may be called more than once for each
+ * open().  This happens if more than one file descriptor refers
+ * to an opened file due to dup(), dup2() or fork() calls.  It is
+ * not possible to determine if a flush is final, so each flush
+ * should be treated equally.  Multiple write-flush sequences are
+ * relatively rare, so this shouldn't be a problem.
+ *
+ * Filesystems shouldn't assume that flush will always be called
+ * after some writes, or that if will be called at all.
+ */
 int rd_flush (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_flush(): %s\n", path);
   rd_file *file;
   if (!valid_path(path)) {
     return -ENOENT;
   }
-  file = get_rd_file(path, REGULAR, root);
+  file = get_rd_file(path, root);
   if (!file) {
     return -ENOENT;
   }
@@ -215,9 +245,13 @@ static int rd_write (const char *path, const char *buffer, size_t size, off_t of
     return -ENOENT;
   }
 
-  file = get_rd_file(path, REGULAR, root);
-  if (file == NULL) {
+  file = get_rd_file(path, root);
+  if (!file) {
     return -ENOENT;
+  }
+
+  if (file->type != REGULAR) {
+    // No error
   }
 
   if (offset > file->size) {
@@ -271,9 +305,13 @@ static int rd_read(const char *path, char *buffer, size_t size, off_t offset, st
     return -ENOENT;
   }
 
-  rd_file *file = get_rd_file(path, REGULAR, root);
-  if (file == NULL) {
+  rd_file *file = get_rd_file(path, root);
+  if (!file) {
     return -ENOENT;
+  }
+
+  if (file->type == DIRECTORY) {
+    return -EISDIR;
   }
 
   if (file->data) {
@@ -558,7 +596,7 @@ static int rd_rmdir (const char *path) {
     return -EPERM;
   }
 
-  rd_file *file = get_rd_file(path, DIRECTORY, root);
+  rd_file *file = get_rd_file(path, root);
   if (!file) {
     return -ENOENT;
   }
