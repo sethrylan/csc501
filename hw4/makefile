@@ -9,6 +9,7 @@ CERT_NAME = gcc-signature
 PUSHD     = pushd $(TEST_DIR) > /dev/null
 POPD      = popd > /dev/null
 WAIT      = sleep .1
+LS 				= ls -w 10000 -C
 
 all: ramdisk
 
@@ -49,7 +50,7 @@ unmount:
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage testmount testtouch testdir1 testremove
+test: all testusage testmount testtouch testdir1 testnesteddirs testremove
 
 maketestdir:
 	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
@@ -82,6 +83,33 @@ testdir1: maketestdir ramdisk
 	mkdir testdir && ls | diff <(echo "testdir") - && \
 	cd testdir && ls -l | diff <(echo "total 0") - && \
 	touch testfile && ls | diff <(echo "testfile") - && \
+	$(POPD) && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
+
+# create the directory strucutre
+# /
+# |-- dir1
+# |-- dir2
+#   |-- dir3
+#     |-- dir4
+#       |-- file
+#   |-- file
+# |-- file
+testnesteddirs: maketestdir ramdisk
+	./ramdisk $(TEST_DIR) 100 && \
+	$(PUSHD) && \
+	mkdir dir1 && $(LS) | diff <(echo "dir1") - && \
+	touch file && $(LS) | diff <(echo "dir1  file") - && \
+	mkdir dir2 && $(LS) | diff <(echo "dir1  dir2  file") - && \
+	cd dir2 && ls -l | diff <(echo "total 0") - && \
+	touch file &&	mkdir dir3 && $(LS) | diff <(echo "dir3  file") - && \
+	cd dir3 && ls -l | diff <(echo "total 0") - && \
+	touch file &&	mkdir dir4 && $(LS) | diff <(echo "dir4  file") - && \
+	cd dir4 && ls -l | diff <(echo "total 0") - && \
+	touch file && $(LS) | diff <(echo "file") - && \
+	pwd | diff <(echo $(TEST_DIR)/dir2/dir3/dir4) - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
