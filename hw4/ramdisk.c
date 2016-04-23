@@ -35,7 +35,7 @@ int memory_available (int bytes) {
 }
 
 boolean valid_path(const char *path) {
-  if (path == NULL || matches(path, root->name) || ends_with(path, "/")) {
+  if (!path || matches(path, root->name) || ends_with(path, "/")) {
     DEBUG_PRINT("path is NULL or a directory\n");
     return FALSE;
   }
@@ -314,12 +314,12 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   DEBUG_PRINT("rd_create(): %s\n", path);
   int i, count, ret_val = EXIT_SUCCESS;
 
-  if (path == NULL || matches(path, root->name) || ends_with(path, "/")) {
+  if (!path || matches(path, root->name) || ends_with(path, "/")) {
     return -EPERM;
   }
 
   char **file_names = get_dirs(path, &count);
-  if (file_names == NULL) {
+  if (!file_names) {
     return -EPERM;
   }
   rd_file *parent_file = get_parent_directory(path, file_names, count);
@@ -328,7 +328,7 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     return -ENOENT;
   } else {
     rd_file *file = create_rd_file(file_names[count], parent_file->name, REGULAR);  // create file under parent directory
-    if (file != NULL) {
+    if (file) {
       file->parent = parent_file;
       if (parent_file->files) {
         push(parent_file->files, file);
@@ -353,7 +353,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
   int i, count, ret_val = EXIT_SUCCESS;
   rd_file *file;
 
-  if (path==NULL || ends_with(path, "/")){
+  if (!path || ends_with(path, "/")){
     return -EPERM;
   }
 
@@ -555,6 +555,10 @@ int rd_unlink(const char * path) {
     if (!file) {
       ret_val = -EPERM;
     } else {
+      DEBUG_PRINT("rd_unlink(): bytes before: %ld\n", current_bytes);
+      DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->bytes);
+      current_bytes -= file->bytes;
+      DEBUG_PRINT("rd_unlink(): bytes after: %ld\n", current_bytes);
       parent_file->files = delete_item(parent_file->files, file);
     }
   }
@@ -563,13 +567,6 @@ int rd_unlink(const char * path) {
     free(file_names[i]);
   }
   free(file_names);
-
-  if (ret_val == EXIT_SUCCESS) {
-    DEBUG_PRINT("rd_unlink(): bytes before: %ld\n", current_bytes);
-    DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->bytes);
-    current_bytes -= file->bytes;
-    DEBUG_PRINT("rd_unlink(): bytes after: %ld\n", current_bytes);
-  }
 
   return ret_val;
 }

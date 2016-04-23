@@ -49,7 +49,7 @@ unmount:
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage testmount testtouch testdir1
+test: all testusage testmount testtouch testdir1 testremove
 
 maketestdir:
 	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
@@ -82,6 +82,21 @@ testdir1: maketestdir ramdisk
 	mkdir testdir && ls | diff <(echo "testdir") - && \
 	cd testdir && ls -l | diff <(echo "total 0") - && \
 	touch testfile && ls | diff <(echo "testfile") - && \
+	$(POPD) && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
+
+# create and remove file in root
+# make directory, create file and remove
+testremove: maketestdir ramdisk
+	./ramdisk $(TEST_DIR) 100 && \
+	$(PUSHD) && \
+	touch testfile && ls | diff <(echo "testfile") - && \
+	rm testfile && ls -l | diff <(echo "total 0") - && \
+	mkdir testdir && cd testdir && \
+	touch testfile && ls | diff <(echo "testfile") - && \
+	rm testfile && ls -l | diff <(echo "total 0") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
