@@ -531,6 +531,50 @@ int rd_mkdir (const char *path, mode_t mode) {
 }
 
 
+int rd_unlink(const char * path) {
+  DEBUG_PRINT("rd_unlink: %s\n", path);
+  int i, count;
+  rd_file *file;
+  int ret_val = EXIT_SUCCESS;
+
+  if (path == NULL || matches(path, root->name)) {
+    return -EPERM;
+  }
+
+  char **file_names = get_dirs(path, &count);
+  if (!file_names) {
+    return -EPERM;
+  }
+
+  rd_file *parent_file = get_parent_directory(path, file_names, count);
+
+  if (!parent_file) {
+    return -EPERM;
+  } else {
+    rd_file *file = get_file(file_names[count], parent_file->files);
+    if (!file) {
+      ret_val = -EPERM;
+    } else {
+      parent_file->files = delete_item(parent_file->files, file);
+    }
+  }
+
+  for (i = 0; i <= count; i++) {
+    free(file_names[i]);
+  }
+  free(file_names);
+
+  if (ret_val == EXIT_SUCCESS) {
+    DEBUG_PRINT("rd_unlink(): bytes before: %ld\n", current_bytes);
+    DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->bytes);
+    current_bytes -= file->bytes;
+    DEBUG_PRINT("rd_unlink(): bytes after: %ld\n", current_bytes);
+  }
+
+  return ret_val;
+}
+
+
 static struct fuse_operations operations = {
   .getattr  = rd_getattr,
   .opendir  = rd_opendir,
@@ -539,13 +583,13 @@ static struct fuse_operations operations = {
   .utimens  = rd_utimens,
   .mkdir    = rd_mkdir,
   .access   = rd_access,
+  .unlink    = rd_unlink,
 
   // // .rmdir     = rd_rmdir,
   // .open      = rd_open,
   // .flush     = rd_flush,  // close()
   // .read      = rd_read,
   // // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
-  // // .unlink    = rd_unlink,
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
   // // .ftruncate = rd_ftruncate_wrapper,
