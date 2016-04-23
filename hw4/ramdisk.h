@@ -16,15 +16,15 @@ typedef struct node {
 } node;
 
 typedef struct rd_file {
-  rd_file_type type;
+  rd_file_type type;  // REGULAR or DIRECTORY
 
   // common attributes
   char *name;
   char *path;
   struct rd_file *parent;
+  int size;    // size in bytes
 
   // REGULAR attributes
-  int bytes;
   int num_blocks;
   char **blocks;
   boolean opened;
@@ -56,9 +56,9 @@ rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
   if (type == REGULAR) {
     file->blocks = (char**)calloc(INITIAL_BLOCKS_PER_FILE, sizeof(char*));  // initialize with 0's
     file->num_blocks = INITIAL_BLOCKS_PER_FILE;
-    file->bytes = 0;
+    file->size = 0;
   } else {  // DIRECTORY file
-    file->bytes = DIRECTORY_BYTES;
+    file->size = DIRECTORY_BYTES;
   }
 
   return file;

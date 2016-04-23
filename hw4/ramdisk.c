@@ -26,9 +26,6 @@ rd_file *root;
 // https://lastlog.de/misc/fuse-doc/doc/html/
 // http://www.gnu.org/software/libc/manual/html_node/Attribute-Meanings.html
 
-// TODO: rename ->size to bytes
-// TODO: move int i into loops
-
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
   return (current_bytes + bytes) <= max_bytes;
@@ -261,8 +258,8 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
     memcpy(buffer, file->blocks[block_index_offset]+block_byte_offset, size);
   } else { // if need to read from the remaining blocks
     current_block_remaining = BLOCK_BYTES - block_byte_offset ; /*4096-4095==1 bytes remained to be read;(index starts from 0!) */
-    if (size > (file->bytes - current_offset)) { /* if the given size is bigger than the file's max possible read size(total-offset) */
-      r_size = file->bytes - current_offset;
+    if (size > (file->size - current_offset)) { /* if the given size is bigger than the file's max possible read size(total-offset) */
+      r_size = file->size - current_offset;
     } else {
       r_size = size;
     }
@@ -386,7 +383,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
         statbuf->st_blksize = BLOCK_BYTES;
         statbuf->st_blocks = 8;
       } else {
-        statbuf->st_size = file->bytes;
+        statbuf->st_size = file->size;
         statbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
         statbuf->st_nlink = 1;
         statbuf->st_blksize = BLOCK_BYTES;
@@ -444,7 +441,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
         if (file->type == REGULAR) {
           st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
           st.st_nlink = 1;
-          st.st_size = file->bytes;
+          st.st_size = file->size;
           /* st.st_blksize = BLOCK_SIZE;
           st.st_blocks = r_file->block_number; */
         } else {
@@ -543,8 +540,8 @@ int rd_unlink(const char * path) {
       ret_val = -EPERM;
     } else {
       DEBUG_PRINT("rd_unlink(): bytes before: %ld\n", current_bytes);
-      DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->bytes);
-      current_bytes -= file->bytes;
+      DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->size);
+      current_bytes -= file->size;
       DEBUG_PRINT("rd_unlink(): bytes after: %ld\n", current_bytes);
       parent_file->files = delete_item(parent_file->files, file);
     }
