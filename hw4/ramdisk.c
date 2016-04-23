@@ -579,11 +579,10 @@ static int rd_rmdir (const char *path) {
 }
 
 // TODO:
-int rd_rename) (const char *source, const char *dest) {
+int rd_rename (const char *source, const char *dest) {
   int ret_val = EXIT_SUCCESS;
   return ret_val;
 }
-
 
 static struct fuse_operations operations = {
   .getattr  = rd_getattr,
@@ -599,7 +598,7 @@ static struct fuse_operations operations = {
   .write    = rd_write,
   .read     = rd_read,
   .rmdir    = rd_rmdir,
-  // .rename   = rd_rename,
+  .rename   = rd_rename,
 
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
