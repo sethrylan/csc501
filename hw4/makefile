@@ -37,6 +37,12 @@ debug: all
 ramdisk: ramdisk.o utils.o
 	$(CC) $(CFLAGS) -o $@ $^
 
+postmark: tests/postmark-1.51.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+testpostmark: postmark
+	postmark tests/benchmark.conf
+
 ramdisk.o: ramdisk.c ramdisk.h
 utils.o:   utils.c utils.h
 
@@ -44,7 +50,7 @@ signcode:
 	codesign --force -s $(CERT_NAME) ./ramdisk
 
 clean:
-	$(RM) ramdisk *.o *.testoutput ramdisk.tar.gz
+	$(RM) ramdisk postmark *.o *.testoutput ramdisk.tar.gz
 
 unmount:
 	$(UMOUNT) $(TEST_DIR)
@@ -230,6 +236,3 @@ testwrite: maketestdir ramdisk
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
 	echo "OK PASS";
-
-
-# ./postmark benchmark.conf
