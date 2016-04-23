@@ -62,7 +62,7 @@ rd_file* get_file(const char *name, node *list){
  * path="/var/log", count=1;
  */
 char** get_dirs(const char *path, int *ret_count) {
-  int path_len, count, flag, start, end;
+  int path_len, count, found, start, end;
   char **file_names;
 
   if (!path) {
@@ -76,13 +76,13 @@ char** get_dirs(const char *path, int *ret_count) {
   count = -1;
   start = end = 0;
   for (int i = 0; i < path_len; i++) {
-    flag = 0;
+    found = 0;
     if ((*(path + i)) == '/') {
       end = i;
       count++;
-      flag = 1;
+      found = 1;
     }
-    if (!flag) {
+    if (!found) {
       continue;
     }
     if (count == 0) {
