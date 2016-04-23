@@ -147,13 +147,16 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_opendir: %s\n", path);
   rd_file *file;
 
-  if (!path) {
-    return -ENOENT;
-  } else if (matches(path, root->name)) {  // path is "/"
-    return EXIT_SUCCESS;
-  } else if (ends_with(path, "/")){        // path is "/**/"
-    return -ENOENT;
+  if (matches(path, root->name)) {  // path is "/"
+      return EXIT_SUCCESS;
   }
+  // if (!path) {
+  //   return -ENOENT;
+  // } else if (matches(path, root->name)) {  // path is "/"
+  //   return EXIT_SUCCESS;
+  // } else if (ends_with(path, "/")){        // path is "/**/"
+  //   return -ENOENT;
+  // }
 
   file = get_rd_file(path, DIRECTORY, root);
 
