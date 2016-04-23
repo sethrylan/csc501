@@ -52,7 +52,7 @@ unmount:
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage testmount testmemory0 testtouch testdir1 testdirerror testnesteddirs testremove testwrite
+test: all testusage testmount testmemory0 testmemory1MB testtouch testdir1 testdirerror testnesteddirs testremove testwrite
 
 maketestdir:
 	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
@@ -78,6 +78,19 @@ testmemory0: maketestdir ramdisk
 	$(LS) | $(GREP) "testfile1" - && \
 	(echo "data" > testfile2) 2>&1 | $(GREP)  "No space left on device" && \
 	$(LS) | $(GREP) "testfile1  testfile2" - && \
+	$(POPD) && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
+
+# create 1023KB file -> pass
+# cat to file (<10B) -> pass
+# delete file
+# cat to file (<10B) -> pass
+# cat to file (>10B) -> fail
+testmemory1MB: maketestdir ramdisk
+	./ramdisk $(TEST_DIR) 1 && \
+	$(PUSHD) && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \

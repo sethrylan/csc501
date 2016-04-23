@@ -259,19 +259,18 @@ static int rd_write (const char *path, const char *buffer, size_t size, off_t of
   }
 
   int size_after_write = offset + size;
-  int data_length = file->data ? strlen(file->data) : 0;
 
-  if (size_after_write > data_length) {
-    int bytes_to_allocate = size_after_write - data_length;
+  if (size_after_write > file->size) {
+    int bytes_to_allocate = size_after_write - file->size;
 
-    if(!memory_available(bytes_to_allocate)){
+    if(!memory_available(bytes_to_allocate)) {
       return -ENOSPC;
     }
 
-    current_bytes = current_bytes - bytes_to_allocate;
+    current_bytes += bytes_to_allocate;
 
     char *temp = calloc(bytes_to_allocate + 1, sizeof(char));
-    strncpy(temp, file->data, data_length);
+    strncpy(temp, file->data, file->size);
     free(file->data);
     file->data = temp;
     file->size =+ bytes_to_allocate;
@@ -315,10 +314,9 @@ static int rd_read(const char *path, char *buffer, size_t size, off_t offset, st
   }
 
   if (file->data) {
-    size_t data_length = strlen(file->data);
-    if (offset < data_length) {
-      if ((offset + size) > data_length) {
-        size = data_length - offset;
+    if (offset < file->size) {
+      if ((offset + size) > file->size) {
+        size = file->size - offset;
       }
       memcpy(buffer, file->data + offset, size);
       buffer[size] = '\0';
@@ -671,6 +669,7 @@ int main (int argc, char *argv[]) {
   gid = getgid();
   uid = getuid();
   init_time = time(NULL);
+  current_bytes = 0;
 
   return fuse_main(argc - 1, argv, &operations, NULL);
 }
