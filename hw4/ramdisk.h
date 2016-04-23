@@ -41,26 +41,20 @@ char* get_rd_file_path(rd_file *file) {
 
 rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
   rd_file *file;
-  if (name==NULL || path==NULL){
+  if (name == NULL || path == NULL){
     return NULL;
   }
 
   file = (rd_file*)malloc(sizeof(rd_file));
   file->type = type;
-  file->name = malloc(strlen(name)+1);
-  file->path = malloc(strlen(path)+1);
-  memset(file->name, 0, sizeof(strlen(name)+1));
-  memset(file->path, 0, sizeof(strlen(path)+1));
-  memcpy(file->name, name, sizeof(strlen(name)));
-  memcpy(file->path, path, sizeof(strlen(path)));
+  file->name = strdup(name);
+  file->path = strdup(path);
   file->files = NULL;
-  file->bytes = 0;
   file->opened = FALSE;
   file->parent = NULL;
 
   if (type == REGULAR) {
-    file->blocks = (char**)malloc(sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1);
-    memset(file->blocks, 0, sizeof(char*)*INITIAL_BLOCKS_PER_FILE + 1 );
+    file->blocks = (char**)calloc(INITIAL_BLOCKS_PER_FILE, sizeof(char*));  // initialize with 0's
     file->num_blocks = INITIAL_BLOCKS_PER_FILE;
     file->bytes = 0;
   } else {  // DIRECTORY file
@@ -68,6 +62,20 @@ rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
   }
 
   return file;
+}
+
+void free_file(rd_file *file) {
+  if (file) {
+    for (int i = 0; i < file->num_blocks; i++) {
+      free(file->blocks[i]);
+    }
+    if (file->blocks) {
+      free(file->blocks);
+    }
+    free(file->name);
+    free(file->path);
+    free(file);
+  }
 }
 
 
@@ -78,8 +86,8 @@ node* make_node(rd_file *file);
 // add node to end of list
 void push(node *head, rd_file *file);
 
-// remove head and return value
-char* pop(node **head);
+// remove item from list and return head of list
+node* delete_item(node* head, rd_file *item);
 
 node* make_node(rd_file *file) {
   node *head = malloc(sizeof(node));
@@ -95,6 +103,21 @@ void push(node *head, rd_file *file) {
     current = current->next;
   }
   current->next = make_node(file);
+}
+
+node* delete_item(node* head, rd_file *item) {
+  node *next;
+  if (head == NULL) {
+    return NULL;
+  } else if ((rd_file*)head->file == item) { // found item to delete
+    next = head->next;
+    free_file(head->file);
+    free(head);
+    return next;
+  } else {                                   // not found, so recurse to continue searching
+    head->next = delete_item(head->next, item);
+    return head;
+  }
 }
 
 // remove head and return value
