@@ -65,7 +65,7 @@ rd_file* get_file(const char *name, node *list){
  * path="/var/log", count=1;
  */
 char** get_dirs(const char *path, int *ret_count) {
-  int path_len, i, count, flag, start, end;
+  int path_len, count, flag, start, end;
   char **file_names;
 
   if (!path) {
@@ -77,13 +77,13 @@ char** get_dirs(const char *path, int *ret_count) {
   file_names = (char**) malloc(sizeof(char*) * count+1);
   memset(file_names, 0, sizeof(char*) * count+1);
 
-  for (i=0; i < count; i++) {
-    file_names[i]=NULL;
+  for (int i = 0; i < count; i++) {
+    file_names[i] = NULL;
   }
 
-  count = -1;  /* when the for-loop ends, count will be, the number of "/" -1 */
+  count = -1;
   start = end = 0;
-  for (i = 0; i < path_len; i++) {
+  for (int i = 0; i < path_len; i++) {
     flag = 0;
     if ((*(path + i)) == '/') {
       end = i;
@@ -97,12 +97,12 @@ char** get_dirs(const char *path, int *ret_count) {
       start = end;
       continue;
     }
-    file_names[count - 1] = (char*) malloc(sizeof(char) * (end - start));
+    file_names[count - 1] = (char*)malloc(end - start);  // TODO: replace with strdup
     memset(file_names[count - 1], 0, sizeof(char) * (end - start));
     memcpy(file_names[count - 1], path + start + 1, sizeof(char) * (end - start - 1));
     start = end;
   }
-  file_names[count] = (char*) malloc(sizeof(char) * (path_len - start));
+  file_names[count] = (char*)malloc(path_len - start);   // TODO: replace with strdup
   memset(file_names[count], 0, sizeof(char) * (path_len - start));
   memcpy(file_names[count], path + start + 1, sizeof(char) * (path_len - start - 1));
 
@@ -112,7 +112,6 @@ char** get_dirs(const char *path, int *ret_count) {
 
 rd_file* get_parent_directory (const char *path, char **file_names, const int count) {
   rd_file *parent_file = NULL, *current_file = NULL;
-  int i;
   if (!file_names) {
     DEBUG_PRINT("get_parent_directory: no directories\n");
     return NULL;
@@ -125,7 +124,7 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
   if (count == 0) {     // e.g., "/example";
     parent_file = root;
   } else {              // count > 0
-    for (i = 0; i <= count - 1; i++) {
+    for (int i = 0; i <= count - 1; i++) {
       if (i == 0) {
         parent_file = get_file(file_names[i], root->files);
         if (parent_file == NULL || parent_file->type == REGULAR) {
@@ -231,7 +230,6 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
   int block_byte_offset = 0; // the byte offset of block_index_offset, from which this reading starts
   int r_size = 0; /* real read size; the given size could be bigger than the file's actual size */
   int t_size = 0; /* local copy of size, will be modified */
-  int i = 0;
   int buffer_offset = 0;
   int to_copy_block_num = 0; /* number of blocks to copy, excluding current block */
   int current_block_remaining = 0; /* current block's bytes after the offset */
@@ -289,7 +287,7 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
     t_size -= current_block_remaining;
 
     /* copy remaining bytes */
-    for (i = 1; i <= to_copy_block_num; i++) {
+    for (int i = 1; i <= to_copy_block_num; i++) {
       if ((block_index_offset+i) >= file->num_blocks || file->blocks[block_index_offset+i] == NULL ) {
 
         // sprintf(s, "r_read, read error, (block_index_offset[%d]+i[%d])>=r_file->block_number[%d], "
@@ -312,7 +310,7 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 // TODO: add mode and decrement memory
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
-  int i, count, ret_val = EXIT_SUCCESS;
+  int count, ret_val = EXIT_SUCCESS;
 
   if (!path || matches(path, root->name) || ends_with(path, "/")) {
     return -EPERM;
@@ -340,17 +338,14 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
     }
   }
 
-  // free files
-  for (i=0; i<=count; i++) {
-    free(file_names[i]);
-  }
-  free(file_names);
+  free_char_list(file_names, count);
+
   return ret_val;
 }
 
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
-  int i, count, ret_val = EXIT_SUCCESS;
+  int count, ret_val = EXIT_SUCCESS;
   rd_file *file;
 
   if (!path || ends_with(path, "/")){
@@ -400,17 +395,15 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
     }
   }
 
-  for (i=0; i<=count; i++) {
-    free(file_names[i]);
-  }
-  free(file_names);
+  free_char_list(file_names, count);
+
   return ret_val;
 }
 
 
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
-  int i, count, ret_val = EXIT_SUCCESS;
+  int count, ret_val = EXIT_SUCCESS;
   struct stat st;
   rd_file *file, *parent_file;
   node *node;
@@ -464,10 +457,7 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
       }
     }
 
-    for(i=0; i<=count; i++) {
-      free(file_names[i]);
-    }
-    free(file_names);
+    free_char_list(file_names, count);
   }
 
   return ret_val;
@@ -485,7 +475,7 @@ static int rd_utimens (const char *path, const struct timespec tv[2]) {
 
 int rd_mkdir (const char *path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
-  int i, count, ret_val = EXIT_SUCCESS;
+  int count, ret_val = EXIT_SUCCESS;
 
   if (!path || matches(path, root->name)) {
     return -EPERM;
@@ -518,10 +508,7 @@ int rd_mkdir (const char *path, mode_t mode) {
     }
   }
 
-  for(i=0; i<=count; i++) {
-    free(file_names[i]);
-  }
-  free(file_names);
+  free_char_list(file_names, count);
 
   if (ret_val ==0 ) {
     current_bytes += DIRECTORY_BYTES;
@@ -533,7 +520,7 @@ int rd_mkdir (const char *path, mode_t mode) {
 
 int rd_unlink(const char * path) {
   DEBUG_PRINT("rd_unlink: %s\n", path);
-  int i, count;
+  int count;
   rd_file *file;
   int ret_val = EXIT_SUCCESS;
 
@@ -563,10 +550,7 @@ int rd_unlink(const char * path) {
     }
   }
 
-  for (i = 0; i <= count; i++) {
-    free(file_names[i]);
-  }
-  free(file_names);
+  free_char_list(file_names, count);
 
   return ret_val;
 }

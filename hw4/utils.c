@@ -82,3 +82,10 @@ int begins_with(const char *string, const char *compare) {
 int ends_with(const char *string, const char *compare) {
   return !strncmp(string + (strlen(string)-strlen(compare)), compare, strlen(compare));
 }
+
+void free_char_list(char **list, int length) {
+  for (int i = 0; i <= length; i++) {
+    free(list[i]);
+  }
+  free(list);
+}
