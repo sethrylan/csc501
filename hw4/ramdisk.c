@@ -185,7 +185,7 @@ static int rd_open (const char *path, struct fuse_file_info *fi){
   return EXIT_SUCCESS;
 }
 
-int rd_flush (const char * path, struct fuse_file_info * fi) {
+int rd_flush (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_flush(): %s\n", path);
   rd_file *file;
   if (!valid_path(path)) {
@@ -557,7 +557,7 @@ static struct fuse_operations operations = {
   .access   = rd_access,
   .unlink    = rd_unlink,
   .open      = rd_open,
-  // .flush     = rd_flush,  // called on close()
+  .flush     = rd_flush,  // called on close()
   // .read      = rd_read,
 
   // .rmdir     = rd_rmdir,
