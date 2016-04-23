@@ -171,17 +171,16 @@ static int rd_open(const char *path, struct fuse_file_info *fi){
   DEBUG_PRINT("rd_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
                               path, fi->flags&O_RDONLY, fi->flags&O_WRONLY, fi->flags&O_RDWR, fi->flags&O_APPEND, fi->flags&O_TRUNC);
 
-  rd_file *file;
-
   if (!valid_path(path)) {
     return -ENOENT;
   }
 
-  file = get_rd_file(path, REGULAR, root);
+  rd_file *file = get_rd_file(path, REGULAR, root);
 
   if (!file) {
     return -ENOENT;
   }
+  file->opened = TRUE;
 
   return EXIT_SUCCESS;
 }
