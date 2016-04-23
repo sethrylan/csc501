@@ -138,16 +138,16 @@ rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   int count;
   char **file_names = get_dirs(path, &count);
   rd_file *parent_file = get_parent_directory(path, file_names, count);
-  return get_file(file_names[count], parent_file->files);
+  rd_file *file = get_file(file_names[count], parent_file->files);
+  free_char_list(file_names, count);
+  return file;
 }
-
 
 int rd_opendir (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_opendir: %s\n", path);
   rd_file *file;
-  int ret_val = EXIT_SUCCESS;
 
-  if (!path ) {
+  if (!path) {
     return -ENOENT;
   } else if (matches(path, root->name)) {
     return EXIT_SUCCESS;
@@ -158,10 +158,10 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   file = get_rd_file(path, DIRECTORY, root);
 
   if (!file) {
-    ret_val = -ENOENT;
+    return -ENOENT;
   }
 
-  return ret_val;
+  return EXIT_SUCCESS;
 }
 
 static int rd_open(const char *path, struct fuse_file_info *fi){
