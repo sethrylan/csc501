@@ -168,8 +168,8 @@ testwrite: maketestdir ramdisk
 	cat testfile2 | diff <(echo "test content two") - && \
 	stat -c "%s" testfile2 | diff <(echo "17") - && \
 	rm $(TEST_DIR)/testfile && rm $(TEST_DIR)/testdir/testfile2 && \
-	ls $(TEST_DIR)  | diff <(echo "testdir") - && \
-	ls $(TEST_DIR)/ | diff <(echo "testdir") - && \
+	$(LS) $(TEST_DIR)  | diff <(echo "testdir") - && \
+	$(LS) $(TEST_DIR)/ | diff <(echo "testdir") - && \
 	ls -l $(TEST_DIR)/testdir  | diff <(echo "total 0") - && \
 	ls -l $(TEST_DIR)/testdir/ | diff <(echo "total 0") - && \
 	$(POPD) && \
