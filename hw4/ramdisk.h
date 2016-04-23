@@ -22,7 +22,7 @@ typedef struct rd_file {
   char *name;
   char *path;
   struct rd_file *parent;
-  int size;    // size in bytes
+  size_t size;    // size in bytes
 
   // REGULAR attributes
   int num_blocks;

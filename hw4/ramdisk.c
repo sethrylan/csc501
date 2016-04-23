@@ -296,7 +296,7 @@ static int rd_read (const char *path, char *buffer, size_t size, off_t offset, s
 }
 
 
-// TODO: add mode and decrement memory
+// TODO: mode
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
@@ -554,8 +554,7 @@ static struct fuse_operations operations = {
   .mkdir    = rd_mkdir,
   .access   = rd_access,
   .unlink    = rd_unlink,
-
-  // // .rmdir     = rd_rmdir,
+  // .rmdir     = rd_rmdir,
   // .open      = rd_open,
   // .flush     = rd_flush,  // close()
   // .read      = rd_read,
