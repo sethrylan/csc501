@@ -526,7 +526,6 @@ int rd_mkdir (const char *path, mode_t mode) {
     rd_file *file = get_file(file_names[count], parent_file->files);
     if (file) {
       // file already exists
-      // TODO: add test case
       ret_val = -EEXIST;
     } else {
       rd_file *new_dir = create_rd_file(file_names[count], parent_file->name, DIRECTORY);  // e.g., "/"
