@@ -2,10 +2,8 @@
 typedef enum {REGULAR, DIRECTORY} rd_file_type;
 typedef enum {FALSE, TRUE} boolean;
 
-#define BLOCK_BYTES             4096
-#define INITIAL_BLOCKS_PER_FILE 4
+#define BYTES_PER_BLOCK         4096
 #define DIRECTORY_BYTES         4096
-
 
 #define DEFAULT_DIRECTORY_PERMISSION 0755
 #define DEFAULT_FILE_PERMISSION      0766
@@ -26,8 +24,6 @@ typedef struct rd_file {
 
   // REGULAR attributes
   char *data;
-  int num_blocks;
-  char **blocks;
   boolean opened;
 
   // DIRECTORY attributes
@@ -55,10 +51,8 @@ rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
   file->parent = NULL;
 
   if (type == REGULAR) {
-    file->blocks = (char**)calloc(INITIAL_BLOCKS_PER_FILE, sizeof(char*));  // initialize with 0's
-    file->num_blocks = INITIAL_BLOCKS_PER_FILE;
     file->size = 0;
-  } else {  // DIRECTORY file
+  } else { // DIRECTORY file
     file->size = DIRECTORY_BYTES;
   }
 
@@ -67,12 +61,7 @@ rd_file* create_rd_file(char *name, char *path, rd_file_type type) {
 
 void free_file(rd_file *file) {
   if (file) {
-    for (int i = 0; i < file->num_blocks; i++) {
-      free(file->blocks[i]);
-    }
-    if (file->blocks) {
-      free(file->blocks);
-    }
+    free(file->data);
     free(file->name);
     free(file->path);
     free(file);

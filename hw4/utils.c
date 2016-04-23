@@ -89,3 +89,7 @@ void free_char_list(char **list, int length) {
   }
   free(list);
 }
+
+unsigned int div_round_up (unsigned int dividend, unsigned int divisor) {
+  return (dividend + (divisor / 2)) / divisor;
+}

@@ -26,7 +26,6 @@ rd_file *root;
 // http://www.cs.cmu.edu/~./fp/courses/15213-s07/lectures/15-filesys/index.html
 
 // TODO: support 'cat > file && cat > file'
-// TODO: remove blocks
 
 int memory_available (int bytes) {
   DEBUG_PRINT("memory_available(): %d (%ld / %ld)\n", bytes, current_bytes, max_bytes);
@@ -375,14 +374,14 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
         statbuf->st_size = DIRECTORY_BYTES;
         statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
         statbuf->st_nlink = 2;
-        statbuf->st_blksize = BLOCK_BYTES;
-        statbuf->st_blocks = 8;
+        statbuf->st_blksize = BYTES_PER_BLOCK;
+        statbuf->st_blocks = DIRECTORY_BYTES / BYTES_PER_BLOCK;
       } else {
         statbuf->st_size = file->size;
         statbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
         statbuf->st_nlink = 1;
-        statbuf->st_blksize = BLOCK_BYTES;
-        statbuf->st_blocks = file->num_blocks;
+        statbuf->st_blksize = BYTES_PER_BLOCK;
+        statbuf->st_blocks = div_round_up(file->size, BYTES_PER_BLOCK);
       }
     }
   }

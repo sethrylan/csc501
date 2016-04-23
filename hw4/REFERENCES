@@ -1,6 +1,9 @@
-count(char, char*) implementation
-http://stackoverflow.com/questions/4235519/counting-number-of-occurrences-of-a-char-in-a-string-in-c
+count(char, char*) implementation:
+  http://stackoverflow.com/a/4235884/1585816
 
-linked list implementation
+linked list implementation:
   http://www.learn-c.org/en/Linked_lists
   http://codereview.stackexchange.com/a/508
+
+round_div implementation:
+  http://stackoverflow.com/a/2422723/1585816

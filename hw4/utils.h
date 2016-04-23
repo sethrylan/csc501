@@ -12,3 +12,4 @@ int matches (const char *string, const char *compare);
 int begins_with(const char *string, const char *compare);
 int ends_with(const char *string, const char *compare);
 void free_char_list(char **list, int length);
+unsigned int div_round_up (unsigned int dividend, unsigned int divisor);
