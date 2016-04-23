@@ -135,6 +135,8 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
   return parent_file;
 }
 
+
+// TODO: remove unused file_type
 rd_file* get_rd_file (const char *path, rd_file_type file_type, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
   int count;
@@ -514,7 +516,7 @@ int rd_unlink(const char * path) {
   rd_file *file;
   int ret_val = EXIT_SUCCESS;
 
-  if (path == NULL || matches(path, root->name)) {
+  if (!path || matches(path, root->name)) {
     return -EPERM;
   }
 
@@ -532,6 +534,7 @@ int rd_unlink(const char * path) {
     if (!file) {
       ret_val = -EPERM;
     } else {
+      // TODO: return if file type is EISDIR
       DEBUG_PRINT("rd_unlink(): bytes before: %ld\n", current_bytes);
       DEBUG_PRINT("rd_unlink(): bytes freed: %ld\n", file->size);
       current_bytes -= file->size;
@@ -541,6 +544,37 @@ int rd_unlink(const char * path) {
   }
 
   free_char_list(file_names, count);
+
+  return ret_val;
+}
+
+
+static int rd_rmdir (const char *path) {
+  DEBUG_PRINT("rd_rmdir: %s\n", path);
+  int ret_val = EXIT_SUCCESS;
+
+  if (!path || matches(path, root->name)) {
+    return -EPERM;
+  }
+
+  rd_file *file = get_rd_file(path, DIRECTORY, root);
+  if (!file) {
+    return -ENOENT;
+  }
+
+  if (file->type != DIRECTORY) {
+    return -ENOTDIR;
+  }
+
+  if (file->files) {
+    return -ENOTEMPTY;
+  }
+
+  rd_file *parent_file = file->parent;
+  parent_file->files = delete_item(parent_file->files, file);
+
+  current_bytes -= DIRECTORY_BYTES;
+
 
   return ret_val;
 }
@@ -560,13 +594,14 @@ static struct fuse_operations operations = {
   .flush    = rd_flush,  // called on close()
   .write    = rd_write,
   .read     = rd_read,
-  // .rmdir    = rd_rmdir,
+  .rmdir    = rd_rmdir,
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
   // // .ftruncate = rd_ftruncate_wrapper,
   // // .rename   = rd_rename,
   // // .chmod    = rd_chmod,
   // // .chown    = rd_chown,
+  // .statfs
 };
 
 int main (int argc, char *argv[]) {

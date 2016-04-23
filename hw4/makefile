@@ -92,7 +92,7 @@ testdir1: maketestdir ramdisk
 	$(UMOUNT) $(TEST_DIR) && \
 	echo "OK PASS";
 
-# create the directory strucutre
+# create and destroy directory strucutre
 # /
 # |-- dir1
 # |-- dir2
@@ -132,6 +132,13 @@ testnesteddirs: maketestdir ramdisk
 	$(LS)                            | diff <(echo "file") - && \
 	$(LS) $(TEST_DIR)/dir2/dir3/dir4 | diff <(echo "file") - && \
 	pwd | diff <(echo $(TEST_DIR)/dir2/dir3/dir4) - && \
+	cd .. && rmdir dir4 2>&1 | diff <(echo "rmdir: failed to remove \`dir4': Directory not empty") - && \
+	rm dir4/file && rmdir dir4 && \
+	$(LS)                       | diff <(echo "file") - && \
+	$(LS) $(TEST_DIR)/dir2/dir3 | diff <(echo "file") - && \
+	rm $(TEST_DIR)/dir2/dir3/file && \
+	ls -l                       | diff <(echo "total 0") - && \
+	ls -l $(TEST_DIR)/dir2/dir3 | diff <(echo "total 0") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \

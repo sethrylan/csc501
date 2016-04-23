@@ -87,7 +87,7 @@ node* make_node(rd_file *file);
 // add node to end of list
 void push(node *head, rd_file *file);
 
-// remove item from list and return head of list
+// remove item from list and return head of list; also frees the item/file
 node* delete_item(node* head, rd_file *item);
 
 node* make_node(rd_file *file) {
