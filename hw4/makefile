@@ -71,7 +71,8 @@ testmount: maketestdir ramdisk
 testtouch: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
-	touch testfile && ls | diff <(echo "testfile") - && \
+	touch testfile && \
+	$(LS) | diff <(echo "testfile") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
@@ -80,9 +81,12 @@ testtouch: maketestdir ramdisk
 testdir1: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
-	mkdir testdir && ls | diff <(echo "testdir") - && \
-	cd testdir && ls -l | diff <(echo "total 0") - && \
-	touch testfile && ls | diff <(echo "testfile") - && \
+	mkdir testdir && \
+	$(LS) | diff <(echo "testdir") - && \
+	cd testdir && \
+	ls -l | diff <(echo "total 0") - && \
+	touch testfile && \
+	$(LS) | diff <(echo "testfile") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
@@ -138,11 +142,14 @@ testnesteddirs: maketestdir ramdisk
 testremove: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
-	touch testfile && ls | diff <(echo "testfile") - && \
-	rm testfile && ls -l | diff <(echo "total 0") - && \
-	mkdir testdir && cd testdir && \
-	touch testfile && ls | diff <(echo "testfile") - && \
-	rm testfile && ls -l | diff <(echo "total 0") - && \
+	touch testfile && \
+	$(LS) | diff <(echo "testfile") - && \
+	rm testfile && \
+	ls -l | diff <(echo "total 0") - && \
+	mkdir testdir && cd testdir && touch testfile && \
+	$(LS) | diff <(echo "testfile") - && \
+	rm testfile && \
+	ls -l | diff <(echo "total 0") - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
