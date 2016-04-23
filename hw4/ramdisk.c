@@ -470,25 +470,27 @@ int rd_mkdir (const char *path, mode_t mode) {
   int count, ret_val = EXIT_SUCCESS;
 
   if (!path || matches(path, root->name)) {
-    return -EPERM;
+    return -ENOTDIR;
   }
 
   if (!memory_available(DIRECTORY_BYTES)) {
-    return -EFBIG;
+    return -ENOSPC;
   }
 
   char **file_names = get_dirs(path, &count);
   if (!file_names){
-    return -EPERM;
+    return -ENOENT;
   }
   rd_file *parent_file = get_parent_directory(path, file_names, count);
 
   if (!parent_file) {
-    return -EPERM;
+    return -ENOENT;
   } else {
     rd_file *file = get_file(file_names[count], parent_file->files);
-    if (file != NULL) {
-      ret_val = -EPERM;
+    if (file) {
+      // file already exists
+      // TODO: add test case
+      ret_val = -EEXIST;
     } else {
       rd_file *new_dir = create_rd_file(file_names[count], parent_file->name, DIRECTORY);  // e.g., "/"
       new_dir->parent = parent_file;
@@ -502,7 +504,7 @@ int rd_mkdir (const char *path, mode_t mode) {
 
   free_char_list(file_names, count);
 
-  if (ret_val ==0 ) {
+  if (ret_val == EXIT_SUCCESS) {
     current_bytes += DIRECTORY_BYTES;
   }
 

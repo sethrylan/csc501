@@ -10,6 +10,7 @@ PUSHD     = pushd $(TEST_DIR) > /dev/null
 POPD      = popd > /dev/null
 WAIT      = sleep .1
 LS 				= ls -w 10000 -C
+GREP      = grep -q
 
 all: ramdisk
 
@@ -50,7 +51,7 @@ unmount:
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage testmount testtouch testdir1 testnesteddirs testremove testwrite
+test: all testusage testmount testmemory0 testtouch testdir1 testnesteddirs testremove testwrite
 
 maketestdir:
 	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
@@ -63,6 +64,19 @@ testmount: maketestdir ramdisk
 	$(PUSHD) && \
 	ls -l | diff <(echo "total 0") - && \
 	pwd | diff <(echo $(TEST_DIR)) - && \
+	$(POPD) && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
+
+testmemory0: maketestdir ramdisk
+	./ramdisk $(TEST_DIR) 0 && \
+	$(PUSHD) && \
+	mkdir testdir 2>&1 | $(GREP) "No space left on device" && \
+	touch testfile1 && \
+	$(LS) | $(GREP) "testfile1" - && \
+	(echo "data" > testfile2) 2>&1 | $(GREP)  "No space left on device" && \
+	$(LS) | $(GREP) "testfile1  testfile2" - && \
 	$(POPD) && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
@@ -183,5 +197,6 @@ testwrite: maketestdir ramdisk
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
 	echo "OK PASS";
+
 
 # ./postmark benchmark.conf
