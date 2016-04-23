@@ -167,7 +167,7 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   return EXIT_SUCCESS;
 }
 
-static int rd_open(const char *path, struct fuse_file_info *fi){
+static int rd_open (const char *path, struct fuse_file_info *fi){
   DEBUG_PRINT("rd_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
                               path, fi->flags&O_RDONLY, fi->flags&O_WRONLY, fi->flags&O_RDWR, fi->flags&O_APPEND, fi->flags&O_TRUNC);
 
@@ -556,10 +556,11 @@ static struct fuse_operations operations = {
   .mkdir    = rd_mkdir,
   .access   = rd_access,
   .unlink    = rd_unlink,
-  // .rmdir     = rd_rmdir,
-  // .open      = rd_open,
-  // .flush     = rd_flush,  // close()
+  .open      = rd_open,
+  // .flush     = rd_flush,  // called on close()
   // .read      = rd_read,
+
+  // .rmdir     = rd_rmdir,
   // // .write     = rd_write,    //==> ssize_t write(int filedes, const void * buf , size_t nbytes ) in POSIX
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
