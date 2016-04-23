@@ -52,7 +52,7 @@ unmount:
 tar:
 	tar czvf ramdisk.tar.gz $(SRCS) makefile README REFERENCES
 
-test: all testusage testmount testmemory0 testmemory1MB testtouch testdir1 testdirerror testnesteddirs testremove testwrite
+test: all testusage testmount testmemory0 testtouch testdir1 testdirerror testnesteddirs testremove testwrite
 
 maketestdir:
 	[ -e $(TEST_DIR) ] || mkdir -p $(TEST_DIR)
@@ -89,12 +89,19 @@ testmemory0: maketestdir ramdisk
 # cat to file (<10B) -> pass
 # cat to file (>10B) -> fail
 testmemory1MB: maketestdir ramdisk
-	./ramdisk $(TEST_DIR) 1 && \
-	$(PUSHD) && \
-	$(POPD) && \
-	$(WAIT) && \
-	$(UMOUNT) $(TEST_DIR) && \
-	echo "OK PASS";
+	mkdir testdir 2>&1 | $(GREP) "No space left on device" && \
+	dd if=/dev/zero of=largefile bs=4096 count=256 && \
+	touch testfile1 && echo "data data" > testfile2 && \
+	$(LS) | $(GREP) "testfile1  testfile2" - && \
+	du testfile1 | diff <(echo "0 testfile1") - && \
+	du testfile2 | diff <(echo "1 testfile2") - && \
+	$(RM) testfile2 && \
+	echo "data data" > testfile2 && \
+	(echo "data data" > testfile3) 2>&1 | $(GREP)  "No space left on device" && \
+	$(LS) | $(GREP) "testfile1  testfile2  testfile3" - && \
+	du testfile1 | diff <(echo "0 testfile1") - && \
+	du testfile2 | diff <(echo "1 testfile2") - && \
+  du testfile3 | diff <(echo "1 testfile3") - && \
 
 testtouch: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
