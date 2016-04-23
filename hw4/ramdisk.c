@@ -149,9 +149,9 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
 
   if (!path) {
     return -ENOENT;
-  } else if (matches(path, root->name)) {
+  } else if (matches(path, root->name)) {  // path is "/"
     return EXIT_SUCCESS;
-  } else if (ends_with(path, "/")){
+  } else if (ends_with(path, "/")){        // path is "/**/"
     return -ENOENT;
   }
 
