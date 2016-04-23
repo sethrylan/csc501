@@ -25,6 +25,7 @@ typedef struct rd_file {
   size_t size;    // size in bytes
 
   // REGULAR attributes
+  char *data;
   int num_blocks;
   char **blocks;
   boolean opened;
