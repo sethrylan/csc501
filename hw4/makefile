@@ -100,15 +100,33 @@ testdir1: maketestdir ramdisk
 testnesteddirs: maketestdir ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	$(PUSHD) && \
-	mkdir dir1 && $(LS) | diff <(echo "dir1") - && \
-	touch file && $(LS) | diff <(echo "dir1  file") - && \
-	mkdir dir2 && $(LS) | diff <(echo "dir1  dir2  file") - && \
-	cd dir2 && ls -l | diff <(echo "total 0") - && \
-	touch file &&	mkdir dir3 && $(LS) | diff <(echo "dir3  file") - && \
-	cd dir3 && ls -l | diff <(echo "total 0") - && \
-	touch file &&	mkdir dir4 && $(LS) | diff <(echo "dir4  file") - && \
-	cd dir4 && ls -l | diff <(echo "total 0") - && \
-	touch file && $(LS) | diff <(echo "file") - && \
+	mkdir dir1 && \
+	$(LS)             | diff <(echo "dir1") - && \
+	$(LS) $(TEST_DIR) | diff <(echo "dir1") - && \
+	touch file && \
+	$(LS)             | diff <(echo "dir1  file") - && \
+	$(LS) $(TEST_DIR) | diff <(echo "dir1  file") - && \
+	mkdir dir2 && \
+	$(LS)             | diff <(echo "dir1  dir2  file") - && \
+	$(LS) $(TEST_DIR) | diff <(echo "dir1  dir2  file") - && \
+	cd dir2 && \
+	ls -l                  | diff <(echo "total 0") - && \
+	ls -l $(TEST_DIR)/dir2 | diff <(echo "total 0") - && \
+	touch file &&	mkdir dir3 && \
+	$(LS)                  | diff <(echo "dir3  file") - && \
+	$(LS) $(TEST_DIR)/dir2 | diff <(echo "dir3  file") - && \
+	cd dir3 && \
+	ls -l                       | diff <(echo "total 0") - && \
+	ls -l $(TEST_DIR)/dir2/dir3 | diff <(echo "total 0") - && \
+	touch file &&	mkdir dir4 && \
+	$(LS)                       | diff <(echo "dir4  file") - && \
+	$(LS) $(TEST_DIR)/dir2/dir3 | diff <(echo "dir4  file") - && \
+	cd dir4 && \
+	ls -l                            | diff <(echo "total 0") - && \
+	ls -l $(TEST_DIR)/dir2/dir3/dir4 | diff <(echo "total 0") - && \
+	touch file && \
+	$(LS)                            | diff <(echo "file") - && \
+	$(LS) $(TEST_DIR)/dir2/dir3/dir4 | diff <(echo "file") - && \
 	pwd | diff <(echo $(TEST_DIR)/dir2/dir3/dir4) - && \
 	$(POPD) && \
 	$(WAIT) && \
