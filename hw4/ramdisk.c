@@ -73,10 +73,6 @@ char** get_dirs(const char *path, int *ret_count) {
   count = count_occurences('/', path);
   file_names = (char**)calloc(count + 1, sizeof(char*));
 
-  for (int i = 0; i < count; i++) {
-    file_names[i] = NULL;
-  }
-
   count = -1;
   start = end = 0;
   for (int i = 0; i < path_len; i++) {
@@ -93,15 +89,12 @@ char** get_dirs(const char *path, int *ret_count) {
       start = end;
       continue;
     }
-    file_names[count - 1] = (char*)malloc(end - start);  // TODO: replace with strdup
-    memset(file_names[count - 1], 0, sizeof(char) * (end - start));
-    memcpy(file_names[count - 1], path + start + 1, sizeof(char) * (end - start - 1));
+    file_names[count - 1] = (char*)calloc(end - start, sizeof(char));
+    strncpy(file_names[count - 1], path + start + 1, end - start - 1);
     start = end;
   }
-  file_names[count] = (char*)malloc(path_len - start);   // TODO: replace with strdup
-  memset(file_names[count], 0, sizeof(char) * (path_len - start));
-  memcpy(file_names[count], path + start + 1, sizeof(char) * (path_len - start - 1));
-
+  file_names[count] = (char*)calloc(path_len - start, sizeof(char));
+  strncpy(file_names[count], path + start + 1, path_len - start - 1);
   *ret_count = count;
   return file_names;
 }
