@@ -72,7 +72,7 @@ char** get_dirs(const char *path, int *ret_count) {
 
   path_len = strlen(path);
   count = count_occurences('/', path);
-  file_names = (char**)calloc(count + 1, sizeof(char*));
+  file_names = calloc(count + 1, sizeof(char*));
 
   count = -1;
   start = end = 0;
@@ -90,11 +90,11 @@ char** get_dirs(const char *path, int *ret_count) {
       start = end;
       continue;
     }
-    file_names[count - 1] = (char*)calloc(end - start, sizeof(char));
+    file_names[count - 1] = calloc(end - start, sizeof(char));
     strncpy(file_names[count - 1], path + start + 1, end - start - 1);
     start = end;
   }
-  file_names[count] = (char*)calloc(path_len - start, sizeof(char));
+  file_names[count] = calloc(path_len - start, sizeof(char));
   strncpy(file_names[count], path + start + 1, path_len - start - 1);
   *ret_count = count;
   return file_names;
