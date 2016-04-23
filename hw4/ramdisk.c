@@ -71,8 +71,7 @@ char** get_dirs(const char *path, int *ret_count) {
 
   path_len = strlen(path);
   count = count_occurences('/', path);
-  file_names = (char**) malloc(sizeof(char*) * count+1);
-  memset(file_names, 0, sizeof(char*) * count+1);
+  file_names = (char**)calloc(count + 1, sizeof(char*));
 
   for (int i = 0; i < count; i++) {
     file_names[i] = NULL;
