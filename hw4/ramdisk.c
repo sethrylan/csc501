@@ -271,7 +271,11 @@ static int rd_write (const char *path, const char *buffer, size_t size, off_t of
 
     char *temp = calloc(bytes_to_allocate + 1, sizeof(char));
     strncpy(temp, file->data, file->size);
-    free(file->data);
+
+    if (file->size > 0) {
+      free(file->data);
+    }
+
     file->data = temp;
     file->size =+ bytes_to_allocate;
   }
