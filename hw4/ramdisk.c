@@ -574,13 +574,15 @@ static int rd_rmdir (const char *path) {
 
   rd_file *parent_file = file->parent;
   parent_file->files = delete_item(parent_file->files, file);
-
   current_bytes -= DIRECTORY_BYTES;
-
-
   return ret_val;
 }
 
+// TODO:
+int rd_rename) (const char *source, const char *dest) {
+  int ret_val = EXIT_SUCCESS;
+  return ret_val;
+}
 
 
 static struct fuse_operations operations = {
@@ -597,10 +599,11 @@ static struct fuse_operations operations = {
   .write    = rd_write,
   .read     = rd_read,
   .rmdir    = rd_rmdir,
+  // .rename   = rd_rename,
+
   // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
   // // .truncate  = rd_truncate_wrapper,
   // // .ftruncate = rd_ftruncate_wrapper,
-  // // .rename   = rd_rename,
   // // .chmod    = rd_chmod,
   // // .chown    = rd_chown,
   // .statfs

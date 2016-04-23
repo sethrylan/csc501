@@ -10,6 +10,7 @@ PUSHD     = pushd $(TEST_DIR) > /dev/null
 POPD      = popd > /dev/null
 WAIT      = sleep .1
 LS 				= ls -w 10000 -C
+# used for non-exact matches; does not show non-matching result like diff
 GREP      = grep -q
 
 all: ramdisk
