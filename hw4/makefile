@@ -1,6 +1,6 @@
 CC        = gcc
 CFLAGS    = -Wall -Wextra -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=600 -Wno-deprecated
-SRCS      = ramdisk.c ramdisk.h makefile REFERENCES README
+SRCS      = ramdisk.c ramdisk.h utils.c utils.h makefile
 rm        = rm -f
 DIFF      = diff -w
 SHELL     = /bin/bash
