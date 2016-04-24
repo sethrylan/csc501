@@ -97,14 +97,14 @@ char** get_dirs(const char *path, int *ret_count) {
   count = count_occurences('/', path);
   file_names = calloc(count + 1, sizeof(char*));
 
-  int start = 0, end = 0, found = 0;
+  int start = 0, end = 0, found = FALSE;
   count = -1;
   for (int i = 0; i < path_length; i++) {
-    found = 0;
+    found = FALSE;
     if ((*(path + i)) == '/') {
       end = i;
       count++;
-      found = 1;
+      found = TRUE;
     }
     if (!found) {
       continue;
@@ -137,7 +137,7 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
   parent_file = root;
   for (int i = 0; i <= count - 1; i++) {
     current_file = get_file(file_names[i], parent_file->files);
-    if (current_file == NULL || current_file->type == REGULAR) {
+    if (!current_file || current_file->type == REGULAR) {
       DEBUG_PRINT("current_file is NULL or not a directory");
       return NULL;
     }
