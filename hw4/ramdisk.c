@@ -11,11 +11,8 @@
 // Global State
 long max_bytes;
 long current_bytes;
-
-time_t init_time;
 uid_t uid;
 gid_t gid;
-
 rd_file *root;
 
 // http://www.cs.nmsu.edu/~pfeiffer/fuse-tutorial/html/callbacks.html
@@ -41,7 +38,7 @@ void fill_stats(struct stat *stats, rd_file *file) {
   stats->st_dev = 1;  // /dev/mem device, see http://man7.org/linux/man-pages/man4/mem.4.html
 
   if (file->type == DIRECTORY) {
-    stats->st_nlink = 2;  // TODO: plus number of subfiles
+    stats->st_nlink = 2 + get_count(file->files);  // 2 plus number of subfiles
     stats->st_size = DIRECTORY_BYTES;
     stats->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
     stats->st_blksize = BYTES_PER_BLOCK;
@@ -737,7 +734,6 @@ int main (int argc, char *argv[]) {
   root = create_rd_file("/","", DIRECTORY);
   gid = getgid();
   uid = getuid();
-  init_time = time(NULL);
   current_bytes = 0;
 
   return fuse_main(argc - 1, argv, &operations, NULL);

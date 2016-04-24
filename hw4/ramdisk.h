@@ -110,6 +110,19 @@ node* delete_item(node* head, rd_file *item) {
   }
 }
 
+int get_count(node* head) {
+  int count = 0;
+  node *current = head;
+  if (current) {
+    count++;
+    while (current->next != NULL) {
+      count++;
+      current = current->next;
+    }
+  }
+  return count;
+}
+
 // remove head and return value
 // rd_file* pop(node **head) {
 //   rd_file *return_value = NULL;
