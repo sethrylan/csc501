@@ -10,3 +10,6 @@ round_div implementation:
 
 split implementation
   http://source-code-share.blogspot.com/2014/07/implementation-of-java-stringsplit.html
+
+stat structure and directory parsing
+  https://github.com/mycoy/NCSU_CSC501OS/tree/14c660445302d7084ed3020093a4b8a0b3250860/P4
