@@ -9,7 +9,6 @@
 #include "utils.h"
 
 // Global State
-char *mount_path;
 long max_bytes;
 long current_bytes;
 
@@ -134,8 +133,6 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
   return parent_file;
 }
 
-
-// TODO: remove unused file_type
 rd_file* get_rd_file (const char *path, rd_file *root) {
   DEBUG_PRINT("get_rd_file(): %s\n", path);
   int count;
@@ -146,6 +143,14 @@ rd_file* get_rd_file (const char *path, rd_file *root) {
   return file;
 }
 
+/** Open directory
+ *
+ * Unless the 'default_permissions' mount option is given,
+ * this method should check if opendir is permitted for this
+ * directory. Optionally opendir may also return an arbitrary
+ * filehandle in the fuse_file_info structure, which will be
+ * passed to readdir, closedir and fsyncdir.
+ */
 int rd_opendir (const char *path, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_opendir: %s\n", path);
   rd_file *file;
@@ -153,13 +158,6 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   if (matches(path, root->name)) {  // path is "/"
       return EXIT_SUCCESS;
   }
-  // if (!path) {
-  //   return -ENOENT;
-  // } else if (matches(path, root->name)) {  // path is "/"
-  //   return EXIT_SUCCESS;
-  // } else if (ends_with(path, "/")){        // path is "/**/"
-  //   return -ENOENT;
-  // }
 
   file = get_rd_file(path, root);
 
@@ -174,6 +172,21 @@ int rd_opendir (const char *path, struct fuse_file_info *fi) {
   return EXIT_SUCCESS;
 }
 
+/** File open operation
+ *
+ * No creation (O_CREAT, O_EXCL) and by default also no
+ * truncation (O_TRUNC) flags will be passed to open(). If an
+ * application specifies O_TRUNC, fuse first calls truncate()
+ * and then open(). Only if 'atomic_o_trunc' has been
+ * specified and kernel version is 2.6.24 or later, O_TRUNC is
+ * passed on to open.
+ *
+ * Unless the 'default_permissions' mount option is given,
+ * open should check if the operation is permitted for the
+ * given flags. Optionally open may also return an arbitrary
+ * filehandle in the fuse_file_info structure, which will be
+ * passed to all file operations.
+ */
 static int rd_open (const char *path, struct fuse_file_info *fi){
   DEBUG_PRINT("rd_open called, path:%s, O_RDONLY:%d, O_WRONLY:%d, O_RDWR:%d, O_APPEND:%d, O_TRUNC:%d\n",
                               path, fi->flags&O_RDONLY, fi->flags&O_WRONLY, fi->flags&O_RDWR, fi->flags&O_APPEND, fi->flags&O_TRUNC);
@@ -334,7 +347,16 @@ static int rd_read(const char *path, char *buffer, size_t size, off_t offset, st
 }
 
 
-// TODO: mode
+/**
+ * Create and open a file
+ *
+ * If the file does not exist, first create it with the specified
+ * mode, and then open it.
+ *
+ * If this method is not implemented or under Linux kernel
+ * versions earlier than 2.6.15, the mknod() and open() methods
+ * will be called instead.
+ */
 static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_create(): %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
@@ -370,6 +392,12 @@ static int rd_create (const char *path, mode_t mode, struct fuse_file_info *fi) 
   return ret_val;
 }
 
+/** Get file attributes.
+ *
+ * Similar to stat().  The 'st_dev' and 'st_blksize' fields are
+ * ignored.  The 'st_ino' field is ignored except if the 'use_ino'
+ * mount option is given.
+ */
 static int rd_getattr (const char *path, struct stat *statbuf) {
   DEBUG_PRINT("rd_getattr(): %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
@@ -432,6 +460,25 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
 }
 
 
+/** Read directory
+ *
+ * This supersedes the old getdir() interface.  New applications
+ * should use this.
+ *
+ * The filesystem may choose between two modes of operation:
+ *
+ * 1) The readdir implementation ignores the offset parameter, and
+ * passes zero to the filler function's offset.  The filler
+ * function will not return '1' (unless an error happens), so the
+ * whole directory is read in a single readdir operation.  This
+ * works just like the old getdir() method.
+ *
+ * 2) The readdir implementation keeps track of the offsets of the
+ * directory entries.  It uses the offset parameter and always
+ * passes non-zero offset to the filler function.  When the buffer
+ * is full (or an error happens) the filler function will return
+ * '1'.
+ */
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
@@ -504,7 +551,13 @@ static int rd_utimens (const char *path, const struct timespec tv[2]) {
   return EXIT_SUCCESS;
 }
 
-int rd_mkdir (const char *path, mode_t mode) {
+/** Create a directory
+ *
+ * Note that the mode argument may not have the type specification
+ * bits set, i.e. S_ISDIR(mode) can be false.  To obtain the
+ * correct directory type bits use  mode|S_IFDIR
+ * */
+static int rd_mkdir (const char *path, mode_t mode) {
   DEBUG_PRINT("rd_mkdir: %s\n", path);
   int count, ret_val = EXIT_SUCCESS;
 
@@ -550,7 +603,7 @@ int rd_mkdir (const char *path, mode_t mode) {
 }
 
 
-int rd_unlink(const char * path) {
+static int rd_unlink(const char * path) {
   DEBUG_PRINT("rd_unlink: %s\n", path);
   int count;
   rd_file *file;
@@ -617,7 +670,7 @@ static int rd_rmdir (const char *path) {
 }
 
 int rd_rename (const char *source, const char *dest) {
-  DEBUG_PRINT("rd_rename: %s to %s\n", path, dest);
+  DEBUG_PRINT("rd_rename: %s to %s\n", source, dest);
 
   int ret_val = EXIT_SUCCESS;
   // TODO
@@ -633,7 +686,6 @@ int rd_rename (const char *source, const char *dest) {
  * Currently this is only called after the create() method if that
  * is implemented (see above).  Later it may be called for
  * invocations of fstat() too.
- *
  */
 static int rd_fgetattr (const char *path, struct stat *buf, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_fgetattr: %s\n", path);
@@ -644,13 +696,23 @@ static int rd_fgetattr (const char *path, struct stat *buf, struct fuse_file_inf
  * Get file system statistics
  *
  * The 'f_frsize', 'f_favail', 'f_fsid' and 'f_flag' fields are ignored
- *
+ * see http://pubs.opengroup.org/onlinepubs/009604599/basedefs/sys/statvfs.h.html
  */
 static int rd_statfs (const char* path, struct statvfs *st) {
+  DEBUG_PRINT("rd_statfs: %s\n", path);
+  st->f_namemax = NAME_MAX;
 
+  // The size in bytes of the minimum unit of allocation on this file system.  (This corresponds to the f_bsize member of struct statfs.)
+  st->f_frsize = BYTES_PER_BLOCK;
+
+  // The preferred length of I/O requests for files on this file system.  (Corresponds to the f_iosize member of struct statfs.)
+  st->f_bsize = BYTES_PER_BLOCK;
+
+  st->f_blocks = div_round_up(current_bytes, BYTES_PER_BLOCK);
+  st->f_bavail = div_round_up(max_bytes - current_bytes, BYTES_PER_BLOCK);  // available to privileged processes
+  st->f_bfree = div_round_up(max_bytes - current_bytes, BYTES_PER_BLOCK);   // available to all processes
+  return EXIT_SUCCESS;
 }
-
-
 
 
 static struct fuse_operations operations = {
@@ -685,10 +747,8 @@ int main (int argc, char *argv[]) {
 
   if (matches(argv[1], "-f")) {
     DEBUG_PRINT("-f used for foreground process.\n");
-    mount_path = argv[2];
     max_bytes = atoi(argv[3]) * 1024 * 1024;
   } else {
-    mount_path = argv[1];
     max_bytes = atoi(argv[2]) * 1024 * 1024;
   }
 
