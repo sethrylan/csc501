@@ -37,9 +37,8 @@ void fill_stats(struct stat *stats, rd_file *file) {
   time(&(stats->st_ctime));
   stats->st_uid = uid;
   stats->st_gid = gid;
-  stats->st_dev = 2049;  // TODO
-  stats->st_ino = 14450705;  // TODO
-  stats->st_rdev = 0;
+
+  stats->st_dev = 1;  // /dev/mem device, see http://man7.org/linux/man-pages/man4/mem.4.html
 
   if (file->type == DIRECTORY) {
     stats->st_nlink = 2;  // TODO: plus number of subfile
