@@ -5,8 +5,8 @@ typedef enum {FALSE, TRUE} boolean;
 #define BYTES_PER_BLOCK         4096
 #define DIRECTORY_BYTES         4096
 
-#define DEFAULT_DIRECTORY_PERMISSION 0777
-#define DEFAULT_FILE_PERMISSION      0777
+#define DEFAULT_DIRECTORY_PERMISSION 0666
+#define DEFAULT_FILE_PERMISSION      0666
 
 typedef struct node {
   void *file;
