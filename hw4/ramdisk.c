@@ -31,6 +31,31 @@ int memory_available (int bytes) {
   return (current_bytes + bytes) <= max_bytes;
 }
 
+void fill_stats(struct stat *stats, rd_file *file) {
+  time(&(stats->st_atime));
+  time(&(stats->st_mtime));
+  time(&(stats->st_ctime));
+  stats->st_uid = uid;
+  stats->st_gid = gid;
+  stats->st_dev = 2049;  // TODO
+  stats->st_ino = 14450705;  // TODO
+  stats->st_rdev = 0;
+
+  if (file->type == DIRECTORY) {
+    stats->st_nlink = 2;  // TODO: plus number of subfile
+    stats->st_size = DIRECTORY_BYTES;
+    stats->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
+    stats->st_blksize = BYTES_PER_BLOCK;
+    stats->st_blocks = DIRECTORY_BYTES / BYTES_PER_BLOCK;
+  } else {
+    stats->st_nlink = 1;
+    stats->st_size = file->size;
+    stats->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
+    stats->st_blksize = BYTES_PER_BLOCK;
+    stats->st_blocks = div_round_up(file->size, BYTES_PER_BLOCK);
+  }
+}
+
 boolean valid_path(const char *path) {
   if (!path || matches(path, root->name) || ends_with(path, "/")) {
     DEBUG_PRINT("path is NULL or a directory\n");
@@ -429,28 +454,7 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
       DEBUG_PRINT("rd_getattr(): %s doesn't exist in %s\n", file_names[count], parent_file->name);
       ret_val = -ENOENT;
     } else {
-      time(&(statbuf->st_atime));
-      time(&(statbuf->st_mtime));
-      time(&(statbuf->st_ctime));
-      statbuf->st_uid = uid;
-      statbuf->st_gid = gid;
-      statbuf->st_dev = 2049;
-      statbuf->st_ino = 14450705;
-      statbuf->st_rdev = 0;
-
-      if (file->type == DIRECTORY) {
-        statbuf->st_size = DIRECTORY_BYTES;
-        statbuf->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-        statbuf->st_nlink = 2;
-        statbuf->st_blksize = BYTES_PER_BLOCK;
-        statbuf->st_blocks = DIRECTORY_BYTES / BYTES_PER_BLOCK;
-      } else {
-        statbuf->st_size = file->size;
-        statbuf->st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
-        statbuf->st_nlink = 1;
-        statbuf->st_blksize = BYTES_PER_BLOCK;
-        statbuf->st_blocks = div_round_up(file->size, BYTES_PER_BLOCK);
-      }
+      fill_stats(statbuf, file);
     }
   }
 
@@ -478,6 +482,8 @@ static int rd_getattr (const char *path, struct stat *statbuf) {
  * passes non-zero offset to the filler function.  When the buffer
  * is full (or an error happens) the filler function will return
  * '1'.
+ *
+ * see https://en.wikibooks.org/wiki/C_Programming/POSIX_Reference/sys/stat.h
  */
 static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
   DEBUG_PRINT("rd_readdir: %s\n", path);
@@ -511,25 +517,8 @@ static int rd_readdir(const char *path, void *buffer, fuse_fill_dir_t filler, of
       node = file->files;
       while (node) {
         file = (rd_file*)node->file;
-
         memset(&st, 0, sizeof(struct stat));
-        time(&(st.st_atime));
-        time(&(st.st_mtime));
-        time(&(st.st_ctime));
-
-        st.st_uid = uid;
-        st.st_gid = gid;
-        if (file->type == REGULAR) {
-          st.st_mode = S_IFREG | DEFAULT_FILE_PERMISSION;
-          st.st_nlink = 1;
-          st.st_size = file->size;
-          /* st.st_blksize = BLOCK_SIZE;
-          st.st_blocks = r_file->block_number; */
-        } else {
-          st.st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
-          st.st_nlink = 2;
-          st.st_size = DIRECTORY_BYTES;
-        }
+        fill_stats(&st, file);
         filler(buffer, file->name, &st, 0);
         node = node->next;
       }
@@ -671,10 +660,8 @@ static int rd_rmdir (const char *path) {
 
 int rd_rename (const char *source, const char *dest) {
   DEBUG_PRINT("rd_rename: %s to %s\n", source, dest);
-
-  int ret_val = EXIT_SUCCESS;
   // TODO
-  return ret_val;
+  return EXIT_SUCCESS;
 }
 
 /**
