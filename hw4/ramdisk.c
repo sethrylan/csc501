@@ -137,15 +137,8 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
   if (count == 0) {     // e.g., "/example";
     parent_file = root;
   } else {              // count > 0
+    parent_file = root;
     for (int i = 0; i <= count - 1; i++) {
-      if (i == 0) {
-        parent_file = get_file(file_names[i], root->files);
-        if (parent_file == NULL || parent_file->type == REGULAR) {
-          DEBUG_PRINT("parent_file is NULL or not a directory");
-          return NULL;
-        }
-        continue;
-      }
       current_file = get_file(file_names[i], parent_file->files);
       if (current_file == NULL || current_file->type == REGULAR) {
         DEBUG_PRINT("current_file is NULL or not a directory");
