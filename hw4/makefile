@@ -40,9 +40,16 @@ ramdisk: ramdisk.o utils.o
 postmark: tests/postmark-1.51.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-runpostmark: postmark ramdisk
+postmarksmall: postmark ramdisk
 	./ramdisk $(TEST_DIR) 100 && \
 	./postmark tests/benchmark-small-tmp-rd.conf <<< "exit\n" && \
+	$(WAIT) && \
+	$(UMOUNT) $(TEST_DIR) && \
+	echo "OK PASS";
+
+postmarklarge: postmark ramdisk
+	./ramdisk $(TEST_DIR) 100 && \
+	./postmark tests/benchmark-tmp-rd.conf <<< "exit\n" && \
 	$(WAIT) && \
 	$(UMOUNT) $(TEST_DIR) && \
 	echo "OK PASS";
