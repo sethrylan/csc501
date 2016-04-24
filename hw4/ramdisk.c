@@ -269,22 +269,22 @@ static int rd_write (const char *path, const char *buffer, size_t size, off_t of
 
     current_bytes += bytes_to_allocate;
 
-    char *temp = calloc(bytes_to_allocate + 1, sizeof(char));
-    strncpy(temp, file->data, file->size);
+    char *temp_file = calloc(bytes_to_allocate + file->size, sizeof(char));
+    strncpy(temp_file, file->data, file->size);
 
     if (file->size > 0) {
       free(file->data);
     }
 
-    file->data = temp;
-    file->size =+ bytes_to_allocate;
+    file->data = temp_file;
+    file->size =+ bytes_to_allocate + file->size;
   }
   int i,j=0;
   for(i = offset; i < (offset + size); i++) {
     file->data[i] = buffer[j];
     j++;
   }
-  file->data[i] = '\0';
+  file->data[i];
   return size;
 }
 
