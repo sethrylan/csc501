@@ -616,11 +616,42 @@ static int rd_rmdir (const char *path) {
   return ret_val;
 }
 
-// TODO:
 int rd_rename (const char *source, const char *dest) {
+  DEBUG_PRINT("rd_rename: %s to %s\n", path, dest);
+
   int ret_val = EXIT_SUCCESS;
+  // TODO
   return ret_val;
 }
+
+/**
+ * Get attributes from an open file
+ *
+ * This method is called instead of the getattr() method if the
+ * file information is available.
+ *
+ * Currently this is only called after the create() method if that
+ * is implemented (see above).  Later it may be called for
+ * invocations of fstat() too.
+ *
+ */
+static int rd_fgetattr (const char *path, struct stat *buf, struct fuse_file_info *fi) {
+  DEBUG_PRINT("rd_fgetattr: %s\n", path);
+  return rd_getattr(path, buf);
+}
+
+/**
+ * Get file system statistics
+ *
+ * The 'f_frsize', 'f_favail', 'f_fsid' and 'f_flag' fields are ignored
+ *
+ */
+static int rd_statfs (const char* path, struct statvfs *st) {
+
+}
+
+
+
 
 static struct fuse_operations operations = {
   .getattr  = rd_getattr,
@@ -637,13 +668,12 @@ static struct fuse_operations operations = {
   .read     = rd_read,
   .rmdir    = rd_rmdir,
   .rename   = rd_rename,
-
-  // // .fgetattr  = rd_fgetattr_wrapper, //==> int fstat(int pathname , struct stat * buf ) in POSIX
-  // // .truncate  = rd_truncate_wrapper,
-  // // .ftruncate = rd_ftruncate_wrapper,
+  .fgetattr = rd_fgetattr,
+  .statfs   = rd_statfs,
+  // .truncate  = rd_truncate,
+  // // .ftruncate = rd_ftruncate,
   // // .chmod    = rd_chmod,
   // // .chown    = rd_chown,
-  // .statfs
 };
 
 int main (int argc, char *argv[]) {
