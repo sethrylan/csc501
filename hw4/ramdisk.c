@@ -63,20 +63,20 @@ rd_file* get_file(const char *name, node *list){
  * path="/var/log", count=1;
  */
 char** get_dirs(const char *path, int *ret_count) {
-  int path_len, count, found, start, end;
+  int path_length, count;
   char **file_names;
 
   if (!path) {
     return NULL;
   }
 
-  path_len = strlen(path);
+  path_length = strlen(path);
   count = count_occurences('/', path);
   file_names = calloc(count + 1, sizeof(char*));
 
+  int start = 0, end = 0, found = 0;
   count = -1;
-  start = end = 0;
-  for (int i = 0; i < path_len; i++) {
+  for (int i = 0; i < path_length; i++) {
     found = 0;
     if ((*(path + i)) == '/') {
       end = i;
@@ -94,8 +94,8 @@ char** get_dirs(const char *path, int *ret_count) {
     strncpy(file_names[count - 1], path + start + 1, end - start - 1);
     start = end;
   }
-  file_names[count] = calloc(path_len - start, sizeof(char));
-  strncpy(file_names[count], path + start + 1, path_len - start - 1);
+  file_names[count] = calloc(path_length - start, sizeof(char));
+  strncpy(file_names[count], path + start + 1, path_length - start - 1);
   *ret_count = count;
   return file_names;
 }

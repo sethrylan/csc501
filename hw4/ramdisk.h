@@ -31,7 +31,7 @@ typedef struct rd_file {
 } rd_file;
 
 char* get_rd_file_path(rd_file *file) {
-  char *result;// = malloc(strlen(file->name) + strlen(file->path) + 2); // +2 for \0 and path separate
+  char *result;
   asprintf(&result, "%s/%s", file->path, file->name);
   return result;
 }
