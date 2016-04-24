@@ -41,7 +41,7 @@ void fill_stats(struct stat *stats, rd_file *file) {
   stats->st_dev = 1;  // /dev/mem device, see http://man7.org/linux/man-pages/man4/mem.4.html
 
   if (file->type == DIRECTORY) {
-    stats->st_nlink = 2;  // TODO: plus number of subfile
+    stats->st_nlink = 2;  // TODO: plus number of subfiles
     stats->st_size = DIRECTORY_BYTES;
     stats->st_mode = S_IFDIR | DEFAULT_DIRECTORY_PERMISSION;
     stats->st_blksize = BYTES_PER_BLOCK;
