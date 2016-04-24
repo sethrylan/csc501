@@ -134,18 +134,14 @@ rd_file* get_parent_directory (const char *path, char **file_names, const int co
     return NULL;
   }
 
-  if (count == 0) {     // e.g., "/example";
-    parent_file = root;
-  } else {              // count > 0
-    parent_file = root;
-    for (int i = 0; i <= count - 1; i++) {
-      current_file = get_file(file_names[i], parent_file->files);
-      if (current_file == NULL || current_file->type == REGULAR) {
-        DEBUG_PRINT("current_file is NULL or not a directory");
-        return NULL;
-      }
-      parent_file = current_file;
+  parent_file = root;
+  for (int i = 0; i <= count - 1; i++) {
+    current_file = get_file(file_names[i], parent_file->files);
+    if (current_file == NULL || current_file->type == REGULAR) {
+      DEBUG_PRINT("current_file is NULL or not a directory");
+      return NULL;
     }
+    parent_file = current_file;
   }
   return parent_file;
 }
